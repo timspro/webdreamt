@@ -1,0 +1,21 @@
+{
+    "name": "vendor/webdreamt",
+    "description": "",
+    "authors": [
+        {
+            "name": "Tim Sprowl",
+            "email": "tim.spr@gmail.com"
+        }
+    ],
+    "require": {
+			"greenlion/php-sql-parser": "dev-trunk",
+			"propel/propel": "dev-master",
+      "cartalyst/sentry": "dev-master",
+			"illuminate/database": ">=4.0.9,<4.2"
+		},
+    "autoload": {
+        "psr-0": {"": "src/"}
+    },
+    "require-dev": {
+    }
+}
