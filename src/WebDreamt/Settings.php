@@ -79,7 +79,7 @@ class Settings {
 		$host = self::$db_host;
 		$name = self::$db_name;
 		if (!isset(self::$pdo)) {
-			self::$pdo = new \PDO("mysql:host=$host;dbname=$name;charset=utf8'", self::$db_username,
+			self::$pdo = new \PDO("mysql:host=$host;dbname=$name;charset=utf8", self::$db_username,
 					self::$db_password);
 			self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		}

@@ -1,0 +1,5 @@
+#Goes in /etc/mysql/conf.d/ to enable utf8 on MySQL server.
+[client]
+default-character-set = utf8
+[mysqld]
+character-set-server = utf8

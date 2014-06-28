@@ -8,6 +8,7 @@
         }
     ],
     "require": {
+			"phpunit/phpunit": "4.*",
 			"greenlion/php-sql-parser": "dev-trunk",
 			"propel/propel": "dev-master",
       "cartalyst/sentry": "dev-master",
