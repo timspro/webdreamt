@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Test setup for WebDreamt
+-->
+<phpunit>
+	<filter>
+    <whitelist>
+        <directory suffix=".php">./../src/</directory>
+        <!-- <exclude>
+            <directory suffix=".phtml">./src/application/</directory>
+            <directory suffix=".php">./Zend/</directory>
+        </exclude> -->
+		</whitelist>
+	</filter>   
+</phpunit>
