@@ -24,19 +24,19 @@ class Settings {
 		self::$self = $this;
 	}
 
-	static public function getDBName() {
+	static public function getDbName() {
 		return self::$db_name;
 	}
 
-	static public function getDBHost() {
+	static public function getDbHost() {
 		return self::$db_host;
 	}
 
-	static public function getDBUsername() {
+	static public function getDbUsername() {
 		return self::$db_username;
 	}
 
-	static public function getDBPassword() {
+	static public function getDbPassword() {
 		return self::$db_password;
 	}
 
@@ -75,9 +75,12 @@ class Settings {
 		if (!isset(self::$self)) {
 			new Settings;
 		}
+
+		$host = self::$db_host;
+		$name = self::$db_name;
 		if (!isset(self::$pdo)) {
-			self::$pdo = new \PDO('mysql:host=' . self::$db_host . ';dbname=' . self::$db_name .
-					';charset=utf8', self::$db_username, self::$db_password);
+			self::$pdo = new \PDO("mysql:host=$host;dbname=$name;charset=utf8'", self::$db_username,
+					self::$db_password);
 			self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		}
 		return self::$pdo;
