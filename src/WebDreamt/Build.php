@@ -31,7 +31,7 @@ class Build {
 		}
 
 		$pdo = Settings::pdo();
-		if (count($pdo->query("SHOW TABLES")) === 0) {
+		if (count($pdo->query("SHOW TABLES")->fetchAll()) === 0) {
 			throw new Exception("Database is not empty.");
 		}
 
@@ -39,6 +39,16 @@ class Build {
 		$pdo->exec($sentrySchema);
 
 		self::updatePropel();
+	}
+
+	/**
+	 * Drops all tables in the database.
+	 */
+	static public function nuke() {
+		$pdo = Settings::pdo();
+		$name = Settings::getDbName();
+		$pdo->exec("DROP DATABASE $name");
+		$pdo->exec("CREATE DATABASE $name");
 	}
 
 	/**

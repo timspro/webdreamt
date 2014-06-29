@@ -8,16 +8,11 @@ namespace WebDreamt;
 class BuildTest extends \PHPUnit_Framework_TestCase {
 
 	/**
-	 * @var Build
-	 */
-	protected $object;
-
-	/**
 	 * Sets up the fixture, for example, opens a network connection.
 	 * This method is called before a test is executed.
 	 */
 	protected function setUp() {
-		$this->object = new Build;
+		Settings::init();
 	}
 
 	/**
@@ -25,18 +20,22 @@ class BuildTest extends \PHPUnit_Framework_TestCase {
 	 * This method is called after a test is executed.
 	 */
 	protected function tearDown() {
-
+		Build::nuke();
 	}
 
-	/**
-	 * @covers WebDreamt\Build::build
-	 * @todo   Implement testBuild().
-	 */
 	public function testBuild() {
 		// Remove the following lines when you implement this test.
 		$this->markTestIncomplete(
 				'This test has not been implemented yet.'
 		);
+	}
+
+	public function testNuke() {
+		$pdo = Settings::pdo();
+		$pdo->exec("CREATE TABLE nuke_test (test VARCHAR(20))");
+		$this->assertEquals(count($pdo->query("SHOW TABLES")->fetchAll()), 1);
+		Build::nuke();
+		$this->assertEquals(count($pdo->query("SHOW TABLES")->fetchAll()), 0);
 	}
 
 	/**
