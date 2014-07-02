@@ -2,51 +2,73 @@
 
 namespace WebDreamt;
 
+/**
+ * A class useful for synchronizing the database with Propel and other dependencies.
+ */
 class Build {
 
-	private static $sentrySchemaDirectory;
-	private static $propelProjectDirectory;
-	private static $propelCommandPath;
-	private static $userSchema;
-	private static $buildSchema;
-	private static $validSchema;
-	private static $generatedSchema;
+	private $propelProjectDirectory;
+	private $propelCommandPath;
+	private $userSchema;
+	private $buildSchema;
+	private $validSchema;
+	private $generatedSchema;
+	private $registeredSchemas;
 
 	/**
-	 * Given an EMPTY database, build() will attempt to 1) Insert the necessary tables for Sentry
-	 * to function, 2) Build the Propel schema.xml file based off the Sentry tables, 3) Build the
+	 * Construct a Build object.
+	 * @param array $schemas Any additional schemas to use for database creation.
+	 */
+	public function __construct(array $schemas) {
+		$this->propelCommandPath = __DIR__ . "/../vendor/bin/propel";
+		$this->propelProjectDirectory = __DIR__ . "/Propel";
+		$this->userSchema = __DIR__ . "/Schemas/schema.xml";
+		$this->validSchema = __DIR__ . "/Schemas/valid.xml";
+		$this->buildSchema = __DIR__ . "/Propel/schema.xml";
+		$this->generatedSchema = __DIR__ . "/Propel/generated-schema/schema.xml";
+
+		$this->registeredSchemas = $schemas;
+	}
+
+	/**
+	 * Given an EMPTY database, build() will attempt to 1) Insert the necessary tables for
+	 * dependencies, 2) Build the Propel schema.xml file based off the dependency tables, 3) Build the
 	 * corresponding Propel classes based off of schema.xml.
 	 * @throws Exception If the Sentry schema is not found or if the database is not empty.
 	 */
-	static public function build() {
+	public function build() {
 		/**
 		 * Commands of interest:
 		 * propel model:build
 		 * propel sql:build
 		 * propel reverse "mysql:host=localhost;dbname=db;user=root;password=pwd"
 		 */
-		$schema = self::$sentrySchemaDirectory;
-		if (!file_exists($schema)) {
-			throw new Exception("Sentry schema does not exist at $schema");
+		$schemas = $this->registeredSchemas;
+		foreach ($schemas as $schema) {
+			if (!file_exists($schema)) {
+				throw new Exception("Registered schema does not exist at $schema");
+			}
 		}
 
-		$pdo = Settings::pdo();
+		$pdo = Custom::a()->db();
 		if (count($pdo->query("SHOW TABLES")->fetchAll()) === 0) {
 			throw new Exception("Database is not empty.");
 		}
 
-		$sentrySchema = file_get_contents($schema);
-		$pdo->exec($sentrySchema);
+		foreach ($schemas as $schema) {
+			$sql = file_get_contents($schema);
+			$pdo->exec($sql);
+		}
 
-		self::updatePropel();
+		$this->updatePropel();
 	}
 
 	/**
 	 * Drops all tables in the database.
 	 */
-	static public function nuke() {
-		$pdo = Settings::pdo();
-		$name = Settings::getDbName();
+	public function nuke() {
+		$pdo = Custom::a()->db();
+		$name = Custom::a()->get("dbName");
 		$pdo->exec("DROP DATABASE $name");
 		$pdo->exec("CREATE DATABASE $name");
 	}
@@ -58,10 +80,10 @@ class Build {
 	 * @throws Exception If the propel command, the Propel project directory, or the generated schema
 	 * are not found.
 	 */
-	static public function updatePropel() {
-		$project = self::$propelProjectDirectory;
+	public function updatePropel() {
+		$project = $this->propelProjectDirectory;
 		$cd = "cd " . $project;
-		$propel = self::$propelCommandPath;
+		$propel = $this->propelCommandPath;
 
 		if (!file_exists($propel)) {
 			throw new Exception("Propel command does not exist at $propel");
@@ -70,35 +92,21 @@ class Build {
 			throw new Exception("Project directory does not exist at $project");
 		}
 
-		$host = Settings::getDbHost();
-		$name = Settings::getDbName();
-		$username = Settings::getDbUsername();
-		$password = Settings::getDbPassword();
+		$custom = Custom::a();
+		$host = $custom->get("dbHost");
+		$name = $custom->get("dbName");
+		$username = $custom->get("dbUsername");
+		$password = $custom->get("dbPassword");
 		shell_exec("$cd; $propel reverse \"mysql:host=$host;dbname=$name;user=$username;" .
 				"password=$password\"");
-		$gen = self::$generatedSchema;
+		$gen = $this->generatedSchema;
 		if (!file_exists($gen)) {
 			throw new Exception("Generated schema does not exist at $gen");
 		}
-		rename($gen, self::$userSchema);
-		self::generateSchemaXml();
+		rename($gen, $this->$userSchema);
 
-		self::generateModels();
-	}
-
-	/**
-	 * Generates the models for Propel.
-	 * @throws Exception If Propel/schema.xml is not found.
-	 */
-	static public function generateModels() {
-		$build = self::$buildSchema;
-		if (!file_exists($build)) {
-			throw new Exception("Build schema does not exist at $build");
-		}
-
-		$propel = self::$propelCommandPath;
-		$cd = "cd " . self::$propelProjectDirectory;
-		shell_exec("$cd; $propel model:build");
+		$this->generateSchemaXml();
+		$this->generateModels();
 	}
 
 	/**
@@ -107,14 +115,14 @@ class Build {
 	 * 3) Generate Propel classes.
 	 * @throws Exception If propel command or project directory is not found.
 	 */
-	static public function updateDatabase() {
-		self::generateSchemaXml();
+	public function updateDatabase() {
+		$this->generateSchemaXml();
 
-		$propel = self::$propelCommandPath;
+		$propel = $this->propelCommandPath;
 		if (!file_exists($propel)) {
 			throw new Exception("Propel command does not exist at $propel");
 		}
-		$project = self::$propelProjectDirectory;
+		$project = $this->propelProjectDirectory;
 		if (!file_exists($project)) {
 			throw new Exception("Project directory does not exist at $project");
 		}
@@ -122,16 +130,31 @@ class Build {
 		$cd = "cd " . $project;
 		shell_exec("$cd; $propel . diff migrate");
 
-		self::generateModels();
+		$this->generateModels();
+	}
+
+	/**
+	 * Generates the models for Propel.
+	 * @throws Exception If Propel/schema.xml is not found.
+	 */
+	private function generateModels() {
+		$build = $this->buildSchema;
+		if (!file_exists($build)) {
+			throw new Exception("Build schema does not exist at $build");
+		}
+
+		$propel = $this->propelCommandPath;
+		$cd = "cd " . $this->propelProjectDirectory;
+		shell_exec("$cd; $propel model:build");
 	}
 
 	/**
 	 * Merges valid.xml and schema.xml in Schema directory to create Propel/schema.xml
 	 * @throws Exception If user or valid schema is not found.
 	 */
-	static public function generateSchemaXml() {
-		$userSchema = self::$userSchema;
-		$validSchema = self::$validSchema;
+	private function generateSchemaXml() {
+		$userSchema = $this->userSchema;
+		$validSchema = $this->validSchema;
 
 		if (!file_exists($userSchema)) {
 			throw new Exception("User schema does not exist at $userSchema");
@@ -141,9 +164,9 @@ class Build {
 		}
 
 		$schemaDom = new \DOMDocument();
-		$schemaDom->load(self::$userSchema);
+		$schemaDom->load($this->userSchema);
 		$validDom = new \DOMDocument();
-		$validDom->load(self::$validSchema);
+		$validDom->load($this->validSchema);
 
 		$markers = $validDom->getElementsByTagName('table');
 		//Get the validation rules.
@@ -164,19 +187,7 @@ class Build {
 		}
 
 		//Save as the build schema.
-		echo $schemaDom->saveXML(self::$buildSchema);
-	}
-
-	static public function init() {
-		self::$propelCommandPath = __DIR__ . "/../vendor/bin/propel";
-		self::$propelProjectDirectory = __DIR__ . "/Propel";
-		self::$sentrySchemaDirectory = __DIR__ . "/../../vendor/cartalyst/sentry/schema/mysql.sql";
-		self::$userSchema = __DIR__ . "/Schemas/schema.xml";
-		self::$buildSchema = __DIR__ . "/Propel/schema.xml";
-		self::$generatedSchema = __DIR__ . "/Propel/generated-schema/schema.xml";
-		self::$validSchema = __DIR__ . "/Schemas/valid.xml";
+		echo $schemaDom->saveXML($this->buildSchema);
 	}
 
 }
-
-Build::init();

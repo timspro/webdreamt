@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../bootstrap.php';
  */
 class SettingsTest extends \PHPUnit_Framework_TestCase {
 
-	protected function setUp() {
+	public static function setUpBeforeClass() {
 		Settings::init();
 	}
 
