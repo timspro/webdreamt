@@ -9,7 +9,7 @@ abstract class Store {
 	/**
 	 * Constructs a Store instance.
 	 */
-	protected function __construct() {
+	public function __construct() {
 		if (!isset(self::$store)) {
 			self::$store = $this;
 		}

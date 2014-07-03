@@ -2,6 +2,10 @@
 
 namespace WebDreamt;
 
+use DOMDocument;
+use DOMNode;
+use Exception;
+
 /**
  * A class useful for synchronizing the database with Propel and other dependencies.
  */
@@ -13,21 +17,31 @@ class Build {
 	private $buildSchema;
 	private $validSchema;
 	private $generatedSchema;
+	private $generatedClasses;
+	private $generatedMigrations;
 	private $registeredSchemas;
+	private $a;
 
 	/**
 	 * Construct a Build object.
-	 * @param array $schemas Any additional schemas to use for database creation.
+	 * @param Custom $custom The settings object.
+	 * @param array|string $schemas Any additional schemas to use for database creation.
 	 */
-	public function __construct(array $schemas) {
-		$this->propelCommandPath = __DIR__ . "/../vendor/bin/propel";
+	public function __construct(Custom $custom, $schemas) {
+		$this->propelCommandPath = __DIR__ . "/../../vendor/bin/propel";
 		$this->propelProjectDirectory = __DIR__ . "/Propel";
 		$this->userSchema = __DIR__ . "/Schemas/schema.xml";
 		$this->validSchema = __DIR__ . "/Schemas/valid.xml";
 		$this->buildSchema = __DIR__ . "/Propel/schema.xml";
-		$this->generatedSchema = __DIR__ . "/Propel/generated-schema/schema.xml";
+		$this->generatedSchema = __DIR__ . "/Propel/generated-reversed-database/schema.xml";
+		$this->generatedClasses = __DIR__ . "/Propel/generated-classes/";
+		$this->generatedMigrations = __DIR__ . "/Propel/generated-migrations/";
 
+		if (!is_array($schemas)) {
+			$schemas = [$schemas];
+		}
 		$this->registeredSchemas = $schemas;
+		$this->a = $custom;
 	}
 
 	/**
@@ -50,9 +64,10 @@ class Build {
 			}
 		}
 
-		$pdo = Custom::a()->db();
-		if (count($pdo->query("SHOW TABLES")->fetchAll()) === 0) {
-			throw new Exception("Database is not empty.");
+		$pdo = $this->a->db();
+		$tables = $pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN);
+		if (count($tables) !== 0) {
+			throw new Exception("Database is not empty: " . implode(",", $tables));
 		}
 
 		foreach ($schemas as $schema) {
@@ -61,16 +76,6 @@ class Build {
 		}
 
 		$this->updatePropel();
-	}
-
-	/**
-	 * Drops all tables in the database.
-	 */
-	public function nuke() {
-		$pdo = Custom::a()->db();
-		$name = Custom::a()->get("dbName");
-		$pdo->exec("DROP DATABASE $name");
-		$pdo->exec("CREATE DATABASE $name");
 	}
 
 	/**
@@ -92,18 +97,19 @@ class Build {
 			throw new Exception("Project directory does not exist at $project");
 		}
 
-		$custom = Custom::a();
+		$custom = $this->a;
 		$host = $custom->get("dbHost");
 		$name = $custom->get("dbName");
 		$username = $custom->get("dbUsername");
 		$password = $custom->get("dbPassword");
-		shell_exec("$cd; $propel reverse \"mysql:host=$host;dbname=$name;user=$username;" .
-				"password=$password\"");
+		$command = "$cd; $propel reverse \"mysql:host=$host;dbname=$name;" .
+				"user=$username;password=$password\"";
+		$output = shell_exec($command);
 		$gen = $this->generatedSchema;
 		if (!file_exists($gen)) {
 			throw new Exception("Generated schema does not exist at $gen");
 		}
-		rename($gen, $this->$userSchema);
+		rename($gen, $this->userSchema);
 
 		$this->generateSchemaXml();
 		$this->generateModels();
@@ -128,7 +134,7 @@ class Build {
 		}
 
 		$cd = "cd " . $project;
-		shell_exec("$cd; $propel . diff migrate");
+		shell_exec("$cd; $propel diff; $propel migrate");
 
 		$this->generateModels();
 	}
@@ -145,6 +151,8 @@ class Build {
 
 		$propel = $this->propelCommandPath;
 		$cd = "cd " . $this->propelProjectDirectory;
+
+		shell_exec("rm -rf " . $this->generatedClasses);
 		shell_exec("$cd; $propel model:build");
 	}
 
@@ -163,31 +171,42 @@ class Build {
 			throw new Exception("Valid schema does not exist at $validSchema");
 		}
 
-		$schemaDom = new \DOMDocument();
+		$schemaDom = new DOMDocument();
 		$schemaDom->load($this->userSchema);
-		$validDom = new \DOMDocument();
+		$validDom = new DOMDocument();
 		$validDom->load($this->validSchema);
 
 		$markers = $validDom->getElementsByTagName('table');
 		//Get the validation rules.
 		$data = [];
-		/* @var $marker \DOMNode */
+		/* @var $marker DOMNode */
 		foreach ($markers as $marker) {
-			$tableName = $marker->attributes["name"];
+			$tableName = $marker->attributes->getNamedItem("name")->nodeValue;
 			$data[$tableName] = $marker->childNodes;
 		}
 
 		//Add the validation rules to data schema.
 		$markers = $schemaDom->getElementsByTagName('table');
 		foreach ($markers as $marker) {
-			$tableName = $marker->attributes["name"];
-			foreach ($data[$tableName] as $node) {
-				$marker->appendChild($node);
+			$tableName = $marker->attributes->getNamedItem("name")->nodeValue;
+			if (isset($data[$tableName])) {
+				foreach ($data[$tableName] as $node) {
+					$marker->appendChild($node);
+				}
 			}
 		}
 
 		//Save as the build schema.
-		echo $schemaDom->saveXML($this->buildSchema);
+		echo $schemaDom->save($this->buildSchema);
+	}
+
+	/**
+	 * Gets the value of the specified property.
+	 * @param string $name The property name
+	 * @return mixed
+	 */
+	public function get($name) {
+		return $this->$name;
 	}
 
 }

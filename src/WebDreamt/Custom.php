@@ -2,15 +2,26 @@
 
 namespace WebDreamt;
 
-class Custom extends \WebDreamt\Common\Store {
+use PDO;
+use Cartalyst\Sentry\Facades\Native\Sentry as Sentry;
+use Illuminate\Database\Capsule\Manager as Capsule;
+use WebDreamt\Common\Store as Store;
 
-	private $dbHost = "localhost";
-	private $dbName = "webdreamt";
-	private $dbUsername = "root";
-	private $dbPassword = "";
+/**
+ * A class to store objects that are configured via constant values.
+ */
+class Custom extends Store {
+
+	// These parameters are accessible via get and aren't really hidden.
+	// This is okay since accessing the objects these parameters configure is functionally similar.
+	// They are protected from being overwritten, however.
+	protected $dbHost = "localhost";
+	protected $dbName = "webdreamt";
+	protected $dbUsername = "root";
+	protected $dbPassword = "";
 
 	/**
-	 * @return \PDO A PDO instance to the database.
+	 * @return PDO A PDO instance to the database.
 	 */
 	function db() {
 		return $this->factory(__FUNCTION__, function () {
@@ -31,7 +42,17 @@ class Custom extends \WebDreamt\Common\Store {
 	}
 
 	/**
-	 * @return \Cartalyst\Sentry\Sentry A sentry instance.
+	 *
+	 * @return Build
+	 */
+	function build() {
+		return $this->factory(__FUNCTION__, function () {
+					return new Build($this, __DIR__ . "/../../vendor/cartalyst/sentry/schema/mysql.sql");
+				});
+	}
+
+	/**
+	 * @return Sentry A sentry instance.
 	 */
 	function sentry() {
 		return $this->factory(__FUNCTION__, function () {
@@ -56,7 +77,7 @@ class Custom extends \WebDreamt\Common\Store {
 	 * Get an instance of Custom.
 	 * @return Custom
 	 */
-	function a() {
+	public static function a() {
 		return parent::a();
 	}
 

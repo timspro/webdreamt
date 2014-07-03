@@ -1,4 +1,76 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<database>
+<?xml version="1.0" encoding="utf-8"?>
+<database name="default" defaultIdMethod="native" defaultPhpNamingMethod="underscore">
+  <table name="groups" idMethod="native" phpName="Groups">
+    <column name="id" phpName="Id" type="INTEGER" size="10" sqlType="int(10) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
+    <column name="name" phpName="Name" type="VARCHAR" size="255" required="true"/>
+    <column name="permissions" phpName="Permissions" type="LONGVARCHAR"/>
+    <column name="created_at" phpName="CreatedAt" type="TIMESTAMP" required="true" defaultValue="0000-00-00 00:00:00"/>
+    <column name="updated_at" phpName="UpdatedAt" type="TIMESTAMP" required="true" defaultValue="0000-00-00 00:00:00"/>
+    <unique name="groups_name_unique">
+      <unique-column name="name"/>
+    </unique>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="migrations" idMethod="native" phpName="Migrations">
+    <column name="migration" phpName="Migration" type="VARCHAR" size="255" required="true"/>
+    <column name="batch" phpName="Batch" type="INTEGER" required="true"/>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="throttle" idMethod="native" phpName="Throttle">
+    <column name="id" phpName="Id" type="INTEGER" size="10" sqlType="int(10) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
+    <column name="user_id" phpName="UserId" type="INTEGER" size="10" sqlType="int(10) unsigned" required="true"/>
+    <column name="ip_address" phpName="IpAddress" type="VARCHAR" size="255"/>
+    <column name="attempts" phpName="Attempts" type="INTEGER" required="true" defaultValue="0"/>
+    <column name="suspended" phpName="Suspended" type="TINYINT" required="true" defaultValue="0"/>
+    <column name="banned" phpName="Banned" type="TINYINT" required="true" defaultValue="0"/>
+    <column name="last_attempt_at" phpName="LastAttemptAt" type="TIMESTAMP"/>
+    <column name="suspended_at" phpName="SuspendedAt" type="TIMESTAMP"/>
+    <column name="banned_at" phpName="BannedAt" type="TIMESTAMP"/>
+    <index name="fk_user_id">
+      <index-column name="user_id"/>
+    </index>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="users" idMethod="native" phpName="Users">
+    <column name="id" phpName="Id" type="INTEGER" size="10" sqlType="int(10) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
+    <column name="email" phpName="Email" type="VARCHAR" size="255" required="true"/>
+    <column name="password" phpName="Password" type="VARCHAR" size="255" required="true"/>
+    <column name="permissions" phpName="Permissions" type="LONGVARCHAR"/>
+    <column name="activated" phpName="Activated" type="TINYINT" required="true" defaultValue="0"/>
+    <column name="activation_code" phpName="ActivationCode" type="VARCHAR" size="255"/>
+    <column name="activated_at" phpName="ActivatedAt" type="VARCHAR" size="255"/>
+    <column name="last_login" phpName="LastLogin" type="VARCHAR" size="255"/>
+    <column name="persist_code" phpName="PersistCode" type="VARCHAR" size="255"/>
+    <column name="reset_password_code" phpName="ResetPasswordCode" type="VARCHAR" size="255"/>
+    <column name="first_name" phpName="FirstName" type="VARCHAR" size="255"/>
+    <column name="last_name" phpName="LastName" type="VARCHAR" size="255"/>
+    <column name="created_at" phpName="CreatedAt" type="TIMESTAMP" required="true" defaultValue="0000-00-00 00:00:00"/>
+    <column name="updated_at" phpName="UpdatedAt" type="TIMESTAMP" required="true" defaultValue="0000-00-00 00:00:00"/>
+    <index name="users_activation_code_index">
+      <index-column name="activation_code"/>
+    </index>
+    <index name="users_reset_password_code_index">
+      <index-column name="reset_password_code"/>
+    </index>
+    <unique name="users_email_unique">
+      <unique-column name="email"/>
+    </unique>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
+  <table name="users_groups" idMethod="native" phpName="UsersGroups">
+    <column name="id" phpName="Id" type="INTEGER" size="10" sqlType="int(10) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
+    <column name="user_id" phpName="UserId" type="INTEGER" size="10" sqlType="int(10) unsigned" required="true"/>
+    <column name="group_id" phpName="GroupId" type="INTEGER" size="10" sqlType="int(10) unsigned" required="true"/>
+    <vendor type="mysql">
+      <parameter name="Engine" value="InnoDB"/>
+    </vendor>
+  </table>
 </database>
