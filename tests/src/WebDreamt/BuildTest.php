@@ -14,6 +14,14 @@ class BuildTest extends Test {
 		self::$build = self::$a->build();
 	}
 
+	public static function tearDownAfterClass() {
+		parent::tearDownAfterClass();
+		parent::nuke();
+		shell_exec("rm -rf " . self::$build->get("generatedMigrations"));
+		shell_exec("rm -rf " . self::$build->get("generatedDatabase"));
+		shell_exec("rm -rf " . self::$build->get("generatedClasses"));
+	}
+
 	protected function setUp() {
 		parent::setUp();
 		$this->nuke();

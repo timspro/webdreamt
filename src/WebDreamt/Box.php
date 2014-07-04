@@ -10,7 +10,7 @@ use WebDreamt\Common\Store as Store;
 /**
  * A class to store objects that are configured via constant values.
  */
-class Custom extends Store {
+class Box extends Store {
 
 	// These parameters are accessible via get and aren't really hidden.
 	// This is okay since accessing the objects these parameters configure is functionally similar.
@@ -74,8 +74,8 @@ class Custom extends Store {
 	}
 
 	/**
-	 * Get an instance of Custom.
-	 * @return Custom
+	 * Get an instance of Box.
+	 * @return Box
 	 */
 	public static function a() {
 		return parent::a();

@@ -4,7 +4,7 @@ namespace WebDreamt;
 
 abstract class Test extends \PHPUnit_Framework_TestCase {
 
-	/** @var Custom */
+	/** @var Box */
 	protected static $a;
 
 	/** @var \PDO */
@@ -12,7 +12,7 @@ abstract class Test extends \PHPUnit_Framework_TestCase {
 	private $id = 0;
 
 	public static function setUpBeforeClass() {
-		self::$a = new Custom;
+		self::$a = new Box;
 		self::$db = self::$a->db();
 	}
 

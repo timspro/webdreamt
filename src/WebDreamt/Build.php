@@ -24,16 +24,17 @@ class Build {
 
 	/**
 	 * Construct a Build object.
-	 * @param Custom $custom The settings object.
+	 * @param Box $custom The settings object.
 	 * @param array|string $schemas Any additional schemas to use for database creation.
 	 */
-	public function __construct(Custom $custom, $schemas) {
+	public function __construct(Box $custom, $schemas) {
 		$this->propelCommandPath = __DIR__ . "/../../vendor/bin/propel";
 		$this->propelProjectDirectory = __DIR__ . "/Propel";
 		$this->userSchema = __DIR__ . "/Schemas/schema.xml";
 		$this->validSchema = __DIR__ . "/Schemas/valid.xml";
 		$this->buildSchema = __DIR__ . "/Propel/schema.xml";
 		$this->generatedSchema = __DIR__ . "/Propel/generated-reversed-database/schema.xml";
+		$this->generatedDatabase = __DIR__ . "/Propel/generated-reversed-database/";
 		$this->generatedClasses = __DIR__ . "/Propel/generated-classes/";
 		$this->generatedMigrations = __DIR__ . "/Propel/generated-migrations/";
 
@@ -104,7 +105,7 @@ class Build {
 		$password = $custom->get("dbPassword");
 		$command = "$cd; $propel reverse \"mysql:host=$host;dbname=$name;" .
 				"user=$username;password=$password\"";
-		$output = shell_exec($command);
+		shell_exec($command);
 		$gen = $this->generatedSchema;
 		if (!file_exists($gen)) {
 			throw new Exception("Generated schema does not exist at $gen");
