@@ -12,11 +12,11 @@ use WebDreamt\Common\Store as Store;
  */
 class Box extends Store {
 
-	// These parameters are accessible via get and aren't really hidden.
-	// This is okay since accessing the objects these parameters configure is functionally similar.
-	// They are protected from being overwritten, however.
+	// These parameters are accessible via get and aren't really hidden. This does not cause a security
+	// vulnerability since accessing the objects these parameters configure is functionally similar.
+	// They are protected from being overwritten externally, however.
 	protected $dbHost = "localhost";
-	protected $dbName = "webdreamt";
+	protected $dbName = "";
 	protected $dbUsername = "root";
 	protected $dbPassword = "";
 
