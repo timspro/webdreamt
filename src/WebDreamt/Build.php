@@ -24,10 +24,10 @@ class Build {
 
 	/**
 	 * Construct a Build object.
-	 * @param Box $custom The settings object.
+	 * @param Box $box The settings object.
 	 * @param array|string $schemas Any additional schemas to use for database creation.
 	 */
-	public function __construct(Box $custom, $schemas) {
+	public function __construct(Box $box, $schemas) {
 		$this->propelCommandPath = __DIR__ . "/../../vendor/bin/propel";
 		$this->propelProjectDirectory = __DIR__ . "/Propel";
 		$this->userSchema = __DIR__ . "/Schemas/schema.xml";
@@ -42,7 +42,7 @@ class Build {
 			$schemas = [$schemas];
 		}
 		$this->registeredSchemas = $schemas;
-		$this->a = $custom;
+		$this->a = $box;
 	}
 
 	/**
