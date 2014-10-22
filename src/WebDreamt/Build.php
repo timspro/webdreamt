@@ -91,7 +91,44 @@ class Build {
 			throw new Exception("Could not get the propel application.");
 		}
 
-		$propelPHP = require_once $this->PropelPHP;
+		$propelPHP = array(
+			'propel' =>
+			array(
+				'database' =>
+				array(
+					'connections' =>
+					array(
+						'default' =>
+						array(
+							'adapter' => 'mysql',
+							'classname' => 'Propel\\Runtime\\Connection\\ConnectionWrapper',
+							'dsn' => 'mysql:host=localhost;dbname=test',
+							'user' => 'root',
+							'password' => '',
+							'attributes' =>
+							array(
+							),
+						),
+					),
+				),
+				'runtime' =>
+				array(
+					'defaultConnection' => 'default',
+					'connections' =>
+					array(
+						0 => 'default',
+					),
+				),
+				'generator' =>
+				array(
+					'defaultConnection' => 'default',
+					'connections' =>
+					array(
+						0 => 'default',
+					),
+				),
+			),
+		);
 		$default = &$propelPHP["propel"]["database"]["connections"]["default"];
 		$default["dsn"] = "mysql:host=" . $this->a->DatabaseHost . ";dbname=" . $this->a->DatabaseName;
 		$default["user"] = $this->a->DatabaseUsername;
