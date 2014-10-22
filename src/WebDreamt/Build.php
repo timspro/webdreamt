@@ -71,7 +71,7 @@ class Build {
 		$this->a = $box;
 
 		$vendor = (\file_exists(__DIR__ . '/../../vendor/') ?
-						__DIR__ . '/../../vendor/' : __DIR . '/../../../../');
+						__DIR__ . '/../../vendor/' : __DIR__ . '/../../../../');
 
 		$finder = new Finder();
 		$finder->files()->name('*.php')
@@ -131,6 +131,16 @@ class Build {
 		}
 
 		$this->updatePropel();
+	}
+
+	/**
+	 * Attempts to add the schems to the database.
+	 */
+	public function addSchemas() {
+		foreach ($this->registeredSchemas as $schema) {
+			$sql = file_get_contents($schema);
+			$this->a->db()->exec($sql);
+		}
 	}
 
 	/**
