@@ -80,7 +80,8 @@ class Builder {
 		$this->makeDir($this->PropelProject);
 		$this->makeDir($schemaDir);
 		if (!file_exists($this->ValidSchema)) {
-			file_put_contents($this->ValidSchema, "");
+			$xml = "<?xml version='1.0' encoding='UTF-8'?>\n<database>\n</database>\n";
+			file_put_contents($this->ValidSchema, $xml);
 		}
 
 		if (!is_array($schemas)) {
