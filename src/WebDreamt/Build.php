@@ -21,6 +21,7 @@ use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
  */
 class Build {
 
+	public $PropelPHP;
 	public $PropelProjectDirectory;
 	public $UserSchema;
 	public $BuildSchema;
@@ -52,6 +53,7 @@ class Build {
 	 */
 	public function __construct(Box $box, $schemas) {
 		$this->PropelProjectDirectory = __DIR__ . "/Propel";
+		$this->PropelPHP = __DIR__ . "/Propel/propel.php";
 		$this->UserSchema = __DIR__ . "/Schemas/schema.xml";
 		$this->ValidSchema = __DIR__ . "/Schemas/validation.xml";
 		$this->BuildSchema = __DIR__ . "/Propel/schema.xml";
@@ -83,6 +85,13 @@ class Build {
 		if (!($app instanceof Application)) {
 			throw new Exception("Could not get the propel application.");
 		}
+
+		$propelPHP = require_once $this->PropelPHP;
+		$default = &$propelPHP["propel"]["database"]["connections"]["default"];
+		$default["dsn"] = "mysql:host=" . $this->a->DatabaseHost . ";dbname=" . $this->a->DatabaseName;
+		$default["user"] = $this->a->DatabaseUsername;
+		$default["password"] = $this->a->DatabasePassword;
+		\file_put_contents($this->PropelPHP, "<?php\nreturn " . \var_export($propelPHP, true) . ";\n");
 
 		umask(0);
 	}
