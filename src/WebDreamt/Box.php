@@ -12,23 +12,20 @@ use WebDreamt\Common\Store as Store;
  */
 class Box extends Store {
 
-	// These parameters are accessible via get and aren't really hidden. This does not cause a security
-	// vulnerability since accessing the objects these parameters configure is functionally similar.
-	// They are protected from being overwritten externally, however.
-	protected $dbHost = "localhost";
-	protected $dbName = "";
-	protected $dbUsername = "root";
-	protected $dbPassword = "";
+	public $DatabaseHost = "localhost";
+	public $DatabaseName = "";
+	public $DatabaseUsername = "root";
+	public $DatabasePassword = "";
 
 	/**
 	 * @return PDO A PDO instance to the database.
 	 */
 	function db() {
 		return $this->factory(__FUNCTION__, function () {
-					$database = $this->dbName;
-					$server = $this->dbHost;
-					$username = $this->dbUsername;
-					$password = $this->dbPassword;
+					$database = $this->DatabaseName;
+					$server = $this->DatabaseHost;
+					$username = $this->DatabaseUsername;
+					$password = $this->DatabasePassword;
 
 					if (empty($database)) {
 						$configure = "mysql:host=$server";
@@ -59,10 +56,10 @@ class Box extends Store {
 					$capsule = new Capsule;
 					$capsule->addConnection([
 						'driver' => 'mysql',
-						'host' => $this->dbHost,
-						'database' => $this->dbName,
-						'username' => $this->dbUsername,
-						'password' => $this->dbPassword,
+						'host' => $this->DatabaseHost,
+						'database' => $this->DatabaseName,
+						'username' => $this->DatabaseUsername,
+						'password' => $this->DatabasePassword,
 						'charset' => 'utf8',
 						'collation' => 'utf8_unicode_ci',
 					]);

@@ -17,9 +17,9 @@ class BuildTest extends Test {
 	public static function tearDownAfterClass() {
 		parent::tearDownAfterClass();
 		parent::nuke();
-		shell_exec("rm -rf " . self::$build->get("generatedMigrations"));
-		shell_exec("rm -rf " . self::$build->get("generatedDatabase"));
-		shell_exec("rm -rf " . self::$build->get("generatedClasses"));
+		self::$build->removeDirectory(self::$build->GeneratedMigrations);
+		self::$build->removeDirectory(self::$build->GeneratedDatabase);
+		self::$build->removeDirectory(self::$build->GeneratedClasses);
 	}
 
 	protected function setUp() {
@@ -41,7 +41,7 @@ class BuildTest extends Test {
 		$this->createTable();
 		$this->createTable();
 		self::$build->updatePropel();
-		$dir = new \DirectoryIterator(self::$build->get("generatedClasses"));
+		$dir = new \DirectoryIterator(self::$build->GeneratedClasses);
 		$count = 0;
 		foreach ($dir as $file) {
 			if ($file->isFile()) {
@@ -56,12 +56,12 @@ class BuildTest extends Test {
 
 		$build->build();
 
-		shell_exec("rm -rf " . $build->get("generatedMigrations"));
+		shell_exec("rm -rf " . $build->GeneratedMigrations);
 
-		$name = self::$a->get("dbName");
-		$password = self::$a->get("dbPassword");
-		$host = self::$a->get("dbHost");
-		$username = self::$a->get("dbUsername");
+		$name = self::$a->DatabaseName;
+		$password = self::$a->DatabasePassword;
+		$host = self::$a->DatabaseHost;
+		$username = self::$a->DatabaseUsername;
 		$goodOutput = shell_exec("mysqldump --no-data --skip-comments --user=$username --password=$password " .
 				"--host=$host $name");
 		$this->nuke();

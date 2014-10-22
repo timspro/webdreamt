@@ -5,22 +5,45 @@ namespace WebDreamt;
 use DOMDocument;
 use DOMNode;
 use Exception;
+use FilesystemIterator;
+use PDO;
+use Propel\Runtime\Propel;
+use RecursiveIteratorIterator;
+use ReflectionClass;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 
 /**
  * A class useful for synchronizing the database with Propel and other dependencies.
  */
 class Build {
 
-	private $propelProjectDirectory;
-	private $propelCommandPath;
-	private $userSchema;
-	private $buildSchema;
-	private $validSchema;
-	private $generatedSchema;
-	private $generatedClasses;
-	private $generatedMigrations;
+	public $PropelProjectDirectory;
+	public $UserSchema;
+	public $BuildSchema;
+	public $ValidSchema;
+	public $GeneratedSchema;
+	public $GeneratedClasses;
+	public $GeneratedMigrations;
+	/**
+	 * A list of schemas to add to the database
+	 * @var array
+	 */
 	private $registeredSchemas;
+	/**
+	 * A reference to the box
+	 * @var type
+	 */
 	private $a;
+	/**
+	 * The propel command runner
+	 * @var Application
+	 */
+	private $propel;
+	private $propelOutput;
 
 	/**
 	 * Construct a Build object.
@@ -28,21 +51,40 @@ class Build {
 	 * @param array|string $schemas Any additional schemas to use for database creation.
 	 */
 	public function __construct(Box $box, $schemas) {
-		$this->propelCommandPath = __DIR__ . "/../../vendor/bin/propel";
-		$this->propelProjectDirectory = __DIR__ . "/Propel";
-		$this->userSchema = __DIR__ . "/Schemas/schema.xml";
-		$this->validSchema = __DIR__ . "/Schemas/valid.xml";
-		$this->buildSchema = __DIR__ . "/Propel/schema.xml";
-		$this->generatedSchema = __DIR__ . "/Propel/generated-reversed-database/schema.xml";
-		$this->generatedDatabase = __DIR__ . "/Propel/generated-reversed-database/";
-		$this->generatedClasses = __DIR__ . "/Propel/generated-classes/";
-		$this->generatedMigrations = __DIR__ . "/Propel/generated-migrations/";
+		$this->PropelProjectDirectory = __DIR__ . "/Propel";
+		$this->UserSchema = __DIR__ . "/Schemas/schema.xml";
+		$this->ValidSchema = __DIR__ . "/Schemas/validation.xml";
+		$this->BuildSchema = __DIR__ . "/Propel/schema.xml";
+		$this->GeneratedSchema = __DIR__ . "/Propel/generated-reversed-database/schema.xml";
+		$this->GeneratedDatabase = __DIR__ . "/Propel/generated-reversed-database/";
+		$this->GeneratedClasses = __DIR__ . "/Propel/generated-classes/";
+		$this->GeneratedMigrations = __DIR__ . "/Propel/generated-migrations/";
 
 		if (!is_array($schemas)) {
 			$schemas = [$schemas];
 		}
 		$this->registeredSchemas = $schemas;
 		$this->a = $box;
+
+		$finder = new Finder();
+		$finder->files()->name('*.php')
+				->in(__DIR__ . '/../../vendor/propel/propel/src/Propel/Generator/Command')->depth(0);
+		$app = new Application('Propel', Propel::VERSION);
+		foreach ($finder as $file) {
+			$ns = '\\Propel\\Generator\\Command';
+			$r = new ReflectionClass($ns . '\\' . $file->getBasename('.php'));
+			if ($r->isSubclassOf('Symfony\\Component\\Console\\Command\\Command') && !$r->isAbstract()) {
+				$app->add($r->newInstance());
+			}
+		}
+
+		$this->propel = $app;
+		$this->propelOutput = new NullOutput();
+		if (!($app instanceof Application)) {
+			throw new Exception("Could not get the propel application.");
+		}
+
+		umask(0);
 	}
 
 	/**
@@ -66,7 +108,7 @@ class Build {
 		}
 
 		$pdo = $this->a->db();
-		$tables = $pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN);
+		$tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
 		if (count($tables) !== 0) {
 			throw new Exception("Database is not empty: " . implode(",", $tables));
 		}
@@ -87,30 +129,28 @@ class Build {
 	 * are not found.
 	 */
 	public function updatePropel() {
-		$project = $this->propelProjectDirectory;
-		$cd = "cd " . $project;
-		$propel = $this->propelCommandPath;
-
-		if (!file_exists($propel)) {
-			throw new Exception("Propel command does not exist at $propel");
-		}
+		$project = $this->PropelProjectDirectory;
 		if (!file_exists($project)) {
 			throw new Exception("Project directory does not exist at $project");
 		}
 
 		$custom = $this->a;
-		$host = $custom->get("dbHost");
-		$name = $custom->get("dbName");
-		$username = $custom->get("dbUsername");
-		$password = $custom->get("dbPassword");
-		$command = "$cd; $propel reverse \"mysql:host=$host;dbname=$name;" .
-				"user=$username;password=$password\"";
-		shell_exec($command);
-		$gen = $this->generatedSchema;
+		$host = $custom->DatabaseHost;
+		$name = $custom->DatabaseName;
+		$username = $custom->DatabaseUsername;
+		$password = $custom->DatabasePassword;
+
+		chdir($project);
+		$this->propel->find("reverse")->run(new ArrayInput([
+			"command" => "reverse",
+			"connection" => "mysql:host=$host;dbname=$name;user=$username;password=$password"
+				]), $this->propelOutput);
+
+		$gen = $this->GeneratedSchema;
 		if (!file_exists($gen)) {
 			throw new Exception("Generated schema does not exist at $gen");
 		}
-		rename($gen, $this->userSchema);
+		rename($gen, $this->UserSchema);
 
 		$this->generateSchemaXml();
 		$this->generateModels();
@@ -125,17 +165,16 @@ class Build {
 	public function updateDatabase() {
 		$this->generateSchemaXml();
 
-		$propel = $this->propelCommandPath;
-		if (!file_exists($propel)) {
-			throw new Exception("Propel command does not exist at $propel");
-		}
-		$project = $this->propelProjectDirectory;
+		$project = $this->PropelProjectDirectory;
 		if (!file_exists($project)) {
 			throw new Exception("Project directory does not exist at $project");
 		}
 
-		$cd = "cd " . $project;
-		shell_exec("$cd; $propel diff; $propel migrate");
+		chdir($project);
+		$this->propel->find("diff")->run(new ArrayInput(["command" => "diff"]), $this->propelOutput);
+		$this->propel->find("migrate")->run(new ArrayInput([
+			"command" => "migrate"
+				]), $this->propelOutput);
 
 		$this->generateModels();
 	}
@@ -145,16 +184,16 @@ class Build {
 	 * @throws Exception If Propel/schema.xml is not found.
 	 */
 	private function generateModels() {
-		$build = $this->buildSchema;
+		$build = $this->BuildSchema;
 		if (!file_exists($build)) {
 			throw new Exception("Build schema does not exist at $build");
 		}
 
-		$propel = $this->propelCommandPath;
-		$cd = "cd " . $this->propelProjectDirectory;
-
-		shell_exec("rm -rf " . $this->generatedClasses);
-		shell_exec("$cd; $propel model:build");
+		$this->removeDirectory($this->GeneratedClasses);
+		chdir($this->PropelProjectDirectory);
+		$this->propel->find("model:build")->run(new ArrayInput([
+			"command" => "model:build"
+				]), $this->propelOutput);
 	}
 
 	/**
@@ -162,8 +201,8 @@ class Build {
 	 * @throws Exception If user or valid schema is not found.
 	 */
 	private function generateSchemaXml() {
-		$userSchema = $this->userSchema;
-		$validSchema = $this->validSchema;
+		$userSchema = $this->UserSchema;
+		$validSchema = $this->ValidSchema;
 
 		if (!file_exists($userSchema)) {
 			throw new Exception("User schema does not exist at $userSchema");
@@ -173,9 +212,9 @@ class Build {
 		}
 
 		$schemaDom = new DOMDocument();
-		$schemaDom->load($this->userSchema);
+		$schemaDom->load($this->UserSchema);
 		$validDom = new DOMDocument();
-		$validDom->load($this->validSchema);
+		$validDom->load($this->ValidSchema);
 
 		$markers = $validDom->getElementsByTagName('table');
 		//Get the validation rules.
@@ -198,16 +237,22 @@ class Build {
 		}
 
 		//Save as the build schema.
-		echo $schemaDom->save($this->buildSchema);
+		echo $schemaDom->save($this->BuildSchema);
 	}
 
 	/**
-	 * Gets the value of the specified property.
-	 * @param string $name The property name
-	 * @return mixed
+	 * Removes all files and directories in a directory if it exists.
+	 * @param string $dirPath
 	 */
-	public function get($name) {
-		return $this->$name;
+	public function removeDirectory($dirPath) {
+		if (\file_exists($dirPath)) {
+			foreach (new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator($dirPath, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as
+						$path) {
+				$path->isDir() ? rmdir($path->getPathname()) : unlink($path->getPathname());
+			}
+			//rmdir($dirPath);
+		}
 	}
 
 }

@@ -37,13 +37,4 @@ abstract class Store {
 		return $this->$name;
 	}
 
-	/**
-	 * Gets the value of the specified property.
-	 * @param string $name The property name
-	 * @return mixed
-	 */
-	public function get($name) {
-		return $this->$name;
-	}
-
 }

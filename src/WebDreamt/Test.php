@@ -2,18 +2,22 @@
 
 namespace WebDreamt;
 
-abstract class Test extends \PHPUnit_Framework_TestCase {
+use PDO;
+use PHPUnit_Framework_TestCase;
+
+abstract class Test extends PHPUnit_Framework_TestCase {
 
 	/** @var Box */
 	protected static $a;
-
-	/** @var \PDO */
+	/** @var PDO */
 	protected static $db;
 	private $id = 0;
 
 	public static function setUpBeforeClass() {
 		self::$a = new Box;
 		self::$db = self::$a->db();
+		self::$db->exec("CREATE DATABASE IF NOT EXISTS test; USE test");
+		self::$a->DatabaseName = "test";
 	}
 
 	public function createTable($name = '') {
@@ -34,7 +38,7 @@ abstract class Test extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function column($query) {
-		return self::$db->query($query)->fetchAll(\PDO::FETCH_COLUMN);
+		return self::$db->query($query)->fetchAll(PDO::FETCH_COLUMN);
 	}
 
 	public function inColumn($query, $value) {
@@ -50,7 +54,7 @@ abstract class Test extends \PHPUnit_Framework_TestCase {
 	 */
 	public function nuke() {
 		$db = self::$a->db();
-		$tables = $db->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN);
+		$tables = $db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
 		$query = "";
 		foreach ($tables as $table) {
 			$query .= "DROP TABLE $table;";
