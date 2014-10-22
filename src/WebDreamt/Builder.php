@@ -19,10 +19,10 @@ use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 /**
  * A class useful for synchronizing the database with Propel and other dependencies.
  */
-class Build {
+class Builder {
 
 	public $PropelPHP;
-	public $PropelProjectDirectory;
+	public $PropelProject;
 	public $UserSchema;
 	public $BuildSchema;
 	public $ValidSchema;
@@ -48,24 +48,37 @@ class Build {
 	private $propelOutput;
 
 	/**
-	 * Construct a Build object.
+	 * Construct a Builder object.
 	 * @param Box $box The settings object.
 	 * @param array|string $schemas Any additional schemas to use for database creation.
 	 */
-	public function __construct(Box $box, $schemas = []) {
+	public function __construct(Box $box, $schemas = [], $baseDir = null) {
 		umask(0);
 
-		$this->PropelProjectDirectory = __DIR__ . "/Propel";
-		$this->PropelPHP = __DIR__ . "/Propel/propel.php";
-		$this->UserSchema = __DIR__ . "/Schemas/schema.xml";
-		$this->ValidSchema = __DIR__ . "/Schemas/validation.xml";
-		$this->BuildSchema = __DIR__ . "/Propel/schema.xml";
-		$this->GeneratedSchema = __DIR__ . "/Propel/generated-reversed-database/schema.xml";
-		$this->GeneratedDatabase = __DIR__ . "/Propel/generated-reversed-database/";
-		$this->GeneratedClasses = __DIR__ . "/Propel/generated-classes/";
-		$this->GeneratedMigrations = __DIR__ . "/Propel/generated-migrations/";
-		$this->Vendor = (\file_exists(__DIR__ . '/../../vendor/') ?
-						__DIR__ . '/../../vendor/' : __DIR__ . '/../../../../');
+		//Change how this is organized.
+		$this->Vendor = $box->VendorDirectory;
+
+		if (!$baseDir) {
+			$this->PropelProject = $this->Vendor . "../db/Propel/";
+		} else {
+			if (!is_dir($baseDir)) {
+				throw new Exception("$baseDir is not a directory.");
+			}
+			$this->PropelProject = $baseDir;
+		}
+		$this->PropelPHP = $this->PropelProject . "propel.php";
+		$schemaDir = $this->Vendor . "../db/Schemas/";
+		$this->UserSchema = $schemaDir . "schema.xml";
+		$this->ValidSchema = $schemaDir . "validation.xml";
+		$this->BuildSchema = $this->PropelProject . "schema.xml";
+		$this->GeneratedSchema = $this->PropelProject . "generated-reversed-database/schema.xml";
+		$this->GeneratedDatabase = $this->PropelProject . "generated-reversed-database/";
+		$this->GeneratedClasses = $this->PropelProject . "generated-classes/";
+		$this->GeneratedMigrations = $this->PropelProject . "generated-migrations/";
+
+		$this->makeDir($this->Vendor . "../db/");
+		$this->makeDir($this->PropelProject);
+		$this->makeDir($schemaDir);
 
 		if (!is_array($schemas)) {
 			$schemas = [$schemas];
@@ -199,7 +212,7 @@ class Build {
 	 * are not found.
 	 */
 	public function updatePropel() {
-		$project = $this->PropelProjectDirectory;
+		$project = $this->PropelProject;
 		if (!file_exists($project)) {
 			throw new Exception("Project directory does not exist at $project");
 		}
@@ -235,7 +248,7 @@ class Build {
 	public function updateDatabase() {
 		$this->generateSchemaXml();
 
-		$project = $this->PropelProjectDirectory;
+		$project = $this->PropelProject;
 		if (!file_exists($project)) {
 			throw new Exception("Project directory does not exist at $project");
 		}
@@ -260,7 +273,7 @@ class Build {
 		}
 
 		$this->removeDirectory($this->GeneratedClasses);
-		chdir($this->PropelProjectDirectory);
+		chdir($this->PropelProject);
 		$this->propel->find("model:build")->run(new ArrayInput([
 			"command" => "model:build"
 				]), $this->propelOutput);
@@ -322,6 +335,16 @@ class Build {
 				$path->isDir() ? rmdir($path->getPathname()) : unlink($path->getPathname());
 			}
 			//rmdir($dirPath);
+		}
+	}
+
+	/**
+	 * Makes a directory if it doesn't exist already.
+	 * @param string $dir
+	 */
+	public function makeDir($dir) {
+		if (!file_exists($dir)) {
+			mkdir($dir);
 		}
 	}
 

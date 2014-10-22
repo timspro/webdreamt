@@ -16,6 +16,18 @@ class Box extends Store {
 	public $DatabaseName = "test";
 	public $DatabaseUsername = "root";
 	public $DatabasePassword = "";
+	public $DatabaseDirectory = null;
+	public $VendorDirectory;
+
+	/**
+	 * Constructs a Box.
+	 */
+	function __construct() {
+		parent::__construct();
+
+		$this->VendorDirectory = (\file_exists(__DIR__ . '/../../vendor/') ?
+						__DIR__ . '/../../vendor/' : __DIR__ . '/../../../../');
+	}
 
 	/**
 	 * @return PDO A PDO instance to the database.
@@ -39,19 +51,18 @@ class Box extends Store {
 	}
 
 	/**
-	 *
-	 * @return Build
+	 * @return Builder A builder instance
 	 */
 	function build() {
 		return $this->factory(__FUNCTION__, function () {
-					$build = new Build($this);
-					$build->registerSchemas($build->Vendor . "cartalyst/sentry/schema/mysql.sql");
+					$schema = $this->VendorDirectory . "cartalyst/sentry/schema/mysql.sql";
+					$build = new Builder($this, $schema, $this->DatabaseDirectory);
 					return $build;
 				});
 	}
 
 	/**
-	 * @return Sentry A sentry instance.
+	 * @return Sentry A sentry instance
 	 */
 	function sentry() {
 		return $this->factory(__FUNCTION__, function () {

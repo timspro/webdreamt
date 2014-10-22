@@ -2,12 +2,14 @@
 
 namespace WebDreamt;
 
+use ReflectionMethod;
 require_once __DIR__ . '/../../bootstrap.php';
 
 class BuildTest extends Test {
 
-	/** @var Build */
+	/** @var Builder */
 	protected static $build;
+	protected static $baseDir;
 
 	public static function setUpBeforeClass() {
 		parent::setUpBeforeClass();
