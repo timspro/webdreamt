@@ -151,6 +151,10 @@ class Builder {
 		$default["user"] = $this->a->DatabaseUsername;
 		$default["password"] = $this->a->DatabasePassword;
 		\file_put_contents($this->PropelPHP, "<?php\nreturn " . \var_export($propelPHP, true) . ";\n");
+
+		chdir($this->PropelProject);
+		$input = new ArrayInput(["command" => "config:convert"]);
+		$this->propel->find("config:convert")->run($input, $this->propelOutput);
 	}
 
 	/**
