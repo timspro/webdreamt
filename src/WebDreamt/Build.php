@@ -51,7 +51,7 @@ class Build {
 	 * @param Box $box The settings object.
 	 * @param array|string $schemas Any additional schemas to use for database creation.
 	 */
-	public function __construct(Box $box, $schemas) {
+	public function __construct(Box $box, $schemas = []) {
 		umask(0);
 
 		$this->PropelProjectDirectory = __DIR__ . "/Propel";
@@ -63,6 +63,8 @@ class Build {
 		$this->GeneratedDatabase = __DIR__ . "/Propel/generated-reversed-database/";
 		$this->GeneratedClasses = __DIR__ . "/Propel/generated-classes/";
 		$this->GeneratedMigrations = __DIR__ . "/Propel/generated-migrations/";
+		$this->Vendor = (\file_exists(__DIR__ . '/../../vendor/') ?
+						__DIR__ . '/../../vendor/' : __DIR__ . '/../../../../');
 
 		if (!is_array($schemas)) {
 			$schemas = [$schemas];
@@ -70,12 +72,9 @@ class Build {
 		$this->registeredSchemas = $schemas;
 		$this->a = $box;
 
-		$vendor = (\file_exists(__DIR__ . '/../../vendor/') ?
-						__DIR__ . '/../../vendor/' : __DIR__ . '/../../../../');
-
 		$finder = new Finder();
 		$finder->files()->name('*.php')
-				->in($vendor . '/propel/propel/src/Propel/Generator/Command')->depth(0);
+				->in($this->Vendor . '/propel/propel/src/Propel/Generator/Command')->depth(0);
 		$app = new Application('Propel', Propel::VERSION);
 		foreach ($finder as $file) {
 			$ns = '\\Propel\\Generator\\Command';
@@ -178,6 +177,17 @@ class Build {
 			$sql = file_get_contents($schema);
 			$this->a->db()->exec($sql);
 		}
+	}
+
+	/**
+	 * Registers schemas to be potentially added.
+	 * @param array $schemas
+	 */
+	public function registerSchemas($schemas = []) {
+		if (!is_array($schemas)) {
+			$schemas = [$schemas];
+		}
+		$this->registeredSchemas = $schemas;
 	}
 
 	/**
