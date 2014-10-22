@@ -158,6 +158,15 @@ class Builder {
 	}
 
 	/**
+	 * Creates the database if it doesn't exist. Does not add any tables.
+	 */
+	public function createDatabase() {
+		$db = $this->a->db();
+		$dbName = $this->a->DatabaseName;
+		$db->exec("CREATE DATABASE IF NOT EXISTS $dbName; USE $dbName");
+	}
+
+	/**
 	 * Given an EMPTY database, build() will attempt to 1) Insert the necessary tables for
 	 * dependencies, 2) Build the Propel schema.xml file based off the dependency tables, 3) Build the
 	 * corresponding Propel classes based off of schema.xml.
@@ -176,6 +185,8 @@ class Builder {
 				throw new Exception("Registered schema does not exist at $schema");
 			}
 		}
+
+		$this->createDatabase();
 
 		$pdo = $this->a->db();
 		$tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
@@ -260,6 +271,8 @@ class Builder {
 		if (!file_exists($project)) {
 			throw new Exception("Project directory does not exist at $project");
 		}
+
+		$this->createDatabase();
 
 		chdir($project);
 		$this->propel->find("diff")->run(new ArrayInput(["command" => "diff"]), $this->propelOutput);

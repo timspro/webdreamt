@@ -34,6 +34,7 @@ class BuildTest extends Test {
 	}
 
 	public function testBuild() {
+		self::$a->db()->exec("DROP DATABASE " . self::$a->DatabaseName);
 		self::$build->build();
 		$this->assertGreaterThan(0, $this->countTables());
 	}
