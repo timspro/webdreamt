@@ -70,9 +70,12 @@ class Build {
 		$this->registeredSchemas = $schemas;
 		$this->a = $box;
 
+		$vendor = (\file_exists(__DIR__ . '/../../vendor/') ?
+						__DIR__ . '/../../vendor/' : __DIR . '/../../../../');
+
 		$finder = new Finder();
 		$finder->files()->name('*.php')
-				->in(__DIR__ . '/../../vendor/propel/propel/src/Propel/Generator/Command')->depth(0);
+				->in($vendor . '/propel/propel/src/Propel/Generator/Command')->depth(0);
 		$app = new Application('Propel', Propel::VERSION);
 		foreach ($finder as $file) {
 			$ns = '\\Propel\\Generator\\Command';
