@@ -1,5 +1,4 @@
-/vendor/*
+/vendor/
 /composer.lock
 /adminer/
 /nbproject/
-!/vendor/autoload.php
