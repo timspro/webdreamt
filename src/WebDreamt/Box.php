@@ -44,7 +44,9 @@ class Box extends Store {
 	 */
 	function build() {
 		return $this->factory(__FUNCTION__, function () {
-					return new Build($this, "cartalyst/sentry/schema/mysql.sql");
+					$build = new Build($this);
+					$build->registerSchemas($build->Vendor . "cartalyst/sentry/schema/mysql.sql");
+					return $build;
 				});
 	}
 

@@ -29,6 +29,7 @@ class Build {
 	public $GeneratedSchema;
 	public $GeneratedClasses;
 	public $GeneratedMigrations;
+	public $Vendor;
 	/**
 	 * A list of schemas to add to the database
 	 * @var array
