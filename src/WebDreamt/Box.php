@@ -13,7 +13,7 @@ use WebDreamt\Common\Store as Store;
 class Box extends Store {
 
 	public $DatabaseHost = "localhost";
-	public $DatabaseName = "";
+	public $DatabaseName = "test";
 	public $DatabaseUsername = "root";
 	public $DatabasePassword = "";
 

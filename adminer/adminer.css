@@ -6,7 +6,7 @@
 
 select {
 	background-color: #fcfcfc;
-	min-width: 295px;
+	//min-width: 295px;
 }
 
 html,
@@ -478,7 +478,7 @@ table:not(#table) input[type="tel"],
 table:not(#table) input[type="url"],
 table:not(#table) input[type="text"],
 table:not(#table) input[type="search"] {
-	min-width: 280px;
+	//min-width: 280px;
 }
 
 input[type=submit],

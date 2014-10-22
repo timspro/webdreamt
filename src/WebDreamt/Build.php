@@ -52,6 +52,8 @@ class Build {
 	 * @param array|string $schemas Any additional schemas to use for database creation.
 	 */
 	public function __construct(Box $box, $schemas) {
+		umask(0);
+
 		$this->PropelProjectDirectory = __DIR__ . "/Propel";
 		$this->PropelPHP = __DIR__ . "/Propel/propel.php";
 		$this->UserSchema = __DIR__ . "/Schemas/schema.xml";
@@ -92,8 +94,6 @@ class Build {
 		$default["user"] = $this->a->DatabaseUsername;
 		$default["password"] = $this->a->DatabasePassword;
 		\file_put_contents($this->PropelPHP, "<?php\nreturn " . \var_export($propelPHP, true) . ";\n");
-
-		umask(0);
 	}
 
 	/**
