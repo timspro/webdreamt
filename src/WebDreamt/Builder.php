@@ -79,8 +79,8 @@ class Builder {
 		$this->makeDir($this->Vendor . "../db/");
 		$this->makeDir($this->PropelProject);
 		$this->makeDir($schemaDir);
-		if (!file_exists($this->BuildSchema)) {
-			file_put_contents($this->BuildSchema, "");
+		if (!file_exists($this->ValidSchema)) {
+			file_put_contents($this->ValidSchema, "");
 		}
 
 		if (!is_array($schemas)) {
