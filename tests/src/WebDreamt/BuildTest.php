@@ -59,7 +59,7 @@ class BuildTest extends Test {
 
 		$build->build();
 
-		shell_exec("rm -rf " . $build->GeneratedMigrations);
+		$build->removeDirectory($build->GeneratedMigrations);
 
 		$name = self::$a->DatabaseName;
 		$password = self::$a->DatabasePassword;
