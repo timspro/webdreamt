@@ -54,6 +54,8 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 */
 	public function nuke() {
 		$db = self::$a->db();
+
+		$db->exec("SET FOREIGN_KEY_CHECKS=0");
 		$tables = $db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
 		$query = "";
 		foreach ($tables as $table) {
@@ -62,6 +64,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 		if ($query) {
 			$db->exec($query);
 		}
+		$db->exec("SET FOREIGN_KEY_CHECKS=1");
 	}
 
 }

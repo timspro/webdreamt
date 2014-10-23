@@ -69,6 +69,18 @@
     <column name="id" phpName="Id" type="INTEGER" size="10" sqlType="int(10) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
     <column name="user_id" phpName="UserId" type="INTEGER" size="10" sqlType="int(10) unsigned" required="true"/>
     <column name="group_id" phpName="GroupId" type="INTEGER" size="10" sqlType="int(10) unsigned" required="true"/>
+    <foreign-key foreignTable="groups" name="users_groups_ibfk_2" onDelete="CASCADE">
+      <reference local="group_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="users" name="users_groups_ibfk_1" onDelete="CASCADE">
+      <reference local="user_id" foreign="id"/>
+    </foreign-key>
+    <index name="user_id">
+      <index-column name="user_id"/>
+    </index>
+    <index name="group_id">
+      <index-column name="group_id"/>
+    </index>
     <vendor type="mysql">
       <parameter name="Engine" value="InnoDB"/>
     </vendor>
