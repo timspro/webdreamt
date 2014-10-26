@@ -279,6 +279,7 @@ class Builder {
 		$this->propel->find("migrate")->run(new ArrayInput([
 			"command" => "migrate"
 				]), $this->propelOutput);
+		array_map('unlink', glob($this->GeneratedMigrations . "*") ? : []);
 
 		$this->generateModels();
 	}
