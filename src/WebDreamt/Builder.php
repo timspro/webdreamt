@@ -342,24 +342,19 @@ class Builder {
 			}
 
 			//http://propelorm.org/documentation/04-relationships.html
-			//If there is no id column in the table and there are at least two foreign keys,
+			//If there is at least two foreign keys,
 			//assume the table is a junction table and add isCrossRef="true" to the table.
-			$hadId = false;
 			$key = 0;
 			/* @var $child DOMNode */
 			foreach ($marker->childNodes as $child) {
 				if ($child->attributes) {
-					$name = $child->attributes->getNamedItem("name");
 					$foreign = $child->attributes->getNamedItem("foreignTable");
-					if ($name && $name->nodeValue === "id") {
-						$hadId = true;
-					}
 					if ($foreign) {
 						$key++;
 					}
 				}
 			}
-			if ($key >= 2 && !$hadId) {
+			if ($key >= 2) {
 				$marker->setAttribute("isCrossRef", "true");
 			}
 		}
