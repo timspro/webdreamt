@@ -92,6 +92,7 @@ class Name {
 				};
 			case 'price':
 			case 'cost':
+			case 'salary':
 				return function () use ($generator) {
 					return $generator->randomFloat(2, 0, 1000);
 				};
