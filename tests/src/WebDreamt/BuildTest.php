@@ -93,4 +93,15 @@ class BuildTest extends Test {
 		$this->assertEquals($this->countRows("addtest"), 0);
 	}
 
+	public function testManyToMany() {
+		self::$db->exec("CREATE TABLE red (id INT PRIMARY KEY AUTO_INCREMENT);"
+				. "CREATE TABLE blue (id INT PRIMARY KEY AUTO_INCREMENT);"
+				. "CREATE TABLE red_blue (red_id INT, blue_id INT,
+					FOREIGN KEY (red_id) REFERENCES red(id),
+					FOREIGN KEY (blue_id) REFERENCES blue(id));");
+		self::$build->updatePropel();
+		$count = substr_count(file_get_contents(self::$build->BuildSchema), "isCrossRef");
+		$this->assertEquals(1, $count);
+	}
+
 }

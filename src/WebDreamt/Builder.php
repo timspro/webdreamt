@@ -303,6 +303,7 @@ class Builder {
 
 	/**
 	 * Merges valid.xml and schema.xml in Schema directory to create Propel/schema.xml
+	 * Note this is also where a table is determined if it it should have isCrossRef="true"
 	 * @throws Exception If user or valid schema is not found.
 	 */
 	private function generateSchemaXml() {
@@ -338,6 +339,28 @@ class Builder {
 				foreach ($data[$tableName] as $node) {
 					$marker->appendChild($node);
 				}
+			}
+
+			//http://propelorm.org/documentation/04-relationships.html
+			//If there is no id column in the table and there are at least two foreign keys,
+			//assume the table is a junction table and add isCrossRef="true" to the table.
+			$hadId = false;
+			$key = 0;
+			/* @var $child DOMNode */
+			foreach ($marker->childNodes as $child) {
+				if ($child->attributes) {
+					$name = $child->attributes->getNamedItem("name");
+					$foreign = $child->attributes->getNamedItem("foreignTable");
+					if ($name && $name->nodeValue === "id") {
+						$hadId = true;
+					}
+					if ($foreign) {
+						$key++;
+					}
+				}
+			}
+			if ($key >= 2 && !$hadId) {
+				$marker->setAttribute("isCrossRef", "true");
 			}
 		}
 
