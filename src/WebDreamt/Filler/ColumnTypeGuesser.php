@@ -38,7 +38,6 @@ class ColumnTypeGuesser {
 					return $generator->boolean;
 				};
 			case PropelTypes::NUMERIC:
-			case PropelTypes::DECIMAL:
 				$size = $column->getSize();
 
 				return function () use ($generator, $size) {
@@ -66,6 +65,7 @@ class ColumnTypeGuesser {
 				};
 			case PropelTypes::DOUBLE:
 			case PropelTypes::REAL:
+			case PropelTypes::DECIMAL:
 				return function () {
 					return mt_rand(0, intval('9223372036854775807')) / mt_rand(1, intval('9223372036854775807'));
 				};
