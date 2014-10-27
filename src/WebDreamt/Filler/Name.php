@@ -59,6 +59,7 @@ class Name {
 				return function () use ($generator) {
 					return $generator->city;
 				};
+			case 'street_address':
 			case 'streetaddress':
 				return function () use ($generator) {
 					return $generator->streetAddress;
