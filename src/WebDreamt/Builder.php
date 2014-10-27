@@ -344,6 +344,7 @@ class Builder {
 			//http://propelorm.org/documentation/04-relationships.html
 			//If there is no id column in the table and there are at least two foreign keys,
 			//assume the table is a junction table and add isCrossRef="true" to the table.
+			//Note that the foreign keys need to also be primary keys for Propel to work correctly.
 			$hadId = false;
 			$key = 0;
 			/* @var $child DOMNode */

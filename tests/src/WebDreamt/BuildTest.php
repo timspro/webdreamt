@@ -98,7 +98,8 @@ class BuildTest extends Test {
 				. "CREATE TABLE blue (id INT PRIMARY KEY AUTO_INCREMENT);"
 				. "CREATE TABLE red_blue (red_id INT, blue_id INT,
 					FOREIGN KEY (red_id) REFERENCES red(id),
-					FOREIGN KEY (blue_id) REFERENCES blue(id));");
+					FOREIGN KEY (blue_id) REFERENCES blue(id),
+					PRIMARY KEY(red_id, blue_id));");
 		self::$build->updatePropel();
 		$count = substr_count(file_get_contents(self::$build->BuildSchema), "isCrossRef");
 		$this->assertEquals(1, $count);
