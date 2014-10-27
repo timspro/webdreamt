@@ -16,8 +16,7 @@
 	"autoload": {
 		"psr-0": {
 			"": "src/"
-		},
-		"classmap": ["db/Propel/generated-classes/"]
+		}
 	},
 	"require-dev": {
 		"phpunit/phpunit": "4.*"
