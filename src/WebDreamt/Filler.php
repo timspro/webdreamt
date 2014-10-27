@@ -1,0 +1,68 @@
+<?php
+
+namespace WebDreamt;
+
+use Faker\Factory;
+use WebDreamt\Filler\Populator;
+use WebDreamt\Filler\Topological;
+use Propel\Runtime\Propel;
+
+class Filler {
+
+	private $vendor;
+
+	public function __construct(Box $box) {
+		$this->vendor = $box->VendorDirectory;
+	}
+
+	/**
+	 * Adds test data to the database.
+	 */
+	public function addData() {
+		require_once $this->vendor . "../db/Propel/generated-conf/config.php";
+
+		$generator = Factory::create();
+		$populator = new Populator($generator);
+
+		$constraints = [];
+		$names = [];
+
+		$mapDirectory = $this->vendor . "../db/Propel/generated-classes/Map/";
+		foreach (array_diff(scandir($mapDirectory), array('..', '.')) as $file) {
+			require_once $mapDirectory . $file;
+		}
+
+		$map = Propel::getDatabaseMap();
+		foreach ($map->getTables() as $table) {
+			$names[] = $table->getPhpName();
+			foreach ($table->getForeignKeys() as $key) {
+				$constraints[] = [$key->getRelatedTable()->getPhpName(), $key->getTable()->getPhpName()];
+			}
+		}
+
+		$entities = Topological::sort($names, $constraints);
+		foreach ($entities as $entity) {
+			if ($entity === "Users") {
+				$populator->addEntity($entity, 50, [
+					"Permissions" => null,
+					"ActivationCode" => null,
+					"ActivatedAt" => null,
+					"LastLogin" => null,
+					"PersistCode" => null,
+					"ResetPasswordCode" => null,
+					"Activated" => function() use ($generator) {
+						return $generator->boolean;
+					}
+				]);
+			} elseif ($entity === "Groups") {
+				$populator->addEntity($entity, 50, [
+					"Permissions" => null
+				]);
+			} else {
+				$populator->addEntity($entity, 50);
+			}
+		}
+		$populator->execute();
+	}
+
+}

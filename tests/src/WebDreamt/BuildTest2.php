@@ -17,7 +17,7 @@ class BuildTest2 extends BuildTest {
 		self::$baseDir = __DIR__ . "/base/";
 		mkdir(self::$baseDir);
 		self::$a->DatabaseDirectory = self::$baseDir;
-		self::$build = self::$a->build();
+		self::$build = self::$a->builder();
 	}
 
 	public static function tearDownAfterClass() {

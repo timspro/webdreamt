@@ -53,12 +53,22 @@ class Box extends Store {
 	/**
 	 * @return Builder A builder instance
 	 */
-	function build() {
+	function builder() {
 		return $this->factory(__FUNCTION__, function () {
 					$schema = $this->VendorDirectory . "cartalyst/sentry/schema/mysql.sql";
 					$fk = __DIR__ . '/FK/fk.sql';
 					$build = new Builder($this, [$schema, $fk], $this->DatabaseDirectory);
 					return $build;
+				});
+	}
+
+	/**
+	 * 
+	 * @return Filler A filler instance
+	 */
+	function filler() {
+		return $this->factory(__FUNCTION__, function() {
+					return new Filler($this);
 				});
 	}
 

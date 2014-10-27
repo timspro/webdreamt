@@ -49,22 +49,15 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($value, $this->column($query)[0]);
 	}
 
-	/**
-	 * Drops all tables in the database.
-	 */
-	public function nuke() {
-		$db = self::$a->db();
+	public function countRows($table) {
+		return intval(self::$db->query("SELECT COUNT(*) FROM $table")->fetchAll(PDO::FETCH_COLUMN)[0]);
+	}
 
-		$db->exec("SET FOREIGN_KEY_CHECKS=0");
-		$tables = $db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
-		$query = "";
+	public function forTables($callable) {
+		$tables = self::$db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
 		foreach ($tables as $table) {
-			$query .= "DROP TABLE $table;";
+			$callable($table);
 		}
-		if ($query) {
-			$db->exec($query);
-		}
-		$db->exec("SET FOREIGN_KEY_CHECKS=1");
 	}
 
 }

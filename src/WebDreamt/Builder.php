@@ -37,7 +37,7 @@ class Builder {
 	private $registeredSchemas;
 	/**
 	 * A reference to the box
-	 * @var type
+	 * @var Box
 	 */
 	private $a;
 	/**
@@ -349,14 +349,17 @@ class Builder {
 	 * Removes all files and directories in a directory if it exists.
 	 * @param string $dirPath
 	 */
-	public function removeDirectory($dirPath) {
+	public function removeDirectory($dirPath, $removeTop = false) {
+		$dirPath = realpath($dirPath);
 		if (\file_exists($dirPath)) {
 			foreach (new RecursiveIteratorIterator(
 			new RecursiveDirectoryIterator($dirPath, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as
 						$path) {
 				$path->isDir() ? rmdir($path->getPathname()) : unlink($path->getPathname());
 			}
-			//rmdir($dirPath);
+			if ($removeTop) {
+				rmdir($dirPath);
+			}
 		}
 	}
 
@@ -368,6 +371,36 @@ class Builder {
 		if (!file_exists($dir)) {
 			mkdir($dir);
 		}
+	}
+
+	/**
+	 * Drops all tables in the database.
+	 */
+	public function deleteDatabase($dropDatabase = false) {
+		$db = $this->a->db();
+		$db->exec("SET FOREIGN_KEY_CHECKS=0");
+		$tables = $db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+		foreach ($tables as $table) {
+			$db->exec("DROP TABLE $table");
+		}
+		$db->exec("SET FOREIGN_KEY_CHECKS=1");
+		if ($dropDatabase) {
+			$database = $this->a->DatabaseName;
+			$db->exec("DROP DATABASE $database");
+		}
+	}
+
+	/**
+	 * Deletes all the data in the database.
+	 */
+	public function deleteData() {
+		$db = $this->a->db();
+		$db->exec("SET FOREIGN_KEY_CHECKS=0");
+		$tables = $db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+		foreach ($tables as $table) {
+			$db->exec("TRUNCATE $table");
+		}
+		$db->exec("SET FOREIGN_KEY_CHECKS=1");
 	}
 
 }
