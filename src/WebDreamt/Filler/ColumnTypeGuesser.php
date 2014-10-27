@@ -38,11 +38,13 @@ class ColumnTypeGuesser {
 					return $generator->boolean;
 				};
 			case PropelTypes::NUMERIC:
-			case PropelTypes::DECIMAL:
 				$size = $column->getSize();
-
 				return function () use ($generator, $size) {
 					return $generator->randomNumber($size + 2) / 100;
+				};
+			case PropelTypes::DECIMAL:
+				return function () use ($generator) {
+					return $generator->randomFloat(2, 0, 1000);
 				};
 			case PropelTypes::TINYINT:
 				return function () {
