@@ -163,9 +163,12 @@ class EntityPopulator {
 		foreach ($this->getModifiers() as $modifier) {
 			$modifier($obj, $insertedEntities);
 		}
-		$obj->save($con);
-
-		return $obj->getPrimaryKey();
+		try {
+			$obj->save($con);
+			return $obj->getPrimaryKey();
+		} catch (Exception $e) {
+			return null;
+		}
 	}
 
 }

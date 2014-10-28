@@ -18,7 +18,7 @@ class Filler {
 	/**
 	 * Adds test data to the database.
 	 */
-	public function addData() {
+	public function addData($number = []) {
 		require_once $this->vendor . "../db/Propel/generated-conf/config.php";
 
 		$generator = Factory::create();
@@ -42,8 +42,12 @@ class Filler {
 
 		$entities = Topological::sort($names, $constraints);
 		foreach ($entities as $entity) {
+			$value = 50;
+			if (isset($number[$entity])) {
+				$value = $number[$entity];
+			}
 			if ($entity === "Users") {
-				$populator->addEntity($entity, 50, [
+				$number = $populator->addEntity($entity, $value, [
 					"Permissions" => null,
 					"ActivationCode" => null,
 					"ActivatedAt" => null,
@@ -55,11 +59,11 @@ class Filler {
 					}
 				]);
 			} elseif ($entity === "Groups") {
-				$populator->addEntity($entity, 50, [
+				$populator->addEntity($entity, $value, [
 					"Permissions" => null
 				]);
 			} else {
-				$populator->addEntity($entity, 50);
+				$populator->addEntity($entity, $value);
 			}
 		}
 		$populator->execute();

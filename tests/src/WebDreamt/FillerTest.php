@@ -27,13 +27,30 @@ class FillerTest extends Test {
 		for ($i = 0; $i < 10; $i++) {
 			$this->createTable();
 		}
+		$this->createTable("bigger");
 
 		self::$build->updatePropel();
-		self::$filler->addData();
+		$gen = self::$build->GeneratedClasses . "Base/";
+		foreach (scandir($gen) as $file) {
+			$require = $gen . $file;
+			if ($file !== '.' && $file !== ".." && is_file($require)) {
+				require_once $require;
+			}
+		}
+		foreach (scandir(self::$build->GeneratedClasses) as $file) {
+			$require = self::$build->GeneratedClasses . $file;
+			if ($file !== '.' && $file !== ".." && is_file($require)) {
+				require_once $require;
+			}
+		}
+
+		self::$filler->addData(["Bigger" => 100]);
 
 		$this->forTables(function($table) {
 			$this->assertGreaterThan(0, $this->countRows($table));
 		});
+
+		$this->assertEquals($this->countRows("bigger"), 100);
 	}
 
 }
