@@ -63,9 +63,7 @@ class Populator {
 		foreach ($this->quantities as $class => $number) {
 			for ($i = 0; $i < $number; $i++) {
 				$id = $this->entities[$class]->execute($con, $insertedEntities);
-				if ($id) {
-					$insertedEntities[$class][] = $id;
-				}
+				$insertedEntities[$class][] = $id;
 			}
 		}
 		$con->commit();

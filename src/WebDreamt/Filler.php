@@ -47,7 +47,7 @@ class Filler {
 				$value = $number[$entity];
 			}
 			if ($entity === "Users") {
-				$number = $populator->addEntity($entity, $value, [
+				$populator->addEntity($entity, $value, [
 					"Permissions" => null,
 					"ActivationCode" => null,
 					"ActivatedAt" => null,
