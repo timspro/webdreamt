@@ -26,7 +26,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 			$this->id++;
 		}
 		self::$db->exec("CREATE TABLE $name (id INT PRIMARY KEY AUTO_INCREMENT," .
-				" letters VARCHAR(20), number INT, big TEXT)");
+				" letters VARCHAR(20), number INT, big TEXT, appt DATE)");
 	}
 
 	public function countTables() {

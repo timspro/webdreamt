@@ -8,6 +8,8 @@ use Propel\Runtime\Map\ColumnMap;
 
 class ColumnTypeGuesser {
 
+	public static $StartDate = '-30 years';
+	public static $EndDate = 'now';
 	protected $generator;
 
 	public function __construct(Generator $generator) {
@@ -23,7 +25,7 @@ class ColumnTypeGuesser {
 						PropelTypes::DATE,
 						PropelTypes::TIME))) {
 				return function () use ($generator) {
-					return $generator->dateTime;
+					return $generator->dateTimeBetween(ColumnTypeGuesser::$StartDate, ColumnTypeGuesser::$EndDate);
 				};
 			} else {
 				return function () use ($generator) {
