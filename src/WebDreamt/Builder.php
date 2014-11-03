@@ -48,7 +48,8 @@ class Builder {
 	private $propelOutput;
 
 	/**
-	 * Construct a Builder object.
+	 * Construct a Builder object. Note that this will ensure/create a basic Propel setup, but
+	 * will not modify the database or create any Propel classes.
 	 * @param Box $box The settings object.
 	 * @param array|string $schemas Any additional schemas to use for database creation.
 	 */
@@ -261,7 +262,8 @@ class Builder {
 	/**
 	 * updateDatabase() attempts to 1) Diff the status of the database with build.xml (formed from
 	 * combining Schemas/build.xml and valid.xml), 2) Push any migrations created to the database,
-	 * 3) Generate Propel classes.
+	 * 3) Generate Propel classes. Note that the Propel migration files are deleted after they are
+	 * used.
 	 * @throws Exception If propel command or project directory is not found.
 	 */
 	public function updateDatabase() {
@@ -303,7 +305,8 @@ class Builder {
 
 	/**
 	 * Merges valid.xml and schema.xml in Schema directory to create Propel/schema.xml
-	 * Note this is also where a table is determined if it it should have isCrossRef="true"
+	 * Note this is also where a table is determined if it it should have isCrossRef="true".
+	 * For this to occur, there needs to be two foreign keys that are part of the primary key.
 	 * @throws Exception If user or valid schema is not found.
 	 */
 	private function generateSchemaXml() {
