@@ -53,20 +53,13 @@ class Builder {
 	 * @param Box $box The settings object.
 	 * @param array|string $schemas Any additional schemas to use for database creation.
 	 */
-	public function __construct(Box $box, $schemas = [], $baseDir = null) {
+	public function __construct(Box $box, $schemas = []) {
 		umask(0);
 
 		//Change how this is organized.
 		$this->Vendor = $box->VendorDirectory;
 
-		if (!$baseDir) {
-			$this->PropelProject = $this->Vendor . "../db/Propel/";
-		} else {
-			if (!is_dir($baseDir)) {
-				throw new Exception("$baseDir is not a directory.");
-			}
-			$this->PropelProject = $baseDir;
-		}
+		$this->PropelProject = $this->Vendor . "../db/Propel/";
 		$this->PropelPHP = $this->PropelProject . "propel.php";
 		$schemaDir = $this->Vendor . "../db/Schemas/";
 		$this->UserSchema = $schemaDir . "schema.xml";

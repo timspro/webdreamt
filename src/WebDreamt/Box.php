@@ -2,13 +2,13 @@
 
 namespace WebDreamt;
 
-use PDO;
 use Cartalyst\Sentry\Facades\Native\Sentry as Sentry;
 use Illuminate\Database\Capsule\Manager as Capsule;
-use WebDreamt\Common\Store as Store;
+use PDO;
+use WebDreamt\Box\Store;
 
 /**
- * A class to store objects that are configured via constant values.
+ * A class to store objects that are configured via constant values or expression.
  */
 class Box extends Store {
 
@@ -16,7 +16,6 @@ class Box extends Store {
 	public $DatabaseName = "";
 	public $DatabaseUsername = "root";
 	public $DatabasePassword = "";
-	public $DatabaseDirectory = null;
 	public $VendorDirectory;
 
 	/**
@@ -56,14 +55,14 @@ class Box extends Store {
 	function builder() {
 		return $this->factory(__FUNCTION__, function () {
 					$schema = $this->VendorDirectory . "cartalyst/sentry/schema/mysql.sql";
-					$fk = __DIR__ . '/FK/fk.sql';
-					$build = new Builder($this, [$schema, $fk], $this->DatabaseDirectory);
+					$fk = __DIR__ . '/Builder/fk.sql';
+					$build = new Builder($this, [$schema, $fk]);
 					return $build;
 				});
 	}
 
 	/**
-	 * 
+	 *
 	 * @return Filler A filler instance
 	 */
 	function filler() {

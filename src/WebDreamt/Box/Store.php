@@ -1,7 +1,10 @@
 <?php
 
-namespace WebDreamt\Common;
+namespace WebDreamt\Box;
 
+/**
+ * A class used to store singletons across the application.
+ */
 abstract class Store {
 
 	private static $store;

@@ -17,6 +17,8 @@ class Filler {
 
 	/**
 	 * Adds test data to the database.
+	 * @param array $number Specifies the number to add for a given Propel class, where the Propel
+	 * class's name is the key and the number to add is the value.
 	 */
 	public function addData($number = []) {
 		require_once $this->vendor . "../db/Propel/generated-conf/config.php";
