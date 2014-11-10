@@ -291,8 +291,8 @@ class Builder {
 
 		$this->removeDirectory($this->GeneratedClasses);
 		chdir($this->PropelProject);
-		$this->propel->find("model:build")->run(new ArrayInput([
-			"command" => "model:build"
+		$this->propel->find("build")->run(new ArrayInput([
+			"command" => "build"
 				]), $this->propelOutput);
 	}
 
