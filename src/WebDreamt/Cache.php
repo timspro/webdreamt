@@ -1,25 +1,30 @@
 <?php
-
-namespace WebDreamt;
-
 use Propel\Runtime\Map\TableMap;
 use WebDreamt\Automatic\Component;
 use WebDreamt\Automatic\Form;
+use WebDreamt\Box;
+use WebDreamt\Cache\Resource;
+
+namespace WebDreamt;
 
 class Cache {
 
 	private $vendor;
 
+	/**
+	 * Constructs the Cache.
+	 * @param Box $box
+	 */
 	function __construct(Box $box) {
 		$this->vendor = $box->VendorDirectory;
 	}
 
 	/**
 	 * Gets a new form.
-	 * @param type $filename
-	 * @param type $key
-	 * @param type $className
-	 * @param type $values
+	 * @param string $filename
+	 * @param string $key
+	 * @param string $className
+	 * @param array $values
 	 * @return Form
 	 */
 	function form($filename, $key, $className, $values = null) {
@@ -27,7 +32,14 @@ class Cache {
 				new Form($this->getTableMap($classname), $values);
 	}
 
-	function table() {
+	/**
+	 *
+	 * @param string $filename
+	 * @param string $key
+	 * @param string $className
+	 * @param string $values
+	 */
+	function table($filename, $key, $className, $values) {
 
 	}
 
@@ -45,9 +57,9 @@ class Cache {
 	/**
 	 * Using the parameters provided, tries to find the component in the cache.
 	 * If successful
-	 * @param type $function
-	 * @param type $filename
-	 * @param type $key
+	 * @param string $filename
+	 * @param string $key
+	 * @param string $function
 	 */
 	protected function find($filename, $key, $function) {
 
@@ -59,7 +71,8 @@ class Cache {
 	 * @return string
 	 */
 	static function add(Component $component) {
-		$component->getTemplate()
+		$component->getTemplate();
+		new Cache\Resource();
 	}
 
 }

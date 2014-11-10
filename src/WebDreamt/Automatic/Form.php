@@ -11,10 +11,17 @@ class Form extends Component {
 
 	protected $formHtml;
 
-	function getDefaultOptions() {
+	protected function getDefaultOptions() {
 		$options = parent::getDefaultOptions();
 		$options[self::OPT_DISABLE] = false;
 		return $options;
+	}
+
+	protected function getDefaultRelation() {
+		$relation = parent::getDefaultRelation();
+		$relation[self::REL_SEARCH] = true;
+		$relation[self::REL_SEARCH_TABLE] = null;
+		return $relation;
 	}
 
 	/**
@@ -66,12 +73,12 @@ class Form extends Component {
 	 * @param array $columns
 	 */
 	protected function outputColumns($columns) {
-		foreach ($this->columns as $column => $options) {
-			if (is_array(current($options))) {
+		foreach ($columns as $column => $options) {
+			if (self::isRelation($options)) {
 				?>
-				<div class='col-md-11'>
+				<div class='col-md-10'>
 					<?php
-					$this->outputColumns($columns);
+					$this->outputColumns($options[self::REL_COLUMNS]);
 					?>
 				</div>
 				<?php
