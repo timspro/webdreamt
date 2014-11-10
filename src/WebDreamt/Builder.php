@@ -268,7 +268,6 @@ class Builder {
 		}
 
 		$this->createDatabase();
-		$this->removeDirectory($this->GeneratedClasses);
 
 		chdir($project);
 		$this->propel->find("diff")->run(new ArrayInput(["command" => "diff"]), $this->propelOutput);
