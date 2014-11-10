@@ -78,7 +78,7 @@ class ColumnTypeGuesser {
 			case PropelTypes::BINARY:
 			case PropelTypes::VARBINARY:
 				$size = $column->getSize();
-
+				$size = ($size < 5 ? 5 : $size);
 				return function () use ($generator, $size) {
 					return $generator->text($size);
 				};
