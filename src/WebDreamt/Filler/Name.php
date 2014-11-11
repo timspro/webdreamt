@@ -25,6 +25,16 @@ class Name {
 				return $generator->dateTime;
 			};
 		}
+		if (preg_match('/^street_address/', $name)) {
+			return function () use ($generator) {
+				return $generator->streetAddress;
+			};
+		}
+		if (preg_match('/mileage/', $name)) {
+			return function () use ($generator) {
+				return $generator->randomNumber(10, 50);
+			};
+		}
 		switch ($name) {
 			case 'first_name':
 			case 'firstname':
@@ -58,11 +68,6 @@ class Name {
 			case 'city':
 				return function () use ($generator) {
 					return $generator->city;
-				};
-			case 'street_address':
-			case 'streetaddress':
-				return function () use ($generator) {
-					return $generator->streetAddress;
 				};
 			case 'zip':
 			case 'postcode':
