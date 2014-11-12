@@ -94,7 +94,7 @@ class Form extends Component {
 						if (isset($this->linked[$options[$column]])) {
 							foreach ($this->linked as $component) {
 								echo '<% $new = isset($input["' . $column . '"] ? $input["' . $column . '"] : []  %>';
-								echo '<% $code = ' . print_r($component->getTemplate(true), true) . '%>';
+								echo '<% $code = ' . print_r($component->getTemplate(true), true) . ' %>';
 								echo '<%= protect($new, $code) %>';
 							}
 							continue;

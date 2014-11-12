@@ -69,6 +69,11 @@ abstract class Component {
 	 */
 	protected $html = '';
 	/**
+	 * The name of the table
+	 * @var string
+	 */
+	protected $tableName;
+	/**
 	 * The filename for the cached object
 	 * @var string
 	 */
@@ -82,6 +87,7 @@ abstract class Component {
 	function __construct(TableMap $table, $values = []) {
 		$this->columns = [];
 		$this->linked = [];
+		$this->tableName = $table->getName();
 		if ($values instanceof ActiveRecordInterface) {
 			$this->values = $values->toArray(TableMap::TYPE_COLNAME);
 		} else if (!empty($values) && $values[0] instanceof ActiveRecordInterface) {

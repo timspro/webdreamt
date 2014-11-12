@@ -33,9 +33,9 @@ class Group extends Component {
 				echo '<% $column = "' . $displayColumn . '" %>';
 				?>
 				<%
-				foreach ($input as $index => $input) {
+				foreach ($input as $index => $row) {
 					%>
-	<li><%= $input[$index][$column] %><li>
+	<li><%= $row[$column] %><li>
 						<%
 					}
 					?>
@@ -43,9 +43,9 @@ class Group extends Component {
 				} else {
 					?>
 					<%
-					foreach ($input as $index => $input) {
+					foreach ($input as $value) {
 						%>
-	<li><%= $input[$index] %></li>
+	<li><%= $value %></li>
 					<%
 				}
 				?>
