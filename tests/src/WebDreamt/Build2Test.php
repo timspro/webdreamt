@@ -4,9 +4,9 @@ namespace WebDreamt;
 
 use ReflectionMethod;
 require_once __DIR__ . '/../../bootstrap.php';
-require_once __DIR__ . "/BuildTest.php";
+require_once __DIR__ . "/Build1Test.php";
 
-class BuildTest2 extends BuildTest {
+class Build2Test extends Build1Test {
 
 	protected static $baseDir;
 

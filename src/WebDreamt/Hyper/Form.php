@@ -75,14 +75,16 @@ class Form extends Component {
 	}
 
 	/**
-	 * Gets the form template.
+	 * Renders the component.
+	 * @param array $input
+	 * @param string $included The class name of the component that is calling render. Null
+	 * if not being called from a component.
 	 */
-	function getTemplate($included = false) {
+	function render($input = null, $included = null) {
 		ob_start();
-		echo $this->getProtection();
-		if (!$included) {
+		if ($included === null) {
 			?>
-			<form <?= $this->html ?>>
+			<form <?= $this->html ?> class="<?= implode(" ", $this->classes) ?>">
 				<?php
 			} else {
 				?>
@@ -91,24 +93,17 @@ class Form extends Component {
 				}
 				foreach ($this->columns as $column => $options) {
 					if ($options[self::OPT_ACCESS]) {
-						if (isset($this->linked[$options[$column]])) {
-							foreach ($this->linked as $component) {
-								echo '<% $new = isset($input["' . $column . '"] ? $input["' . $column . '"] : []  %>';
-								echo '<% $code = ' . print_r($component->getTemplate(true), true) . ' %>';
-								echo '<%= protect($new, $code) %>';
+						$value = isset($input[$column]) ? $input[$column] : $options[self::OPT_DEFAULT];
+						if (isset($this->linked[$column])) {
+							foreach ($this->linked[$column] as $component) {
+								echo $component->render($input[$column], self::class);
 							}
 							continue;
 						}
 
 						$label = $options[self::OPT_LABEL];
-						$disabled = ($options[self::OPT_DISABLE] ? 'disabled' : '');
-						$hidden = ($options[self::OPT_ACCESS] ? 'style="display:none"' : '');
-						$value = 'value="<% isset($input["' . $column . '"] ? $input["' . $column . '"] : ';
-						if ($options[self::OPT_DEFAULT]) {
-							$value = '"' . $options[self::OPT_DEFAULT] . '" %>"';
-						} else {
-							$value = '"" %>"';
-						}
+						$disabled = $options[self::OPT_DISABLE] ? 'disabled' : '';
+						$hidden = $options[self::OPT_ACCESS] ? 'style="display:none"' : '';
 						switch ($options[self::OPT_TYPE]) {
 							case PropelTypes::LONGVARCHAR:
 							case PropelTypes::VARCHAR:
@@ -137,7 +132,7 @@ class Form extends Component {
 							<label for='<?= $column ?>'><?= $spacedName ?></label>
 							<?php
 							if (!isset($select)) {
-								$attributes = "name='$label' $disabled $extra $value";
+								$attributes = "name='$label' $disabled $extra value='$value'";
 								?>
 								<input class='form-control' type='<?= $type ?>' <?= $attributes ?>/>
 								<?php

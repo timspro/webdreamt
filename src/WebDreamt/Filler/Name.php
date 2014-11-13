@@ -32,7 +32,7 @@ class Name {
 		}
 		if (preg_match('/mileage/', $name)) {
 			return function () use ($generator) {
-				return $generator->randomNumber(10, 50);
+				return $generator->numberBetween(10, 50);
 			};
 		}
 		switch ($name) {

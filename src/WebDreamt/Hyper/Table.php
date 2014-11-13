@@ -68,26 +68,34 @@ class Table extends Component {
 		$this->rowNumberHeader = $rowNumberHeader;
 	}
 
-	function getTemplate() {
+	/**
+	 * Renders the component.
+	 * @param array $input
+	 * @param string $included The class name of the component that is calling render. Null
+	 * if not being called from a component.
+	 */
+	function render($input = null, $included = null) {
 		ob_start();
-		echo $this->getProtection();
 		?>
-		<table <?= $this->html ?>>
+		<table <?= $this->html ?> class="<?= implode(" ", $this->classes) ?>">
 			<?php
 			if (!$this->hideHeaders) {
 				?>
 				<thead>
-					<?= '<th>' . $this->rowNumberHeader . '</th>' ?>
 					<?php
-					foreach ($this->columns as $column) {
+					if ($this->showRowNumbers) {
 						?>
-					<th>
-						<?=
-						($column[self::OPT_ACCESS] && $column[self::OPT_VISIBLE]) ?
-								$column[self::OPT_HEADER] : ''
-						?>
-					</th>
+					<th><?= $this->rowNumberHeader ?></th>
 					<?php
+				}
+				?>
+				<?php
+				foreach ($this->columns as $column => $options) {
+					if ($options[self::OPT_ACCESS] && $options[self::OPT_VISIBLE]) {
+						?>
+						<th><?= $options[self::OPT_HEADER] ?></th>
+						<?php
+					}
 				}
 				?>
 			</thead>
@@ -96,48 +104,36 @@ class Table extends Component {
 		?>
 		<tbody>
 			<?php
-			$columns = [];
-			foreach ($this->columns as $name => $column) {
-				if ($column[self::OPT_ACCESS] && $column[self::OPT_VISIBLE]) {
-					$columns[$name] = $column;
-				}
-			}
-			echo '<% $columns = ' . print_r($columns, true) . ' %>';
-			$linked = [];
-			foreach ($this->linked as $name => $component) {
-				$linked[$name] = $component->getTemplate(true);
-			}
-			echo '<% $linked = ' . print_r($linked, true) . ' %>';
-			?>
-			<%
-			foreach ($input as $index => $input) {
-				%>
-	<tr>
+			foreach ($input as $index => $row) {
+				?>
+				<tr>
 					<?php
-					echo $this->showRowNumbers ? '<%= $index %>' : '';
-					?>
-					<%
-					foreach ($columns as $column) {
-						%>
-		<td>
-							<%
-							if (isset($input[$index][$column])) {
-								if (isset($linked[$column])) {
-									echo protect($input[$index][$column], $linked[$column]);
-								} else {
-									echo $input[$index][$column];
-								}
-							}
-							%>
-		</td>
-						<%
+					if ($this->showRowNumbers) {
+						?>
+						<td><?= ($index + 1) ?></td>
+						<?php
 					}
-					%>
-	</tr>
-				<%
+					foreach ($this->columns as $column => $options) {
+						if (isset($this->linked[$column])) {
+							foreach ($this->linked[$column] as $component) {
+								echo $component->render($input[$column], self::class);
+							}
+							continue;
+						}
+						if ($options[self::OPT_ACCESS] && $options[self::OPT_VISIBLE]) {
+							?>
+							<td>
+								<?= isset($input[$column]) ? $input[$column] : $options[self::OPT_DEFAULT] ?>
+							</td>
+							<?php
+						}
+					}
+					?>
+				</tr>
+				<?php
 			}
-			%>
-</tbody>
+			?>
+		</tbody>
 		</table>
 		<?php
 		return ob_get_clean();

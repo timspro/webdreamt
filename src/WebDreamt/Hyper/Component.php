@@ -6,8 +6,6 @@ use Propel\Generator\Model\PropelTypes;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Map\ColumnMap;
 use Propel\Runtime\Map\TableMap;
-use ReflectionClass;
-use WebDreamt\Cache;
 
 /**
  * A class to be used as a base to render other objects from the database.
@@ -50,97 +48,40 @@ abstract class Component {
 	 * An array where the keys are column names and the values are the options for each column.
 	 * @var array
 	 */
-	protected $columns;
+	protected $columns = [];
 	/**
 	 * An array where the keys are column names and the values are arrays with values
 	 * that are Components.
 	 * @var array
 	 */
-	protected $linked;
-	/**
-	 * An array which is just the $values parameter of the constructor. This represents values
-	 * that are not known ahead of time and are accessed by the renderer.
-	 * @var array
-	 */
-	protected $values;
+	protected $linked = [];
 	/**
 	 * HTML attributes for the top level element.
 	 * @var string
 	 */
 	protected $html = '';
 	/**
+	 * CSS classes for the top level element.
+	 * @var array
+	 */
+	protected $classes = [];
+	/**
 	 * The name of the table
 	 * @var string
 	 */
 	protected $tableName;
-	/**
-	 * The filename for the cached object
-	 * @var string
-	 */
-	public $cachedFilename;
 
 	/**
 	 * Constructs a component.
-	 * @param TableMap $table
-	 * @param array|ActiveRecordInterface|ActiveRecordInterface[] $values
+	 * @param string $table
 	 */
-	function __construct(TableMap $table, $values = []) {
-		$this->columns = [];
-		$this->linked = [];
+	function __construct($table) {
+		$table = Propel::getDatabaseMap()->getTable($table);
 		$this->tableName = $table->getName();
-		if ($values instanceof ActiveRecordInterface) {
-			$this->values = $values->toArray(TableMap::TYPE_COLNAME);
-		} else if (!empty($values) && $values[0] instanceof ActiveRecordInterface) {
-			$this->values = $values->toArray(TableMap::TYPE_COLNAME);
-		} else {
-			$this->values = $values;
-		}
 		foreach ($table->getColumns() as $column) {
 			$name = $column->getName();
 			$this->columns[$name] = $this->getDefaultOptions();
 			$this->addColumn($column, $this->columns[$name]);
-		}
-	}
-
-	/**
-	 * Link a column value with another Component.
-	 * @param string $column Can be an empty string, which means that the component will
-	 *
-	 * @param Component|Resource $component
-	 */
-	function link($column, $component) {
-		if (!isset($this->linked[$column])) {
-			$this->linked[$column] = [];
-		}
-		$this->linked[$column][] = $component;
-	}
-
-	/**
-	 * Gets the default options.
-	 * @return array
-	 */
-	protected function getDefaultOptions() {
-		return [
-			self::OPT_ACCESS => true,
-			self::OPT_VISIBLE => true,
-			self::OPT_DEFAULT => null,
-			self::OPT_TYPE => null,
-			self::OPT_EXTRA => null
-		];
-	}
-
-	/**
-	 * Returns the options available for the current class.
-	 */
-	protected function getAllOptions() {
-		if (!static::$options) {
-			$class = new ReflectionClass(static::class);
-			foreach ($class->getConstants() as $constant) {
-				$option = substr($constant, 0, 3);
-				if ($option === 'OPT') {
-					static::$options[$option] = true;
-				}
-			}
 		}
 	}
 
@@ -160,17 +101,23 @@ abstract class Component {
 	}
 
 	/**
-	 * Gets the values given to the component.
+	 * Gets the default options.
 	 * @return array
 	 */
-	function getValues() {
-		return $this->values;
+	protected function getDefaultOptions() {
+		return [
+			self::OPT_ACCESS => true,
+			self::OPT_VISIBLE => true,
+			self::OPT_DEFAULT => null,
+			self::OPT_TYPE => null,
+			self::OPT_EXTRA => null
+		];
 	}
 
 	/**
-	 * Sets the HTML of the top level element.
+	 * Sets the HTML of the top level element. Note use addCssClass to add classes.
 	 * @param string $html
-	 * @return this
+	 * @return self
 	 */
 	function setHtml($html = '') {
 		$this->html = $html;
@@ -186,8 +133,47 @@ abstract class Component {
 	}
 
 	/**
+	 * Appends on to the HTML of the top level element.
+	 * @param string $html
+	 * @return self
+	 */
+	function appendHtml($html = '') {
+		$this->html .= $html;
+		return $this;
+	}
+
+	/**
+	 * Adds a CSS class to the top level element. Note use addCssClass to add classes.
+	 * @param array|string|... $className
+	 * @return self
+	 */
+	function addCssClass($className) {
+		if (is_array($className)) {
+			$array = $className;
+		} else {
+			$array = func_get_args();
+		}
+		$this->classes = array_merge($this->classes, $array);
+		return $this;
+	}
+
+	/**
+	 * Link a column value with another Component.
+	 * @param string $column
+	 * @param Component $component
+	 * @return self
+	 */
+	function link($column, $component) {
+		if (!isset($this->linked[$column])) {
+			$this->linked[$column] = [];
+		}
+		$this->linked[$column][] = $component;
+		return $this;
+	}
+
+	/**
 	 * Makes columns visible. Defaults to all columns.
-	 * @param array $columns Column names should be the values of the array.
+	 * @param array|... $columns Column names should be the values of the array.
 	 * @return self
 	 */
 	function show($columns = null) {
@@ -197,7 +183,7 @@ abstract class Component {
 
 	/**
 	 * Hides columns. Defaults to all columns.
-	 * @param array $columns Column names should be the values of the array.
+	 * @param array|... $columns Column names should be the values of the array.
 	 * @return self
 	 */
 	function hide($columns = null) {
@@ -207,7 +193,7 @@ abstract class Component {
 
 	/**
 	 * Enable the columns to be sent to the client. Defaults to all columns.
-	 * @param array $columns Column names should be the values of the array.
+	 * @param array|... $columns Column names should be the values of the array.
 	 * @return self
 	 */
 	function allow($columns = null) {
@@ -217,7 +203,7 @@ abstract class Component {
 
 	/**
 	 * Disables the columns from being sent to the client. Defaults to all columns.
-	 * @param array $columns Column names should be the values of the array.
+	 * @param array|... $columns Column names should be the values of the array.
 	 * @return self
 	 */
 	function deny($columns = null) {
@@ -286,31 +272,39 @@ abstract class Component {
 	}
 
 	/**
-	 * Renders the form with the given values and options.
+	 * Syntactic sugar for the render(...) method.
 	 * @return string
 	 */
 	function __toString() {
-		//The cache will take care of the rendering.
-		return Cache::add($this);
+		return $this->render();
 	}
 
 	/**
-	 * Returns a function within which child components can run other components.
+	 * Renders the component.
+	 * @param array $input
+	 * @param string $included The class name of the component that is calling render. Null
+	 * if not being called from a component.
 	 * @return string
 	 */
-	protected function getProtection() {
-		return '<% function protect($input, $code) {	eval("?>" . $code . "<?php"; } %>';
+	abstract function render($input = null, $included = null);
+	/**
+	 * Parses input into an array.
+	 * @param array|ActiveRecordInterface|ActiveRecordInterface[] $input
+	 * @return array
+	 */
+	protected function parseInput($input = null) {
+		if ($input instanceof ActiveRecordInterface) {
+			return $input->toArray(TableMap::TYPE_COLNAME);
+		} else if (!empty($input) && $input[0] instanceof ActiveRecordInterface) {
+			return $input->toArray(TableMap::TYPE_COLNAME);
+		} else if (is_array($input)) {
+			return $input;
+		}
+		return null;
 	}
 
 	/**
-	 * Gets the template as a string to be used to render the component.
-	 * @param boolean $included Indicates if the template is included from another template.
-	 * Defaults to false.
-	 * @return string
-	 */
-	abstract function getTemplate($included = false);
-	/**
-	 * Spaces out a column name
+	 * Spaces out a column name.
 	 * @param string $name
 	 * @return string
 	 */

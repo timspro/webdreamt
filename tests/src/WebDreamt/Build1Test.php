@@ -4,7 +4,7 @@ namespace WebDreamt;
 
 require_once __DIR__ . '/../../bootstrap.php';
 
-class BuildTest extends Test {
+class Build1Test extends Test {
 
 	/** @var Builder */
 	protected static $build;
