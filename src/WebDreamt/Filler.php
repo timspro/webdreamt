@@ -20,7 +20,7 @@ class Filler {
 	 * @param array $number Specifies the number to add for a given Propel class, where the Propel
 	 * class's name is the key and the number to add is the value.
 	 */
-	public function addData($number = []) {
+	public function addData($number = [], $only = false) {
 		require_once $this->vendor . "../db/Propel/generated-conf/config.php";
 
 		$generator = Factory::create();
@@ -34,11 +34,14 @@ class Filler {
 			require_once $mapDirectory . $file;
 		}
 
-		$map = Propel::getDatabaseMap();
-		foreach ($map->getTables() as $table) {
-			$names[] = $table->getPhpName();
-			foreach ($table->getForeignKeys() as $key) {
-				$constraints[] = [$key->getRelatedTable()->getPhpName(), $key->getTable()->getPhpName()];
+		$tables = Propel::getDatabaseMap()->getTables();
+		foreach ($tables as $table) {
+			$name = $table->getPhpName();
+			if (!$only || isset($number[$name])) {
+				$names[] = $name;
+				foreach ($table->getForeignKeys() as $key) {
+					$constraints[] = [$key->getRelatedTable()->getPhpName(), $key->getTable()->getPhpName()];
+				}
 			}
 		}
 

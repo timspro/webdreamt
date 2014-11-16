@@ -4,40 +4,22 @@ namespace WebDreamt;
 
 require_once __DIR__ . '/../../bootstrap.php';
 
-class Build1Test extends Test {
+class Build1Test extends DatabaseTest {
 
-	/** @var Builder */
-	protected static $build;
 	protected static $baseDir;
 
-	public static function setUpBeforeClass() {
-		parent::setUpBeforeClass();
-		self::$build = self::$a->builder();
-	}
-
-	public static function tearDownAfterClass() {
-		parent::tearDownAfterClass();
-		self::$build->deleteDatabase();
-		self::$build->removeDirectory(self::$build->GeneratedMigrations);
-		self::$build->removeDirectory(self::$build->GeneratedDatabase);
-		self::$build->removeDirectory(self::$build->GeneratedClasses);
-	}
-
-	protected function setUp() {
-		parent::setUp();
-		self::$build->deleteDatabase();
-	}
-
-	protected function tearDown() {
-
-	}
-
+	/**
+	 * @group Build
+	 */
 	public function testBuild() {
 		self::$a->db()->exec("DROP DATABASE " . self::$a->DatabaseName);
 		self::$build->build();
 		$this->assertGreaterThan(0, $this->countTables());
 	}
 
+	/**
+	 * @group Build
+	 */
 	public function testUpdatePropel() {
 		$this->createTable();
 		$this->createTable();
@@ -51,14 +33,17 @@ class Build1Test extends Test {
 			}
 		}
 		$this->assertEquals(6, $count);
+		$file = file_get_contents(self::$build->BuildSchema);
+		preg_match('/valueSet="([^\"]*)"/', $file, $check);
+		$this->assertEquals("male, female", $check[1]);
 	}
 
+	/**
+	 * @group Build
+	 */
 	public function testUpdateDatabase() {
 		$build = self::$build;
-
 		$build->build();
-
-		$build->removeDirectory($build->GeneratedMigrations);
 
 		$name = self::$a->DatabaseName;
 		$password = self::$a->DatabasePassword;
@@ -81,6 +66,9 @@ class Build1Test extends Test {
 		$this->assertEquals($goodOutput, $maybeOutput);
 	}
 
+	/**
+	 * @group Build
+	 */
 	public function testDeleteData() {
 		$build = self::$build;
 		parent::createTable("addtest");
@@ -93,6 +81,9 @@ class Build1Test extends Test {
 		$this->assertEquals($this->countRows("addtest"), 0);
 	}
 
+	/**
+	 * @group Build
+	 */
 	public function testManyToMany() {
 		self::$db->exec("CREATE TABLE red (id INT PRIMARY KEY AUTO_INCREMENT);"
 				. "CREATE TABLE blue (id INT PRIMARY KEY AUTO_INCREMENT);"

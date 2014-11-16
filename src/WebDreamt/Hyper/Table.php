@@ -114,16 +114,16 @@ class Table extends Component {
 						<?php
 					}
 					foreach ($this->columns as $column => $options) {
-						if (isset($this->linked[$column])) {
-							foreach ($this->linked[$column] as $component) {
-								echo $component->render($input[$column], self::class);
-							}
+						$value = isset($input[$column]) ? $input[$column] : $options[self::OPT_DEFAULT];
+						$components = $this->renderLinked($column, $value);
+						if ($components !== null) {
+							echo $components;
 							continue;
 						}
 						if ($options[self::OPT_ACCESS] && $options[self::OPT_VISIBLE]) {
 							?>
 							<td>
-								<?= isset($input[$column]) ? $input[$column] : $options[self::OPT_DEFAULT] ?>
+								<?= $value ?>
 							</td>
 							<?php
 						}

@@ -2,7 +2,8 @@
 
 namespace WebDreamt;
 
-use Cartalyst\Sentry\Facades\Native\Sentry as Sentry;
+use Cartalyst\Sentry\Facades\Native\Sentry as SentryNative;
+use Cartalyst\Sentry\Sentry as Sentry;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use PDO;
 use WebDreamt\Box\Store;
@@ -55,7 +56,7 @@ class Box extends Store {
 	function builder() {
 		return $this->factory(__FUNCTION__, function () {
 					$schema = $this->VendorDirectory . "cartalyst/sentry/schema/mysql.sql";
-					$fk = __DIR__ . '/Builder/fk.sql';
+					$fk = __DIR__ . '/Builder/sentry.sql';
 					$build = new Builder($this, [$schema, $fk]);
 					return $build;
 				});
@@ -89,7 +90,26 @@ class Box extends Store {
 
 					$capsule->bootEloquent();
 
-					return Sentry::instance();
+					return SentryNative::instance();
+				});
+	}
+
+	/**
+	 * @return Server A server instance
+	 */
+	function server() {
+		return $this->factory(__FUNCTION__, function() {
+					return new Server($this);
+				});
+	}
+
+	/**
+	 *
+	 * @return Router A router instance
+	 */
+	function router() {
+		return $this->router(__FUNCTION__, function() {
+					return new Router($this);
 				});
 	}
 

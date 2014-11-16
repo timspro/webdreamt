@@ -288,6 +288,24 @@ abstract class Component {
 	 */
 	abstract function render($input = null, $included = null);
 	/**
+	 * Renders any linked components for the given column. Returns null if there is no component
+	 * for the given column.
+	 * @param string $column
+	 * @param mixed $input The input to be given to the component.
+	 * @return string
+	 */
+	function renderLinked($column, $input = null) {
+		if (isset($this->linked[$column])) {
+			$result = '';
+			foreach ($this->linked[$column] as $component) {
+				$result .= $component->render($input, static::class);
+			}
+			return $result;
+		}
+		return null;
+	}
+
+	/**
 	 * Parses input into an array.
 	 * @param array|ActiveRecordInterface|ActiveRecordInterface[] $input
 	 * @return array

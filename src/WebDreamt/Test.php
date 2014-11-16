@@ -14,10 +14,10 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	private $id = 0;
 
 	public static function setUpBeforeClass() {
-		self::$a = new Box;
-		self::$db = self::$a->db();
-		self::$db->exec("CREATE DATABASE IF NOT EXISTS test; USE test");
-		self::$a->DatabaseName = "test";
+		static::$a = new Box;
+		static::$db = static::$a->db();
+		static::$db->exec("CREATE DATABASE IF NOT EXISTS test; USE test");
+		static::$a->DatabaseName = "test";
 	}
 
 	public function createTable($name = '') {
@@ -26,23 +26,24 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 			$this->id++;
 		}
 		self::$db->exec("CREATE TABLE $name (id INT PRIMARY KEY AUTO_INCREMENT," .
-				" letters VARCHAR(20), number INT, big TEXT, appt DATE)");
+				" letters VARCHAR(20), number INT, big TEXT, appt DATE, gender ENUM('male', 'female'))");
 	}
 
 	public function countTables() {
-		return count(self::$db->query("SHOW TABLES")->fetchAll());
+		return count(static::$db->query("SHOW TABLES")->fetchAll());
 	}
 
 	public function all($query) {
-		return self::$db->query($query)->fetchAll();
+		return static::$db->query($query)->fetchAll();
 	}
 
 	public function column($query) {
-		return self::$db->query($query)->fetchAll(PDO::FETCH_COLUMN);
+		return static::$db->query($query)->fetchAll(PDO::FETCH_COLUMN);
 	}
 
 	public function inColumn($query, $value) {
-		$this->assertContains($value, $this->column($query));
+		$array = $this->column($query);
+		$this->assertContains($value, $array);
 	}
 
 	public function is($query, $value) {
@@ -50,11 +51,11 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	}
 
 	public function countRows($table) {
-		return intval(self::$db->query("SELECT COUNT(*) FROM $table")->fetchAll(PDO::FETCH_COLUMN)[0]);
+		return intval(static::$db->query("SELECT COUNT(*) FROM $table")->fetchAll(PDO::FETCH_COLUMN)[0]);
 	}
 
 	public function forTables($callable) {
-		$tables = self::$db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+		$tables = static::$db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
 		foreach ($tables as $table) {
 			$callable($table);
 		}

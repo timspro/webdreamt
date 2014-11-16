@@ -94,13 +94,13 @@ class Form extends Component {
 				foreach ($this->columns as $column => $options) {
 					if ($options[self::OPT_ACCESS]) {
 						$value = isset($input[$column]) ? $input[$column] : $options[self::OPT_DEFAULT];
-						if (isset($this->linked[$column])) {
-							foreach ($this->linked[$column] as $component) {
-								echo $component->render($input[$column], self::class);
-							}
+						$components = $this->renderLinked($column, $value);
+						if ($components !== null) {
+							echo $components;
 							continue;
 						}
 
+						$name = $column;
 						$label = $options[self::OPT_LABEL];
 						$disabled = $options[self::OPT_DISABLE] ? 'disabled' : '';
 						$hidden = $options[self::OPT_ACCESS] ? 'style="display:none"' : '';
@@ -132,7 +132,7 @@ class Form extends Component {
 							<label for='<?= $column ?>'><?= $spacedName ?></label>
 							<?php
 							if (!isset($select)) {
-								$attributes = "name='$label' $disabled $extra value='$value'";
+								$attributes = "name='$name' $disabled $extra value='$value'";
 								?>
 								<input class='form-control' type='<?= $type ?>' <?= $attributes ?>/>
 								<?php

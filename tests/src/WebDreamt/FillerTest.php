@@ -4,25 +4,11 @@ namespace WebDreamt;
 
 require_once __DIR__ . '/../../bootstrap.php';
 
-class FillerTest extends Test {
+class FillerTest extends DatabaseTest {
 
-	/** @var Filler */
-	protected static $filler;
-	/** @var Builder */
-	protected static $build;
-
-	public static function setUpBeforeClass() {
-		parent::setUpBeforeClass();
-		self::$filler = self::$a->filler();
-		self::$build = self::$a->builder();
-	}
-
-	public static function tearDownAfterClass() {
-		parent::tearDownAfterClass();
-		self::$build->deleteDatabase();
-		self::$build->removeDirectory(self::$build->PropelProject . '../', true);
-	}
-
+	/**
+	 * @group Filler
+	 */
 	public function testAddData() {
 		for ($i = 0; $i < 10; $i++) {
 			$this->createTable();
@@ -30,27 +16,38 @@ class FillerTest extends Test {
 		$this->createTable("bigger");
 
 		self::$build->updatePropel();
-		$gen = self::$build->GeneratedClasses . "Base/";
-		foreach (scandir($gen) as $file) {
-			$require = $gen . $file;
-			if ($file !== '.' && $file !== ".." && is_file($require)) {
-				require_once $require;
-			}
-		}
-		foreach (scandir(self::$build->GeneratedClasses) as $file) {
-			$require = self::$build->GeneratedClasses . $file;
-			if ($file !== '.' && $file !== ".." && is_file($require)) {
-				require_once $require;
-			}
-		}
-
-		self::$filler->addData(["Bigger" => 100]);
+		self::$build->loadAllClasses();
+		self::$a->filler()->addData(["Bigger" => 100]);
 
 		$this->forTables(function($table) {
 			$this->assertGreaterThan(0, $this->countRows($table));
 		});
 
 		$this->assertEquals($this->countRows("bigger"), 100);
+	}
+
+	/**
+	 * @group Filler
+	 */
+	public function testBigData() {
+		$sql = file_get_contents(__DIR__ . '/test.sql');
+		self::$a->db()->exec($sql);
+		self::$build->updatePropel();
+		self::$build->loadAllClasses();
+		self::$a->filler()->addData([
+			"Job" => 10,
+			"Service" => 10,
+			"ServiceJob" => 5,
+			"Customer" => 10,
+			"Location" => 10,
+			"CustomerLocation" => 5,
+			"Driver" => 10,
+			"Groups" => 0,
+			"Users" => 0,
+			"UsersGroups" => 0,
+			"Job" => 20,
+			"Vehicles" => 10
+				], true);
 	}
 
 }

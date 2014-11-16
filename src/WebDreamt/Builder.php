@@ -12,7 +12,7 @@ use RecursiveIteratorIterator;
 use ReflectionClass;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 
@@ -30,6 +30,7 @@ class Builder {
 	public $GeneratedClasses;
 	public $GeneratedMigrations;
 	public $Vendor;
+	public $DB;
 	/**
 	 * A list of schemas to add to the database
 	 * @var array
@@ -59,24 +60,17 @@ class Builder {
 		//Change how this is organized.
 		$this->Vendor = $box->VendorDirectory;
 
+		$this->DB = $this->Vendor . "../db/";
 		$this->PropelProject = $this->Vendor . "../db/Propel/";
 		$this->PropelPHP = $this->PropelProject . "propel.php";
-		$schemaDir = $this->Vendor . "../db/Schemas/";
-		$this->UserSchema = $schemaDir . "schema.xml";
-		$this->ValidSchema = $schemaDir . "validation.xml";
+		$this->Schemas = $this->Vendor . "../db/Schemas/";
+		$this->UserSchema = $this->Schemas . "schema.xml";
+		$this->ValidSchema = $this->Schemas . "validation.xml";
 		$this->BuildSchema = $this->PropelProject . "schema.xml";
 		$this->GeneratedSchema = $this->PropelProject . "generated-reversed-database/schema.xml";
 		$this->GeneratedDatabase = $this->PropelProject . "generated-reversed-database/";
 		$this->GeneratedClasses = $this->PropelProject . "generated-classes/";
 		$this->GeneratedMigrations = $this->PropelProject . "generated-migrations/";
-
-		$this->makeDir($this->Vendor . "../db/");
-		$this->makeDir($this->PropelProject);
-		$this->makeDir($schemaDir);
-		if (!file_exists($this->ValidSchema)) {
-			$xml = "<?xml version='1.0' encoding='UTF-8'?>\n<database>\n</database>\n";
-			file_put_contents($this->ValidSchema, $xml);
-		}
 
 		if (!is_array($schemas)) {
 			$schemas = [$schemas];
@@ -97,11 +91,25 @@ class Builder {
 		}
 
 		$this->propel = $app;
-		$this->propelOutput = new NullOutput();
+		$this->propelOutput = new ConsoleOutput();
 		if (!($app instanceof Application)) {
 			throw new Exception("Could not get the propel application.");
 		}
 
+		$this->setupFiles();
+	}
+
+	/**
+	 * Sets up the appropiate directory structure.
+	 */
+	public function setupFiles() {
+		$this->makeDir($this->Vendor . "../db/");
+		$this->makeDir($this->PropelProject);
+		$this->makeDir($this->Schemas);
+		if (!file_exists($this->ValidSchema)) {
+			$xml = "<?xml version='1.0' encoding='UTF-8'?>\n<database>\n</database>\n";
+			file_put_contents($this->ValidSchema, $xml);
+		}
 		$propelPHP = array(
 			'propel' =>
 			array(
@@ -360,6 +368,19 @@ class Builder {
 				$marker->setAttribute("isCrossRef", "true");
 			}
 		}
+		//Need to fix how enum is handled.
+		$markers = (new \DOMXpath($schemaDom))->query("//*[starts-with(@sqlType,'enum(')]");
+		foreach ($markers as $marker) {
+			$values = $marker->getAttribute("sqlType");
+			$values = substr($values, 5, strlen($values) - 1 - 5);
+			$entries = [];
+			foreach (explode(",", $values) as $entry) {
+				$entries[] = substr($entry, 1, strlen($entry) - 1 - 1);
+			}
+			$marker->setAttribute("type", "ENUM");
+			$marker->setAttribute("valueSet", implode(", ", $entries));
+		}
+
 
 		//Save as the build schema.
 		echo $schemaDom->save($this->BuildSchema);
@@ -421,6 +442,29 @@ class Builder {
 			$db->exec("TRUNCATE $table");
 		}
 		$db->exec("SET FOREIGN_KEY_CHECKS=1");
+	}
+
+	/**
+	 * Load all generated classes. This is useful if you cannot autoload the classes for a
+	 * certain script.
+	 */
+	public function loadAllClasses() {
+		$this->loadAll($this->GeneratedClasses . "Base/");
+		$this->loadAll($this->GeneratedClasses);
+		$this->loadAll($this->GeneratedClasses . "Map/");
+	}
+
+	/**
+	 * Load all PHP files in a directory. Assumes directory has a trailing slash.
+	 * @param string $directory
+	 */
+	protected function loadAll($directory) {
+		foreach (scandir($directory) as $file) {
+			$require = $directory . $file;
+			if ($file !== '.' && $file !== ".." && is_file($require)) {
+				require_once $require;
+			}
+		}
 	}
 
 }
