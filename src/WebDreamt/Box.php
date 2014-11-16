@@ -108,8 +108,18 @@ class Box extends Store {
 	 * @return Router A router instance
 	 */
 	function router() {
-		return $this->router(__FUNCTION__, function() {
+		return $this->factory(__FUNCTION__, function() {
 					return new Router($this);
+				});
+	}
+
+	/**
+	 * Gets the web root URL.
+	 * @return string
+	 */
+	function root() {
+		return $this->factory(__FUNCTION__, function() {
+					return substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT']));
 				});
 	}
 
