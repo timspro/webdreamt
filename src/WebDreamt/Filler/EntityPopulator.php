@@ -55,8 +55,8 @@ class EntityPopulator {
 			if ($columnMap->isForeignKey()) {
 				$relatedClass = $columnMap->getRelation()->getForeignTable()->getPhpName();
 				$formatters[$columnMap->getPhpName()] = function ($inserted) use ($relatedClass) {
-					return isset($inserted[$relatedClass]) ? $inserted[$relatedClass][mt_rand(0, count($inserted[$relatedClass])
-									- 1)] : null;
+					return isset($inserted[$relatedClass]) ?
+							$inserted[$relatedClass][mt_rand(0, count($inserted[$relatedClass]) - 1)] : null;
 				};
 				continue;
 			}
@@ -150,6 +150,8 @@ class EntityPopulator {
 		return $modifiers;
 	}
 
+	public $hashes = [];
+
 	/**
 	 * Insert one new record using the Entity class.
 	 */
@@ -163,8 +165,15 @@ class EntityPopulator {
 		foreach ($this->getModifiers() as $modifier) {
 			$modifier($obj, $insertedEntities);
 		}
-		$obj->save($con);
-		return $obj->getPrimaryKey();
+		$keys = $obj->getPrimaryKey();
+		$hash = md5(print_r($keys, true));
+		if ($keys === null || !isset($this->hashes[$hash])) {
+			$obj->save($con);
+			$this->hashes[$hash] = true;
+			return $obj->getPrimaryKey();
+		} else {
+			return null;
+		}
 	}
 
 }

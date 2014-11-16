@@ -5,33 +5,62 @@ namespace WebDreamt;
 //Check permissions.
 class Router {
 
-	private static $webRoot;
-	private static $cache;
-
-	public static function init() {
-		self::$webRoot = __DIR__ . "/../../web/";
-		self::$cache = __DIR__ . "/cache/web.dat";
-	}
-
-	private $web;
-	private $retryOnNotFound;
+	/**
+	 * The directory to use to sore the web files
+	 * @var string
+	 */
+	protected $webDirectory;
+	/**
+	 * The directory to use to store the cache
+	 * @var string
+	 */
+	protected $cacheDirectory;
+	/**
+	 * The structure of the web directory.
+	 * @var array
+	 */
+	protected $web;
+	/**
+	 * Whether to rebuild $web if the script is not found.
+	 * @var boolean
+	 */
+	protected $retryOnNotFound;
 
 	/**
 	 * Constructs the router by parsing the web root. Note that file extensions are ignored and there
 	 * should not be a folder named "index".
+	 * @param Box $box
+	 * @param boolean $retryOnNotFound
 	 */
-	public function __construct($retryOnNotFound = true) {
+	function __construct(Box $box, $retryOnNotFound = true) {
+		$this->cacheDirectory = $box->VendorDirectory . "../cache/";
+		$this->cacheFile = $this->cacheDirectory . "web.php";
+		$this->webDirectory = $box->VendorDirectory . '../web/';
 		$this->retryOnNotFound = $retryOnNotFound;
 		//Check to see if the cache exists.
-		if (!file_exists(self::$cache)) {
-			//If it doesn't
-			$this->web = $this->buildWeb(self::$webRoot);
-			file_put_contents(self::$cache, json_encode($this->web));
+		if (!file_exists($this->cacheFile)) {
+			if (!file_exists($this->cacheDirectory)) {
+				mkdir($this->cacheDirectory);
+			}
+			$this->buildCache();
 		} else {
-			$this->web = json_decode(self::$cache);
+			$this->web = require $this->cacheFile;
 		}
 	}
 
+	/**
+	 * Builds the Router's cache.
+	 */
+	function buildCache() {
+		$this->web = $this->buildWeb($this->webDirectory);
+		file_put_contents($this->cacheFile, print_r($this->web, true));
+	}
+
+	/**
+	 * Build the cached directory structure.
+	 * @param string $originalDir
+	 * @return string
+	 */
 	protected function buildWeb($originalDir) {
 		$contents = array();
 		foreach (scandir($originalDir) as $fileName) {
@@ -39,9 +68,10 @@ class Router {
 				continue;
 			}
 			if (is_dir($originalDir . '/' . $fileName)) {
-				$contents[$fileName] = buildWeb($originalDir . '/' . $fileName);
+				$contents[$fileName] = $this->buildWeb($originalDir . '/' . $fileName);
 			} else {
-				$contents[$fileName] = $originalDir . "/" . $fileName;
+				$removed = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileName);
+				$contents[$removed] = $originalDir . "/" . $fileName;
 			}
 		}
 		return $contents;
@@ -59,8 +89,9 @@ class Router {
 	/**
 	 * Executes the page associated with the URL, passing along any page parameters in the process.
 	 * @param string $url The URL to execute. Can start with "/", which has no effect.
+	 * @param boolena $retry
 	 */
-	public function run($url) {
+	public function run($url, $retry = true) {
 		//Get rid of starting slash if it exists.
 		if ($url[0] === "/") {
 			$url = substr($url, 1);
@@ -89,7 +120,7 @@ class Router {
 					//Need to add the current part in this case.
 					$params[] = $part;
 				} else {
-					throw new Exception("Could not find page for " + $url);
+					$this->notFound($url, $retry);
 				}
 				//Otherwise, just add the part to the list of parameters.
 			} else {
@@ -103,12 +134,28 @@ class Router {
 			if (isset($current["index"])) {
 				$script = $current["index"];
 			} else {
-				throw new Exception("Cound not find page for " + $url);
+				$this->notFound($url, $retry);
 			}
 		}
 
 		//Run the resolved file.
 		$this->go($script, $url);
+	}
+
+	/**
+	 * Called when the url is not found.
+	 * @param string $url
+	 * @param boolean $retry If $retry is true and retryOnNotFound is true, then will retry
+	 * to find the page.
+	 * @throws Exception
+	 */
+	protected function notFound($url, $retry) {
+		if ($this->retryOnNotFound && $retry) {
+			$this->buildCache();
+			$this->run($url, false);
+		} else {
+			throw new Exception("Could not find page for " + $url);
+		}
 	}
 
 }
