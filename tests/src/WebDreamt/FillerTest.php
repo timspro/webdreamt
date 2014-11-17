@@ -24,6 +24,15 @@ class FillerTest extends DatabaseTest {
 		});
 
 		$this->assertEquals($this->countRows("bigger"), 100);
+		//Check enum.
+		$this->inColumn('SELECT gender FROM bigger', 'male');
+
+		$bigger = new \Bigger();
+		$bigger->setGender('female');
+		$bigger->save();
+		$id = $bigger->getId();
+		$bigger2 = \BiggerQuery::create()->findPk($id);
+		$this->assertEquals($bigger2->getGender(), 'female');
 	}
 
 	/**

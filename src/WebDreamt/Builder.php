@@ -377,8 +377,8 @@ class Builder {
 			foreach (explode(",", $values) as $entry) {
 				$entries[] = substr($entry, 1, strlen($entry) - 1 - 1);
 			}
-			$marker->setAttribute("type", "ENUM");
-			$marker->setAttribute("valueSet", implode(", ", $entries));
+			//$marker->setAttribute("type", "ENUM");
+			$marker->setAttribute("size", "'" . implode(", ", $entries) . "'");
 		}
 
 

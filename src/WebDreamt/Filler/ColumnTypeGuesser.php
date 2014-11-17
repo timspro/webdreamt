@@ -73,7 +73,6 @@ class ColumnTypeGuesser {
 				return function () {
 					return mt_rand(0, intval('9223372036854775807')) / mt_rand(1, intval('9223372036854775807'));
 				};
-			case PropelTypes::CHAR:
 			case PropelTypes::VARCHAR:
 			case PropelTypes::BINARY:
 			case PropelTypes::VARBINARY:
@@ -90,9 +89,13 @@ class ColumnTypeGuesser {
 				return function () use ($generator) {
 					return $generator->text;
 				};
+			case PropelTypes::CHAR:
+				$valueSet = explode(', ', $column->getSize());
+				return function () use ($generator, $valueSet) {
+					return $generator->randomElement($valueSet);
+				};
 			case PropelTypes::ENUM:
 				$valueSet = $column->getValueSet();
-
 				return function () use ($generator, $valueSet) {
 					return $generator->randomElement($valueSet);
 				};
