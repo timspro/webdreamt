@@ -119,7 +119,7 @@ class Box extends Store {
 	 */
 	function root() {
 		return $this->factory(__FUNCTION__, function() {
-					return substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT']));
+					return substr($_SERVER['REQUEST_URI'], strlen($_SERVER['DOCUMENT_ROOT']));
 				});
 	}
 
