@@ -10,7 +10,7 @@ class Checked {
 		$this->myValue = $checkedValue;
 	}
 
-	function select($currentValue) {
+	function check($currentValue) {
 		$ret = "value='$currentValue'";
 		if ($this->myValue && $this->myValue === $currentValue) {
 			$ret .= " CHECKED";
