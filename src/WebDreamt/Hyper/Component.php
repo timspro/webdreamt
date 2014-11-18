@@ -311,10 +311,9 @@ abstract class Component {
 	 * @return array
 	 */
 	protected function parseInput($input = null) {
-		if ($input instanceof ActiveRecordInterface) {
-			return $input->toArray(TableMap::TYPE_COLNAME);
-		} else if (!empty($input) && $input[0] instanceof ActiveRecordInterface) {
-			return $input->toArray(TableMap::TYPE_COLNAME);
+		if (($input instanceof ActiveRecordInterface) ||
+				(is_array($input) && !empty($input) && $input[0] instanceof ActiveRecordInterface)) {
+			return new PropelWrapper($input);
 		} else if (is_array($input)) {
 			return $input;
 		}
