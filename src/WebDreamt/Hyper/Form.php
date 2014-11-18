@@ -24,6 +24,11 @@ class Form extends Component {
 	 * @var string
 	 */
 	protected $formHtml = "role='form'";
+	/**
+	 * A count of the number of forms rendered.
+	 * @var int
+	 */
+	protected static $count = 0;
 
 	protected function getDefaultOptions() {
 		$options = parent::getDefaultOptions();
@@ -82,6 +87,7 @@ class Form extends Component {
 	 */
 	function render($input = null, $included = null) {
 		ob_start();
+		static::$count++;
 		if ($included === null) {
 			?>
 			<form <?= $this->html ?> class="<?= implode(" ", $this->classes) ?>">
@@ -100,7 +106,7 @@ class Form extends Component {
 							continue;
 						}
 
-						$name = $column;
+						$name = static::$count . "." . $this->tableName . "." . $column;
 						$label = $options[self::OPT_LABEL];
 						$disabled = $options[self::OPT_DISABLE] ? 'disabled' : '';
 						$hidden = $options[self::OPT_ACCESS] ? 'style="display:none"' : '';
@@ -129,7 +135,7 @@ class Form extends Component {
 						}
 						?>
 						<div class='form-group' <?= $hidden ?>>
-							<label for='<?= $column ?>'><?= $spacedName ?></label>
+							<label for='<?= $name ?>'><?= $label ?></label>
 							<?php
 							if (!isset($select)) {
 								$attributes = "name='$name' $disabled $extra value='$value'";

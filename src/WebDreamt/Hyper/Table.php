@@ -91,9 +91,10 @@ class Table extends Component {
 				?>
 				<?php
 				foreach ($this->columns as $column => $options) {
-					if ($options[self::OPT_ACCESS] && $options[self::OPT_VISIBLE]) {
+					if ($options[self::OPT_ACCESS]) {
+						$visible = ($options[self::OPT_VISIBLE] ? 'style="display:none"' : '');
 						?>
-						<th><?= $options[self::OPT_HEADER] ?></th>
+						<th <?= $visible ?>><?= $options[self::OPT_HEADER] ?></th>
 						<?php
 					}
 				}
@@ -114,15 +115,15 @@ class Table extends Component {
 						<?php
 					}
 					foreach ($this->columns as $column => $options) {
-						$value = isset($input[$column]) ? $input[$column] : $options[self::OPT_DEFAULT];
+						$value = isset($row[$column]) ? $row[$column] : $options[self::OPT_DEFAULT];
 						$components = $this->renderLinked($column, $value);
 						if ($components !== null) {
-							echo $components;
-							continue;
+							$value = $components;
 						}
-						if ($options[self::OPT_ACCESS] && $options[self::OPT_VISIBLE]) {
+						if ($options[self::OPT_ACCESS]) {
+							$visible = ($options[self::OPT_VISIBLE] ? 'style="display:none"' : '');
 							?>
-							<td>
+							<td <?= $visible ?>>
 								<?= $value ?>
 							</td>
 							<?php
