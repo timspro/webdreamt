@@ -12,7 +12,7 @@ class Checked {
 
 	function check($currentValue) {
 		$ret = "value='$currentValue'";
-		if ($this->myValue && $this->myValue === $currentValue) {
+		if ($this->myValue === $currentValue) {
 			$ret .= " CHECKED";
 		}
 		return $ret;

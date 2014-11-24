@@ -12,7 +12,7 @@ class Select {
 
 	function select($currentValue) {
 		$ret = "value='$currentValue'";
-		if ($this->myValue && $this->myValue === $currentValue) {
+		if ($this->myValue === $currentValue) {
 			$ret .= " SELECTED";
 		}
 		return $ret;
