@@ -76,6 +76,9 @@ class Table extends Component {
 	 */
 	function render($input = null, $included = null) {
 		ob_start();
+		if ($this->input) {
+			$input = $this->input;
+		}
 		?>
 		<table <?= $this->html ?> class="<?= implode(" ", $this->classes) ?>">
 			<?php
@@ -124,7 +127,7 @@ class Table extends Component {
 							$visible = ($options[self::OPT_VISIBLE] ? 'style="display:none"' : '');
 							?>
 							<td <?= $visible ?>>
-								<?= $value ?>
+								<?= nl2br($value) ?>
 							</td>
 							<?php
 						}

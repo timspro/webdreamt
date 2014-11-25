@@ -19,11 +19,11 @@ class Group extends Component {
 
 	/**
 	 * Set the component to use to display children. Defaults to just assuming that the data
-	 * is indexed.
+	 * is indexed. Can also provide a string, in which case that column of the input will be used.
 	 * @param Component|string $display
 	 * @return self
 	 */
-	function setChildComponent($display = null) {
+	function setDisplay($display = null) {
 		$this->display = $display;
 		return $this;
 	}
@@ -49,8 +49,9 @@ class Group extends Component {
 	}
 
 	/**
-	 * Set the HTML for all children.
-	 * @param string $childHtml
+	 * Set the HTML for all children. Note that this can be function, in which case it will be passed
+	 * the value of the current input, the index of the current input, and the current input.
+	 * @param string|callable $childHtml
 	 * @return self
 	 */
 	function setChildHtml($childHtml = '') {
@@ -79,6 +80,16 @@ class Group extends Component {
 	}
 
 	/**
+	 * Set a string to go after the opening tag.
+	 * @param string $after
+	 * @return self
+	 */
+	function setAfter($after = '') {
+		$this->after = $after;
+		return $this;
+	}
+
+	/**
 	 * Renders the component.
 	 * @param array $input
 	 * @param string $included The class name of the component that is calling render. Null
@@ -86,17 +97,29 @@ class Group extends Component {
 	 */
 	function render($input = null, $included = null) {
 		ob_start();
-		if ($this->htmlTag) {
-			echo '<' . $this->htmlTag . ' ' . $this->html . " class='" . implode(" ", $this->classes) . "'>";
+		if ($this->input) {
+			$input = $this->input;
 		}
+		if ($this->htmlTag) {
+			$visible = ($this->display && !$this->columns[$this->display][self::OPT_VISIBLE] ?
+							'style="display:none"' : '');
+			echo '<' . $this->htmlTag . ' ' . $this->html . " class='" . implode(" ", $this->classes) .
+			"' $visible>\n";
+		}
+		echo $this->after;
 		foreach ($input as $index => $value) {
 			$id = ($this->childPrefix ? 'id="' . $this->childPrefix . '-' . $index . '"' : '');
 			$startTag = '';
 			$endTag = '';
 			$show = true;
 			if ($this->childHtmlTag) {
-				$visible = ($this->columns[$this->display][self::OPT_VISIBLE] ? 'style="display:none"' : '');
-				$startTag = '<' . $this->childHtmlTag . ' ' . $this->childHtml . " " . $id . " $visible>";
+				if (is_callable($this->childHtml)) {
+					$function = $this->childHtml;
+					$child = $function($value, $index, $input);
+				} else {
+					$child = $this->childHtml;
+				}
+				$startTag = '<' . $this->childHtmlTag . ' ' . $child . " " . $id . ">";
 			}
 
 			$middle = '';
@@ -106,13 +129,13 @@ class Group extends Component {
 					$middle = $components;
 				} else {
 					$show = $this->columns[$this->display][self::OPT_ACCESS];
-					$middle = (isset($value[$this->display]) ? $value[$this->display] :
+					$middle = nl2br(isset($value[$this->display]) ? $value[$this->display] :
 									$this->columns[$this->display][self::OPT_DEFAULT]);
 				}
 			} else if ($this->display instanceof Component) {
 				$middle = $this->display->render($value, static::class);
 			} else {
-				$middle = $value;
+				$middle = nl2br($value);
 			}
 			if ($this->childHtmlTag) {
 				$endTag = '</' . $this->childHtmlTag . '>';
@@ -123,11 +146,11 @@ class Group extends Component {
 			}
 
 			if ($show) {
-				echo $startTag . $middle . $endTag;
+				echo $startTag . $middle . $endTag . "\n";
 			}
 		}
 		if ($this->htmlTag) {
-			echo '</' . $this->htmlTag . '>';
+			echo '</' . $this->htmlTag . ">\n";
 		}
 		return ob_get_clean();
 	}

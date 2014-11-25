@@ -8,12 +8,15 @@ class Display extends Group {
 	 * This function is disabled.
 	 * @param type $display
 	 */
-	function setChildComponent($display = null) {
+	function setDisplay($display = null) {
 		throw new Exception("Cannot set a child component for a display.");
 	}
 
 	function render($input = null, $included = null) {
 		ob_start();
+		if ($this->input) {
+			$input = $this->input;
+		}
 		if ($this->htmlTag) {
 			echo '<' . $this->htmlTag . ' ' . $this->html . " class='" . implode(" ", $this->classes) . "'>";
 		}
@@ -27,7 +30,7 @@ class Display extends Group {
 				if ($components !== null) {
 					echo $components;
 				} else {
-					echo $value;
+					echo nl2br($value);
 				}
 				echo '</' . $this->childHtmlTag . '>';
 			}

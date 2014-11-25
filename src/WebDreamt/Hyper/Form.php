@@ -38,7 +38,10 @@ class Form extends Component {
 
 	protected function addColumn(ColumnMap $column, array &$options) {
 		parent::addColumn($column, $options);
-		$options[self::OPT_LABEL] = static::spaceColumnName($column->getPhpName());
+		$options[self::OPT_LABEL] = static::spaceColumnName($column->getName());
+		if ($column->getName() === 'id') {
+			$options[self::OPT_ACCESS] = false;
+		}
 	}
 
 	/**
@@ -84,10 +87,15 @@ class Form extends Component {
 	 * @param array $input
 	 * @param string $included The class name of the component that is calling render. Null
 	 * if not being called from a component.
+	 * @return string
 	 */
 	function render($input = null, $included = null) {
 		ob_start();
+		if ($this->input) {
+			$input = $this->input;
+		}
 		static::$count++;
+		$count = static::$count;
 		if ($included === null) {
 			?>
 			<form <?= $this->html ?> class="<?= implode(" ", $this->classes) ?>">
@@ -99,65 +107,114 @@ class Form extends Component {
 				}
 				foreach ($this->columns as $column => $options) {
 					if ($options[self::OPT_ACCESS]) {
-						$value = isset($input[$column]) ? $input[$column] : $options[self::OPT_DEFAULT];
-						$components = $this->renderLinked($column, $value);
+						$value = nl2br(isset($input[$column]) ? $input[$column] : $options[self::OPT_DEFAULT]);
+
+						$components = null;
+						$selectComponent = null;
+						if (isset($this->linked[$column])) {
+							$components = '';
+							foreach ($this->linked[$column] as $component) {
+								if ($component instanceof Select) {
+									$selectComponent = $component;
+								} else {
+									$components .= $component->render($input, static::class);
+								}
+							}
+						}
+
+						if ($components === null || $selectComponent !== null) {
+							$name = $count . "." . $this->tableName . "." . $column;
+							$label = ($selectComponent ?
+											'Select ' . static::spaceColumnName($selectComponent->getTableName()) :
+											$options[self::OPT_LABEL]);
+							$disabled = $options[self::OPT_DISABLE] ? 'disabled=""' : '';
+							$hidden = $options[self::OPT_ACCESS] ? '' : 'style="display:none"';
+							$extra = '';
+							$classes = '';
+							$select = false;
+							$textarea = false;
+							switch ($options[self::OPT_TYPE]) {
+								case PropelTypes::LONGVARCHAR:
+									$extra = 'size="' . $options[self::OPT_EXTRA] . '"';
+									$textarea = true;
+									break;
+								case PropelTypes::VARCHAR:
+									if (intval($options[self::OPT_EXTRA]) >= 255) {
+										$textarea = true;
+									} else {
+										$type = 'text';
+									}
+									$extra = 'size="' . $options[self::OPT_EXTRA] . '"';
+									break;
+								case PropelTypes::INTEGER:
+									$type = 'number';
+									$extra = 'size="' . $options[self::OPT_EXTRA] . '"';
+									break;
+								case PropelTypes::FLOAT:
+								case PropelTypes::DOUBLE:
+								case PropelTypes::DECIMAL:
+									$type = 'number';
+									$extra = 'step="0.01"';
+									break;
+								case PropelTypes::BOOLEAN:
+									$select = ['Yes', 'No'];
+									break;
+								case PropelTypes::ENUM:
+									$select = $options[self::OPT_EXTRA];
+									break;
+								case PropelTypes::DATE:
+									$type = 'text';
+									if ($value) {
+										$value = date("m-d-Y", strtotime($value));
+									}
+									$classes = 'date-control';
+									break;
+								case PropelTypes::TIMESTAMP:
+									$type = 'text';
+									if ($value) {
+										$value = date("m-d-Y g:i a", strtotime($value));
+									}
+									$classes = 'datetime-control';
+									break;
+							}
+							$attributes = "name='$name' $disabled $extra value='$value'";
+							?>
+							<div class='form-group' <?= $hidden ?>>
+								<label for='<?= $name ?>'><?= $label ?></label>
+								<?php
+								if (isset($selectComponent)) {
+									$selectComponent->appendHtml($attributes);
+									echo $selectComponent->render($value);
+								} else if ($select) {
+									?>
+									<select <?= $attributes ?>>
+										<?php
+										foreach ($select as $option) {
+											?>
+											<option><?= $option ?></option>
+											<?php
+										}
+										?>
+									</select>
+									<?php
+								} else if ($textarea) {
+									?>
+									<textarea class='form-control <?= $classes ?>' <?= $attributes ?>><?= $value ?></textarea>
+									<?php
+								} else {
+									?>
+									<input class='form-control <?= $classes ?>' type='<?= $type ?>' <?= $attributes ?>/>
+									<?php
+								}
+								?>
+							</div>
+							<?php
+						}
+
 						if ($components !== null) {
 							echo $components;
 							continue;
 						}
-
-						$name = static::$count . "." . $this->tableName . "." . $column;
-						$label = $options[self::OPT_LABEL];
-						$disabled = $options[self::OPT_DISABLE] ? 'disabled' : '';
-						$hidden = $options[self::OPT_ACCESS] ? 'style="display:none"' : '';
-						switch ($options[self::OPT_TYPE]) {
-							case PropelTypes::LONGVARCHAR:
-							case PropelTypes::VARCHAR:
-								$type = 'text';
-								$extra = 'size="' . $options[self::OPT_EXTRA] . '"';
-								break;
-							case PropelTypes::INTEGER:
-								$type = 'number';
-								$extra = 'size="' . $options[self::OPT_EXTRA] . '"';
-								break;
-							case PropelTypes::FLOAT:
-							case PropelTypes::DOUBLE:
-							case PropelTypes::DECIMAL:
-								$type = 'number';
-								$extra = 'step="0.01"';
-								break;
-							case PropelTypes::BOOLEAN;
-								$select = ['Yes', 'No'];
-								break;
-							case PropelTypes::ENUM:
-								$select = $options[self::OPT_EXTRA];
-								break;
-						}
-						?>
-						<div class='form-group' <?= $hidden ?>>
-							<label for='<?= $name ?>'><?= $label ?></label>
-							<?php
-							if (!isset($select)) {
-								$attributes = "name='$name' $disabled $extra value='$value'";
-								?>
-								<input class='form-control' type='<?= $type ?>' <?= $attributes ?>/>
-								<?php
-							} else {
-								?>
-								<select <?= $attributes ?>>
-									<?php
-									foreach ($select as $option) {
-										?>
-										<option><?= $option ?></option>
-										<?php
-									}
-									?>
-								</select>
-								<?php
-							}
-							?>
-						</div>
-						<?php
 					}
 				}
 				if ($included) {
@@ -170,7 +227,7 @@ class Form extends Component {
 			</form>
 			<?php
 		}
-		return ob_end_flush();
+		return ob_get_clean();
 	}
 
 }

@@ -11,12 +11,11 @@ CREATE TABLE `customer` (
   `first_name` varchar(100) DEFAULT NULL,
   `last_name` varchar(100) DEFAULT NULL,
   `company_name` varchar(100) DEFAULT NULL,
-  `billing_street1` varchar(100) DEFAULT NULL,
-  `billing_street2` varchar(100) DEFAULT NULL,
+  `billing_street_address` varchar(255) DEFAULT NULL,
   `billing_city` varchar(100) DEFAULT NULL,
   `billing_state` enum('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY') DEFAULT NULL,
   `billing_zip` int(5) unsigned DEFAULT NULL,
-  `customeradd_date` datetime DEFAULT NULL,
+  `customer_add_date` datetime DEFAULT NULL,
   `active` tinyint(1) unsigned DEFAULT NULL,
   `credit_customer` tinyint(1) unsigned DEFAULT NULL,
   `phone` int(10) unsigned DEFAULT NULL,
@@ -84,8 +83,7 @@ CREATE TABLE `location` (
   `city` varchar(100) NOT NULL,
   `state` varchar(50) NOT NULL,
   `zip` int(10) unsigned NOT NULL,
-  `street_address1` varchar(255) NOT NULL,
-  `street_address2` varchar(255) NOT NULL,
+  `street_address` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

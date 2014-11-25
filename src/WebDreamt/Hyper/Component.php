@@ -6,6 +6,7 @@ use Propel\Generator\Model\PropelTypes;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Map\ColumnMap;
 use Propel\Runtime\Map\TableMap;
+use Propel\Runtime\Propel;
 
 /**
  * A class to be used as a base to render other objects from the database.
@@ -70,6 +71,11 @@ abstract class Component {
 	 * @var string
 	 */
 	protected $tableName;
+	/**
+	 * The input to be passed to the render method.
+	 * @var array
+	 */
+	protected $input = null;
 
 	/**
 	 * Constructs a component.
@@ -115,6 +121,14 @@ abstract class Component {
 	}
 
 	/**
+	 * Get the table name for the component.
+	 * @return string
+	 */
+	function getTableName() {
+		return $this->tableName;
+	}
+
+	/**
 	 * Sets the HTML of the top level element. Note use addCssClass to add classes.
 	 * @param string $html
 	 * @return self
@@ -140,6 +154,25 @@ abstract class Component {
 	function appendHtml($html = '') {
 		$this->html .= $html;
 		return $this;
+	}
+
+	/**
+	 * Set the input of the component. Note that input set this way will override input passed to the
+	 * render method.
+	 * @param array $input
+	 * @return self
+	 */
+	function setInput($input = null) {
+		$this->input = $input;
+		return $this;
+	}
+
+	/**
+	 * Get the input of the component.
+	 * @return array
+	 */
+	function getInput() {
+		return $this->input;
 	}
 
 	/**

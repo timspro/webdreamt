@@ -25,16 +25,6 @@ class Name {
 				return $generator->dateTime;
 			};
 		}
-		if (preg_match('/^street_address/', $name)) {
-			return function () use ($generator) {
-				return $generator->streetAddress;
-			};
-		}
-		if (preg_match('/mileage/', $name)) {
-			return function () use ($generator) {
-				return $generator->numberBetween(10, 50);
-			};
-		}
 		switch ($name) {
 			case 'first_name':
 			case 'firstname':
@@ -61,6 +51,8 @@ class Name {
 				return function () use ($generator) {
 					return $generator->phoneNumber;
 				};
+			case 'streetaddress':
+			case 'street_address':
 			case 'address':
 				return function () use ($generator) {
 					return $generator->address;
@@ -107,6 +99,16 @@ class Name {
 		if (preg_match('/name$/', $name)) {
 			return function () use ($generator) {
 				return substr(ucwords($generator->text(rand(10, 30))), 0, -1);
+			};
+		}
+		if (preg_match('/street_address$/', $name)) {
+			return function () use ($generator) {
+				return $generator->streetAddress;
+			};
+		}
+		if (preg_match('/mileage$/', $name)) {
+			return function () use ($generator) {
+				return $generator->numberBetween(10, 50);
 			};
 		}
 	}
