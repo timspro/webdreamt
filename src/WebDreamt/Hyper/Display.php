@@ -22,7 +22,7 @@ class Display extends Group {
 		}
 		foreach ($this->columns as $column => $options) {
 			if ($options[self::OPT_ACCESS]) {
-				$value = (isset($input[$column]) ? $input[$column] : $options[self::OPT_DEFAULT]);
+				$value = $this->getValueFromInput($column, $input);
 				$visible = ($options[self::OPT_VISIBLE] ? 'style="display:none"' : '');
 				$class = ($this->childPrefix ? "class='" . $this->childPrefix . "_$column'" : '');
 				echo '<' . $this->childHtmlTag . ' ' . $this->childHtml . " $class $visible>";
@@ -30,11 +30,12 @@ class Display extends Group {
 				if ($components !== null) {
 					echo $components;
 				} else {
-					echo nl2br($value);
+					echo $value;
 				}
 				echo '</' . $this->childHtmlTag . '>';
 			}
 		}
+		echo $this->renderExtra($input);
 		if ($this->htmlTag) {
 			echo '</' . $this->htmlTag . '>';
 		}

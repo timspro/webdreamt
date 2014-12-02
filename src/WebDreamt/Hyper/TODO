@@ -1,0 +1,12 @@
+<?php
+
+class JobForm extends Form {
+
+}
+
+new JobForm('job');
+
+//Required
+//Better support for labels
+//Order
+//Alias

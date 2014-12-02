@@ -7,11 +7,6 @@ namespace WebDreamt\Hyper;
  */
 class Table extends Component {
 
-	/**
-	 * The header for the column.
-	 */
-	const OPT_HEADER = 'header';
-
 	protected $hideHeaders = false;
 	protected $showRowNumbers = false;
 	protected $tableHtml = 'class="table"';
@@ -19,27 +14,7 @@ class Table extends Component {
 
 	protected function addColumn(ColumnMap $column, array &$options) {
 		parent::addColumn($column, $options);
-		$options[self::OPT_HEADER] = static::spaceColumnName($column->getPhpName());
-	}
-
-	/**
-	 * Sets the headers for the column.
-	 * @param type $columns
-	 * @return this
-	 */
-	function setHeaders($columns) {
-		$this->merge($columns, self::OPT_HEADER);
-		return $this;
-	}
-
-	/**
-	 * If the parameter $hide is true, then the table won't have headers.
-	 * @param boolean $hide
-	 * @return this
-	 */
-	function hideHeaders($hide = false) {
-		$this->hideHeaders = $hide;
-		return $this;
+		$options[self::OPT_LABEL] = static::spaceColumnName($column->getPhpName());
 	}
 
 	/**
@@ -97,7 +72,7 @@ class Table extends Component {
 					if ($options[self::OPT_ACCESS]) {
 						$visible = ($options[self::OPT_VISIBLE] ? 'style="display:none"' : '');
 						?>
-						<th <?= $visible ?>><?= $options[self::OPT_HEADER] ?></th>
+						<th <?= $visible ?>><?= $options[self::OPT_LABEL] ?></th>
 						<?php
 					}
 				}
@@ -118,7 +93,7 @@ class Table extends Component {
 						<?php
 					}
 					foreach ($this->columns as $column => $options) {
-						$value = isset($row[$column]) ? $row[$column] : $options[self::OPT_DEFAULT];
+						$value = $this->columns[$this->display][self::OPT_DEFAULT];
 						$components = $this->renderLinked($column, $value);
 						if ($components !== null) {
 							$value = $components;
@@ -127,10 +102,16 @@ class Table extends Component {
 							$visible = ($options[self::OPT_VISIBLE] ? 'style="display:none"' : '');
 							?>
 							<td <?= $visible ?>>
-								<?= nl2br($value) ?>
+								<?= $value ?>
 							</td>
 							<?php
 						}
+					}
+					$extra = $this->renderExtra($input);
+					if (!empty($extra)) {
+						?>
+						<td><?= $extra ?></td>
+						<?php
 					}
 					?>
 				</tr>

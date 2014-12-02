@@ -14,16 +14,12 @@ class Form extends Component {
 	 * Whether the input type is disabled.
 	 */
 	const OPT_DISABLE = 'disable';
-	/**
-	 * The label for the input
-	 */
-	const OPT_LABEL = 'label';
 
 	/**
-	 * See setFormHtml()
-	 * @var string
+	 * Indicates if the form can handle multiple items.
+	 * @var boolean
 	 */
-	protected $formHtml = "role='form'";
+	protected $multiple = false;
 	/**
 	 * A count of the number of forms rendered.
 	 * @var int
@@ -40,6 +36,9 @@ class Form extends Component {
 		parent::addColumn($column, $options);
 		$options[self::OPT_LABEL] = static::spaceColumnName($column->getName());
 		if ($column->getName() === 'id') {
+			$options[self::OPT_VISIBLE] = false;
+		}
+		if ($column->getName() === 'created_at' || $column->getName() === 'updated_at') {
 			$options[self::OPT_ACCESS] = false;
 		}
 	}
@@ -73,12 +72,12 @@ class Form extends Component {
 	}
 
 	/**
-	 * Sets the labels.
-	 * @param array $columns
-	 * @return this
+	 * Sets if the form should submit multiple items.
+	 * @param boolean $multiple
+	 * @return self
 	 */
-	function setLabels($columns) {
-		$this->merge($columns, self::OPT_LABEL);
+	function setMultiple($multiple = false) {
+		$this->multiple = $multiple;
 		return $this;
 	}
 
@@ -102,12 +101,15 @@ class Form extends Component {
 				<?php
 			} else {
 				?>
-				<div class="wd-subform">
+				<div <?= $this->html ?> class="wd-subform <?= implode(" ", $this->classes) ?>">
 					<?php
 				}
+				?>
+				<input type='hidden' name='<?= $count ?>' value='<?= $this->tableName ?>'/>
+				<?php
 				foreach ($this->columns as $column => $options) {
 					if ($options[self::OPT_ACCESS]) {
-						$value = nl2br(isset($input[$column]) ? $input[$column] : $options[self::OPT_DEFAULT]);
+						$value = $this->getValueFromInput($column, $input);
 
 						$components = null;
 						$selectComponent = null;
@@ -123,12 +125,12 @@ class Form extends Component {
 						}
 
 						if ($components === null || $selectComponent !== null) {
-							$name = $count . "." . $this->tableName . "." . $column;
+							$name = $count . "-" . $this->tableName . "-" . $column;
 							$label = ($selectComponent ?
 											'Select ' . static::spaceColumnName($selectComponent->getTableName()) :
 											$options[self::OPT_LABEL]);
 							$disabled = $options[self::OPT_DISABLE] ? 'disabled=""' : '';
-							$hidden = $options[self::OPT_ACCESS] ? '' : 'style="display:none"';
+							$hidden = $options[self::OPT_VISIBLE] ? '' : 'style="display:none"';
 							$extra = '';
 							$classes = '';
 							$select = false;
@@ -217,6 +219,12 @@ class Form extends Component {
 						}
 					}
 				}
+				if ($this->multiple) {
+					?>
+					<button type='button' class="btn btn-default">Add Another</button>
+					<?php
+				}
+				echo $this->renderExtra($input);
 				if ($included) {
 					?>
 				</div>

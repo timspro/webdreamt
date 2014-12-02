@@ -6,6 +6,7 @@ class Group extends Component {
 
 	protected $display = null;
 	protected $htmlTag;
+	protected $afterOpening = '';
 	protected $childHtmlTag;
 	protected $childHtml = '';
 	protected $childPrefix;
@@ -84,8 +85,8 @@ class Group extends Component {
 	 * @param string $after
 	 * @return self
 	 */
-	function setAfter($after = '') {
-		$this->after = $after;
+	function setAfterOpeningTag($after = '') {
+		$this->afterOpening = $after;
 		return $this;
 	}
 
@@ -106,7 +107,7 @@ class Group extends Component {
 			echo '<' . $this->htmlTag . ' ' . $this->html . " class='" . implode(" ", $this->classes) .
 			"' $visible>\n";
 		}
-		echo $this->after;
+		echo $this->afterOpening;
 		foreach ($input as $index => $value) {
 			$id = ($this->childPrefix ? 'id="' . $this->childPrefix . '-' . $index . '"' : '');
 			$startTag = '';
@@ -129,25 +130,24 @@ class Group extends Component {
 					$middle = $components;
 				} else {
 					$show = $this->columns[$this->display][self::OPT_ACCESS];
-					$middle = nl2br(isset($value[$this->display]) ? $value[$this->display] :
-									$this->columns[$this->display][self::OPT_DEFAULT]);
+					$middle = $this->getValueFromInput($this->display, $value);
 				}
 			} else if ($this->display instanceof Component) {
 				$middle = $this->display->render($value, static::class);
 			} else {
-				$middle = nl2br($value);
+				$middle = $value;
 			}
 			if ($this->childHtmlTag) {
 				$endTag = '</' . $this->childHtmlTag . '>';
 			}
-
 			if ($this->breaks) {
 				$middle .= '<br />';
 			}
-
 			if ($show) {
 				echo $startTag . $middle . $endTag . "\n";
 			}
+
+			echo $this->renderExtra($value);
 		}
 		if ($this->htmlTag) {
 			echo '</' . $this->htmlTag . ">\n";

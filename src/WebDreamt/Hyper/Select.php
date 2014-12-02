@@ -13,7 +13,7 @@ class Select extends Group {
 			}
 			return '';
 		});
-		$this->setAfter("<option value='' disabled='' selected=''></option>\n");
+		$this->setAfterOpeningTag("<option value='' disabled='' selected=''></option>\n");
 	}
 
 }

@@ -64,25 +64,56 @@ class FormTest extends Test {
 	 * @group Form
 	 */
 	public function testLinkedForm() {
-		$form = new Form('job');
-		$driverSelect = new Select('driver');
-		$locationSelect = new Select('location');
+		//Get information about drivers.
+		$driverQuery = "SELECT id, CONCAT(last_name, ', ', first_name) as last_name FROM driver "
+				. "ORDER BY last_name";
+		$stmt = self::$a->db()->query($driverQuery);
+		$driverData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-		$stmt = self::$a->db()->prepare("SELECT id, CONCAT(last_name, ', ', first_name) as last_name FROM driver");
-		$stmt->execute();
-		$driverSelect->setDisplay('last_name')->setInput($stmt->fetchAll(PDO::FETCH_ASSOC));
+		//Get information about locations.
+		$stmt = self::$a->db()->query("SELECT street_address FROM location");
+		$locationData = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+		//Set up a new job form.
+		$form = new Form('job');
+
+		//Set up a component to pick from the current drivers.
+		$driverSelect = new Select('driver');
+		$driverSelect->setDisplay('last_name')->setInput($driverData);
 		$form->link('driver_id', $driverSelect);
+		//Also link to an add form for the driver.
 		$form->link('driver_id', new Form('driver'));
 
-		$stmt = self::$a->db()->prepare("SELECT street_address FROM location");
-		$stmt->execute();
-		$locationSelect->setInput($stmt->fetchAll(PDO::FETCH_COLUMN));
+		//Link to a select to pick the location.
+		$locationSelect = new Select('location');
+		$locationSelect->setInput($locationData);
 		$form->link('location_id', $locationSelect);
 
+		//Link to a form to add the customer information.
 		$form->link('customer_id', new Form('customer'));
 
+		//Output
 		$output = $form->render();
 		$this->output('job-form-linked.html', $output);
+	}
+
+	/**
+	 * @group Form
+	 */
+	public function testExtraForm() {
+		//Get information about available services.
+		$data = self::$a->db()->query("SELECT id, name FROM service");
+		//Set up the job form.
+		$jobForm = new Form('job');
+		//Set up the service job form.
+		$serviceJobForm = new Form('service_job');
+		$serviceJobForm->setMultiple(true)
+				->link('service_id', (new Select('service'))->setDisplay('name')->setInput($data))
+				->link('service_id', new Form('service'))->deny('job_id');
+		$jobForm->addExtraComponent($serviceJobForm);
+		//Output
+		$output = $jobForm->render();
+		$this->output('job-form-extra.html', $output);
 	}
 
 }

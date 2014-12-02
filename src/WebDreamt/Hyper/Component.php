@@ -2,6 +2,7 @@
 
 namespace WebDreamt\Hyper;
 
+use Propel\Common\Pluralizer\StandardEnglishPluralizer;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Map\ColumnMap;
@@ -38,13 +39,22 @@ abstract class Component {
 	 * length for others.
 	 */
 	const OPT_EXTRA = 'extra';
+	/**
+	 * The label for the column displayed in an easily human-readable form
+	 */
+	const OPT_LABEL = 'label';
+	/**
+	 * The method to call on the propel object to access a different object. Only applies if input is
+	 * given as a Propel object.
+	 */
+	const OPT_PROPEL_OBJECT = 'object';
 
 	/**
-	 * An array of the $options as keys. This is lazily initiated and includes options declared
-	 * in child and parent classes.
-	 * @var array
+	 * An instance of the pluralizer Propel uses for pluralization. Should be accessed through
+	 * getPluralizer().
+	 * @var StandardEnglishPluralizer
 	 */
-	static protected $options = [];
+	static private $pluralizer;
 	/**
 	 * An array where the keys are column names and the values are the options for each column.
 	 * @var array
@@ -70,7 +80,17 @@ abstract class Component {
 	 * The name of the table
 	 * @var string
 	 */
-	protected $tableName;
+	protected $tableName = '';
+	/**
+	 * The table map
+	 * @var TableMap
+	 */
+	protected $tableMap;
+	/**
+	 * An array of extra components to render.
+	 * @var array
+	 */
+	protected $extraComponents = [];
 	/**
 	 * The input to be passed to the render method.
 	 * @var array
@@ -79,11 +99,14 @@ abstract class Component {
 
 	/**
 	 * Constructs a component.
-	 * @param string $table
+	 * @param string $tableName
 	 */
-	function __construct($table) {
-		$table = Propel::getDatabaseMap()->getTable($table);
-		$this->tableName = $table->getName();
+	function __construct($tableName) {
+		$table = Propel::getDatabaseMap()->getTable($tableName);
+		//Keep a reference to the table map so when something is linked, we can look up the linked table's
+		//information.
+		$this->tableMap = $table;
+		$this->tableName = $tableName;
 		foreach ($table->getColumns() as $column) {
 			$name = $column->getName();
 			$this->columns[$name] = $this->getDefaultOptions();
@@ -92,11 +115,13 @@ abstract class Component {
 	}
 
 	/**
-	 * Changes the default column options.
+	 * Changes the default column options. Note that this does not set the PROPEL_OBJECT property.
+	 * This is instead set by addRelatedTable() and link().
 	 * @param ColumnMap $column
 	 * @param array $options
 	 */
 	protected function addColumn(ColumnMap $column, array &$options) {
+		$options[self::OPT_LABEL] = static::spaceColumnName($column->getName());
 		$options[self::OPT_DEFAULT] = $column->getDefaultValue();
 		$options[self::OPT_TYPE] = $column->getType();
 		if ($options[self::OPT_TYPE] === PropelTypes::ENUM) {
@@ -116,8 +141,29 @@ abstract class Component {
 			self::OPT_VISIBLE => true,
 			self::OPT_DEFAULT => null,
 			self::OPT_TYPE => null,
-			self::OPT_EXTRA => null
+			self::OPT_EXTRA => null,
+			self::OPT_PROPEL_OBJECT => null,
+			self::OPT_LABEL => null
 		];
+	}
+
+	/**
+	 * Adds an extra component that will be rendered within the context of the current component.
+	 * This also checks the table name of the given component and computes the method to call to get the
+	 * input for the extra component.
+	 * @param Component $component
+	 * @param string $inputIdColumn If there are multiple methods to call on the input (i.e.
+	 * multiple "RelatedBy" methods), then specify the ID column to use.
+	 * @return self
+	 */
+	function addExtraComponent($component, $inputIdColumn = null) {
+		$table = Propel::getDatabaseMap()->getTable($component->getTableName());
+		$propel = 'get' . self::pluralize($table->getPhpName());
+		if ($inputIdColumn) {
+			$propel .= 'RelatedBy' . $table->getColumn($inputIdColumn)->getPhpName();
+		}
+		$this->extraComponents[$propel] = $component;
+		return $this;
 	}
 
 	/**
@@ -201,6 +247,14 @@ abstract class Component {
 			$this->linked[$column] = [];
 		}
 		$this->linked[$column][] = $component;
+
+		//Set the propel method that needs to be called to get input for the linked component.
+		$columnMap = $this->tableMap->getColumn($column);
+		$propel = 'get' . $columnMap->getRelatedTable()->getPhpName();
+		if (!method_exists($this->tableMap->getPhpName(), $propel)) {
+			$propel .= 'By' . $columnMap->getPhpName();
+		}
+		$this->columns[$column][self::OPT_PROPEL_OBJECT] = $propel;
 		return $this;
 	}
 
@@ -258,6 +312,16 @@ abstract class Component {
 	}
 
 	/**
+	 * Sets the labels.
+	 * @param array $columns
+	 * @return this
+	 */
+	function setLabels($columns) {
+		$this->merge($columns, self::OPT_LABEL);
+		return $this;
+	}
+
+	/**
 	 * Applies the $options for each $columns.
 	 * @param array|string $columns If an array, then column names are values. If a string, then
 	 * $columns = [$columns]. If empty, then assumes option applies to all columns.
@@ -275,11 +339,11 @@ abstract class Component {
 		}
 		if (!is_array($options)) {
 			foreach ($columns as $name) {
-				$columns[$name][$options] = $value;
+				$this->columns[$name][$options] = $value;
 			}
 		} else {
 			foreach ($columns as $name) {
-				$columns[$name] = $options;
+				$this->columns[$name] = array_merge($this->columns[$name], $options);
 			}
 		}
 	}
@@ -339,18 +403,40 @@ abstract class Component {
 	}
 
 	/**
-	 * Parses input into an array.
-	 * @param array|ActiveRecordInterface|ActiveRecordInterface[] $input
-	 * @return array
+	 * Renders the extra componenents.
+	 * @param mixed $input
+	 * @return string
 	 */
-	protected function parseInput($input = null) {
-		if (($input instanceof ActiveRecordInterface) ||
-				(is_array($input) && !empty($input) && $input[0] instanceof ActiveRecordInterface)) {
-			return new PropelWrapper($input);
-		} else if (is_array($input)) {
-			return $input;
+	function renderExtra($input = null) {
+		$result = '';
+		foreach ($this->extraComponents as $method => $component) {
+			if ($input instanceof ActiveRecordInterface) {
+				$result .= $component->render($input->$method(), static::class);
+			} else {
+				$result .= $component->render($input, static::class);
+			}
 		}
-		return null;
+		return $result;
+	}
+
+	/**
+	 * Gets a value from input.
+	 * @param string $column
+	 * @param mixed $input
+	 * @return string
+	 */
+	protected function getValueFromInput($column, $input) {
+		if (is_array($input) && isset($input[$column])) {
+			return $input[$column];
+		} else if ($input instanceof ActiveRecordInterface) {
+			$object = $this->columns[$column][self::OPT_PROPEL_OBJECT];
+			if ($object) {
+				return $input->$object();
+			} else {
+				return $input->getByName($column, TableMap::TYPE_FIELDNAME);
+			}
+		}
+		return $this->columns[$column][self::OPT_DEFAULT];
 	}
 
 	/**
@@ -360,6 +446,17 @@ abstract class Component {
 	 */
 	static protected function spaceColumnName($name) {
 		return ucwords(str_replace('_', ' ', $name));
+	}
+
+	/**
+	 * Pluralizes a string using Propel's pluralizer.
+	 * @return string
+	 */
+	static protected function pluralize($string) {
+		if (!isset(self::$pluralizer)) {
+			self::$pluralizer = new StandardEnglishPluralizer();
+		}
+		return self::$pluralizer->getPluralForm($string);
 	}
 
 }
