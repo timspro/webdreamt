@@ -8,8 +8,9 @@ class Select extends Group {
 		parent::__construct($table, 'select', 'option');
 		$this->addCssClass('form-control');
 		$this->setChildHtml(function($value) {
-			if (isset($value['id'])) {
-				return "value='" . $value['id'] . "'";
+			$id = $this->getValueFromInput('id', $value);
+			if ($id) {
+				return "value='$id'";
 			}
 			return '';
 		});

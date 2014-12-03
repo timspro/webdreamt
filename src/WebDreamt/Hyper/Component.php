@@ -2,6 +2,7 @@
 
 namespace WebDreamt\Hyper;
 
+use DateTime;
 use Propel\Common\Pluralizer\StandardEnglishPluralizer;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
@@ -96,6 +97,11 @@ abstract class Component {
 	 * @var array
 	 */
 	protected $input = null;
+	/**
+	 * Indicates whether the labels should be shown.
+	 * @var boolean
+	 */
+	protected $showLabels = true;
 
 	/**
 	 * Constructs a component.
@@ -128,6 +134,11 @@ abstract class Component {
 			$options[self::OPT_EXTRA] = $column->getValueSet();
 		} else {
 			$options[self::OPT_EXTRA] = $column->getSize();
+		}
+
+		if (substr($column->getName(), -2) === 'id') {
+			$remainder = substr($options[self::OPT_LABEL], 0, strlen($options[self::OPT_LABEL]) - 2);
+			$options[self::OPT_LABEL] = $remainder . 'ID';
 		}
 	}
 
@@ -233,6 +244,16 @@ abstract class Component {
 			$array = func_get_args();
 		}
 		$this->classes = array_merge($this->classes, $array);
+		return $this;
+	}
+
+	/**
+	 * Shows or hide labels. Defaults to true.
+	 * @param boolean $labels
+	 * @return self;
+	 */
+	function showLabels($labels = true) {
+		$this->showLabels = $labels;
 		return $this;
 	}
 
@@ -433,7 +454,11 @@ abstract class Component {
 			if ($object) {
 				return $input->$object();
 			} else {
-				return $input->getByName($column, TableMap::TYPE_FIELDNAME);
+				$value = $input->getByName($column, TableMap::TYPE_FIELDNAME);
+				if ($value instanceof DateTime) {
+					return $value->format('Y-m-d H:i:s');
+				}
+				return $value;
 			}
 		}
 		return $this->columns[$column][self::OPT_DEFAULT];

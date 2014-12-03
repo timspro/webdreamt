@@ -2,19 +2,22 @@
 
 namespace WebDreamt\Hyper;
 
+use Propel\Runtime\Map\ColumnMap;
+
 /**
  * A class to easily render a table based on a database table.
  */
 class Table extends Component {
 
-	protected $hideHeaders = false;
 	protected $showRowNumbers = false;
-	protected $tableHtml = 'class="table"';
 	protected $rowNumberHeader = '#';
+	protected $classes = ['table'];
 
 	protected function addColumn(ColumnMap $column, array &$options) {
 		parent::addColumn($column, $options);
-		$options[self::OPT_LABEL] = static::spaceColumnName($column->getPhpName());
+		if ($column->getName() === 'id') {
+			$options[self::OPT_VISIBLE] = false;
+		}
 	}
 
 	/**
@@ -23,15 +26,6 @@ class Table extends Component {
 	 */
 	function showRowNumbers($show = false) {
 		$this->showRowNumbers = $show;
-		return $this;
-	}
-
-	/**
-	 * Sets HTML attributes for the table. You will likely want to include 'class="table"'.
-	 * @param string $html Example: "class='table table-bordered'"
-	 */
-	function setHtml($html = 'class="table"') {
-		$this->html = $html;
 		return $this;
 	}
 
@@ -57,7 +51,7 @@ class Table extends Component {
 		?>
 		<table <?= $this->html ?> class="<?= implode(" ", $this->classes) ?>">
 			<?php
-			if (!$this->hideHeaders) {
+			if ($this->showLabels) {
 				?>
 				<thead>
 					<?php
@@ -70,7 +64,7 @@ class Table extends Component {
 				<?php
 				foreach ($this->columns as $column => $options) {
 					if ($options[self::OPT_ACCESS]) {
-						$visible = ($options[self::OPT_VISIBLE] ? 'style="display:none"' : '');
+						$visible = ($options[self::OPT_VISIBLE] ? '' : 'style="display:none"');
 						?>
 						<th <?= $visible ?>><?= $options[self::OPT_LABEL] ?></th>
 						<?php
@@ -93,21 +87,19 @@ class Table extends Component {
 						<?php
 					}
 					foreach ($this->columns as $column => $options) {
-						$value = $this->columns[$this->display][self::OPT_DEFAULT];
+						$value = $this->getValueFromInput($column, $row);
 						$components = $this->renderLinked($column, $value);
 						if ($components !== null) {
 							$value = $components;
 						}
 						if ($options[self::OPT_ACCESS]) {
-							$visible = ($options[self::OPT_VISIBLE] ? 'style="display:none"' : '');
+							$visible = ($options[self::OPT_VISIBLE] ? '' : 'style="display:none"');
 							?>
-							<td <?= $visible ?>>
-								<?= $value ?>
-							</td>
+							<td <?= $visible ?>><?= $value ?></td>
 							<?php
 						}
 					}
-					$extra = $this->renderExtra($input);
+					$extra = $this->renderExtra($row);
 					if (!empty($extra)) {
 						?>
 						<td><?= $extra ?></td>

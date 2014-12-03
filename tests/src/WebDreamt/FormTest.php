@@ -4,8 +4,11 @@ namespace WebDreamt;
 
 use DOMDocument;
 use PDO;
+use WebDreamt\Hyper\Custom;
 use WebDreamt\Hyper\Form;
+use WebDreamt\Hyper\Group;
 use WebDreamt\Hyper\Select;
+use WebDreamt\Hyper\Table;
 require_once __DIR__ . '/../../bootstrap.php';
 
 class FormTest extends Test {
@@ -22,7 +25,7 @@ class FormTest extends Test {
 		self::$a->filler()->addData([
 			"Job" => 10,
 			"Service" => 10,
-			"ServiceJob" => 5,
+			"ServiceJob" => 30,
 			"Customer" => 10,
 			"Location" => 10,
 			"CustomerLocation" => 5,
@@ -100,9 +103,9 @@ class FormTest extends Test {
 	/**
 	 * @group Form
 	 */
-	public function testExtraForm() {
+	public function testFormExtra() {
 		//Get information about available services.
-		$data = self::$a->db()->query("SELECT id, name FROM service");
+		$data = self::$a->db()->query("SELECT id, name FROM service")->fetchAll(PDO::FETCH_ASSOC);
 		//Set up the job form.
 		$jobForm = new Form('job');
 		//Set up the service job form.
@@ -114,6 +117,68 @@ class FormTest extends Test {
 		//Output
 		$output = $jobForm->render();
 		$this->output('job-form-extra.html', $output);
+	}
+
+	/**
+	 * @group Table
+	 */
+	public function testTable() {
+		//Get job information.
+		$data = self::$a->db()->query("SELECT * FROM job")->fetchAll(PDO::FETCH_ASSOC);
+		//Set up the table.
+		$table = new Table('job');
+		//Output
+		$output = $table->render($data);
+		$this->output('job-table.html', $output);
+	}
+
+	/**
+	 * @group Table
+	 */
+	public function testTableLinked() {
+		//Get job information.
+		//$data = self::$a->db()->query("SELECT * FROM job")->fetchAll(PDO::FETCH_ASSOC);
+		$data = \JobQuery::create()->find();
+		//Set up the table.
+		$table = new Table('job');
+		$table->link('driver_id', new Custom(function(\Driver $driver) {
+			return $driver->getLastName() . ', ' . $driver->getFirstName();
+		}))->link('location_id', new Custom(function(\Location $location) {
+			return $location->getStreetAddress();
+		}))->setLabels(['driver_id' => 'Driver', 'location_id' => 'Location']);
+		//Output
+		$output = $table->render($data);
+		$this->output('job-table-linked.html', $output);
+	}
+
+	/**
+	 * @group Table
+	 */
+	public function testTableExtra() {
+		$data = \JobQuery::create()->find();
+		//Set up the table.
+		$table = new Table('job');
+		$services = new Group('service_job', '', '');
+		$services->setDisplay('service_id')->link('service_id', new Custom(function(\Service $service) {
+			return $service->getName() . '<br />';
+		}));
+		$table->addExtraComponent($services);
+		//Output
+		$output = $table->render($data);
+		$this->output('job-table-extra.html', $output);
+	}
+
+	/**
+	 * @group Table
+	 */
+	public function testTableDeny() {
+		$data = \JobQuery::create()->find();
+		//Set up the table.
+		$table = new Table('job');
+		$table->deny()->allow('id')->show('id')->showLabels(false);
+		//Output
+		$output = $table->render($data);
+		$this->output('job-table-deny.html', $output);
 	}
 
 }

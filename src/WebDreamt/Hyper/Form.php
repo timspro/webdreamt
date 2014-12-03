@@ -34,7 +34,6 @@ class Form extends Component {
 
 	protected function addColumn(ColumnMap $column, array &$options) {
 		parent::addColumn($column, $options);
-		$options[self::OPT_LABEL] = static::spaceColumnName($column->getName());
 		if ($column->getName() === 'id') {
 			$options[self::OPT_VISIBLE] = false;
 		}

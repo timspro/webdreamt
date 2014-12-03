@@ -108,7 +108,7 @@ class Group extends Component {
 			"' $visible>\n";
 		}
 		echo $this->afterOpening;
-		foreach ($input as $index => $value) {
+		foreach ($input as $index => $row) {
 			$id = ($this->childPrefix ? 'id="' . $this->childPrefix . '-' . $index . '"' : '');
 			$startTag = '';
 			$endTag = '';
@@ -116,7 +116,7 @@ class Group extends Component {
 			if ($this->childHtmlTag) {
 				if (is_callable($this->childHtml)) {
 					$function = $this->childHtml;
-					$child = $function($value, $index, $input);
+					$child = $function($row, $index, $input);
 				} else {
 					$child = $this->childHtml;
 				}
@@ -125,17 +125,18 @@ class Group extends Component {
 
 			$middle = '';
 			if (is_string($this->display)) {
+				$value = $this->getValueFromInput($this->display, $row);
 				$components = $this->renderLinked($this->display, $value);
 				if ($components !== null) {
 					$middle = $components;
 				} else {
 					$show = $this->columns[$this->display][self::OPT_ACCESS];
-					$middle = $this->getValueFromInput($this->display, $value);
+					$middle = $value;
 				}
 			} else if ($this->display instanceof Component) {
-				$middle = $this->display->render($value, static::class);
+				$middle = $this->display->render($row, static::class);
 			} else {
-				$middle = $value;
+				$middle = $row;
 			}
 			if ($this->childHtmlTag) {
 				$endTag = '</' . $this->childHtmlTag . '>';
@@ -147,7 +148,7 @@ class Group extends Component {
 				echo $startTag . $middle . $endTag . "\n";
 			}
 
-			echo $this->renderExtra($value);
+			echo $this->renderExtra($row);
 		}
 		if ($this->htmlTag) {
 			echo '</' . $this->htmlTag . ">\n";
