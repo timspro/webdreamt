@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../bootstrap.php';
 class FillerTest extends DatabaseTest {
 
 	/**
-	 * @group Fil
+	 * @group Filler
 	 */
 	public function testAddData() {
 		for ($i = 0; $i < 10; $i++) {

@@ -63,7 +63,7 @@ class EntityPopulator {
 			if ($columnMap->isPrimaryKey()) {
 				continue;
 			}
-			if ($formatter = $nameGuesser->guessFormat($columnMap->getPhpName())) {
+			if ($formatter = $nameGuesser->guessFormat($columnMap->getPhpName(), $columnMap->getType())) {
 				$formatters[$columnMap->getPhpName()] = $formatter;
 				continue;
 			}
