@@ -13,7 +13,7 @@ CREATE TABLE `customer` (
   `company_name` varchar(100) DEFAULT NULL,
   `billing_street_address` varchar(255) DEFAULT NULL,
   `billing_city` varchar(100) DEFAULT NULL,
-  `billing_state` enum('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY') DEFAULT NULL,
+  `billing_state` enum('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY') NOT NULL,
   `billing_zip` int(5) unsigned DEFAULT NULL,
   `customer_add_date` datetime DEFAULT NULL,
   `active` tinyint(1) unsigned DEFAULT NULL,

@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../bootstrap.php';
 class FillerTest extends DatabaseTest {
 
 	/**
-	 * @group Filler
+	 * @group Fil
 	 */
 	public function testAddData() {
 		for ($i = 0; $i < 10; $i++) {
@@ -57,6 +57,9 @@ class FillerTest extends DatabaseTest {
 			"Job" => 20,
 			"Vehicles" => 10
 				], true);
+
+		$states = $this->column('SELECT billing_state FROM customer');
+		$this->assertNotContains('', $states);
 	}
 
 }
