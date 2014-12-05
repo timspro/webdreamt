@@ -477,7 +477,9 @@ class Builder {
 	public static function guarantee(Box $box) {
 		if (filemtime($box->VendorDirectory . "../db/Schemas/schema.xml") >
 				filemtime($box->VendorDirectory . "../db/Propel/schema.xml")) {
+			ob_start();
 			$box->builder()->updateDatabase();
+			ob_get_clean();
 			return true;
 		}
 		return false;
