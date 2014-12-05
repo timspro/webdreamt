@@ -474,9 +474,10 @@ class Builder {
 	 * If not, then returns false.
 	 * @return boolean Indicates if the synchronization was carried out.
 	 */
-	public function guarantee() {
-		if (filemtime($this->UserSchema) > filemtime($this->GeneratedSchema)) {
-			$this->updateDatabase();
+	public static function guarantee(Box $box) {
+		if (filemtime($box->VendorDirectory . "../db/Schemas/schema.xml") >
+				filemtime($box->VendorDirectory . "../db/Propel/schema.xml")) {
+			$box->builder()->updateDatabase();
 			return true;
 		}
 		return false;
