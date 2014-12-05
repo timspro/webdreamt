@@ -2,6 +2,7 @@
 
 namespace WebDreamt;
 
+use Faker\Factory;
 require_once __DIR__ . '/../../bootstrap.php';
 
 class FillerTest extends DatabaseTest {
@@ -17,7 +18,7 @@ class FillerTest extends DatabaseTest {
 
 		self::$build->updatePropel();
 		self::$build->loadAllClasses();
-		self::$a->filler()->addData(["Bigger" => 100]);
+		self::$a->filler()->addData(["bigger" => 100]);
 
 		$this->forTables(function($table) {
 			$this->assertGreaterThan(0, $this->countRows($table));
@@ -43,23 +44,59 @@ class FillerTest extends DatabaseTest {
 		self::$a->db()->exec($sql);
 		self::$build->updatePropel();
 		self::$build->loadAllClasses();
+		$generator = Factory::create();
 		self::$a->filler()->addData([
-			"Job" => 10,
-			"Service" => 10,
-			"ServiceJob" => 5,
-			"Customer" => 10,
-			"Location" => 10,
-			"CustomerLocation" => 5,
-			"Driver" => 10,
-			"Groups" => 0,
-			"Users" => 0,
-			"UsersGroups" => 0,
-			"Job" => 20,
-			"Vehicles" => 10
-				], true);
+			"job" => 10,
+			"service" => 10,
+			"service_job" => 5,
+			"customer" => 10,
+			"location" => 10,
+			"customer_location" => 5,
+			"driver" => 10,
+			"groups" => 0,
+			"users" => 0,
+			"users_groups" => 0,
+			"job" => 20,
+			"vehicles" => 10
+				], true, [
+			"vehicles" => [
+				'mileage_oil_last' => function () use ($generator ) {
+					return $generator->numberBetween(0, 20000);
+				}
+			]
+		]);
+
+		$mileages = $this->column('SELECT mileage_oil_last FROM vehicles');
+		foreach ($mileages as $mileage) {
+			$this->assertLessThan(20000, $mileage);
+		}
 
 		$states = $this->column('SELECT billing_state FROM customer');
 		$this->assertNotContains('', $states);
+	}
+
+	/**
+	 * @group Filler
+	 * @expectedException Exception
+	 */
+	public function testBadTableName() {
+		$this->createTable("bigger");
+
+		self::$build->updatePropel();
+		self::$build->loadAllClasses();
+		self::$a->filler()->addData(["Bigger" => 100]);
+	}
+
+	/**
+	 * @group Filler
+	 * @expectedException Exception
+	 */
+	public function testBadColumnName() {
+		$this->createTable("bigger");
+
+		self::$build->updatePropel();
+		self::$build->loadAllClasses();
+		self::$a->filler()->addData(["bigger" => 100], false, ["bigger" => ["Bigs" => null]]);
 	}
 
 }

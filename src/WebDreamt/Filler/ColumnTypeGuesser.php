@@ -90,7 +90,7 @@ class ColumnTypeGuesser {
 					return $generator->text;
 				};
 			case PropelTypes::CHAR:
-				$valueSet = explode(', ', $column->getSize());
+				$valueSet = $column->getSize();
 				return function () use ($generator, $valueSet) {
 					return $generator->randomElement($valueSet);
 				};

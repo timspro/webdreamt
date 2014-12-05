@@ -181,4 +181,16 @@ class FormTest extends Test {
 		$this->output('job-table-deny.html', $output);
 	}
 
+	/**
+	 * @group Form
+	 */
+	public function testFormEnumSelect() {
+		$data = \LocationQuery::create()->find();
+		//Set up the table.
+		$table = new Form('customer');
+		//Output
+		$output = $table->render($data);
+		$this->output('customer-form-enum.html', $output);
+	}
+
 }

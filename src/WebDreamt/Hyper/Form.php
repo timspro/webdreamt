@@ -160,6 +160,7 @@ class Form extends Component {
 								case PropelTypes::BOOLEAN:
 									$select = ['Yes', 'No'];
 									break;
+								case PropelTypes::CHAR:
 								case PropelTypes::ENUM:
 									$select = $options[self::OPT_EXTRA];
 									break;

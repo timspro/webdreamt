@@ -373,12 +373,7 @@ class Builder {
 		foreach ($markers as $marker) {
 			$values = $marker->getAttribute("sqlType");
 			$values = substr($values, 5, strlen($values) - 1 - 5);
-			$entries = [];
-			foreach (explode(",", $values) as $entry) {
-				$entries[] = substr($entry, 1, strlen($entry) - 1 - 1);
-			}
-			//$marker->setAttribute("type", "ENUM");
-			$marker->setAttribute("size", "'" . implode(", ", $entries) . "'");
+			$marker->setAttribute("size", "[" . $values . "]");
 		}
 
 
