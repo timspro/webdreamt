@@ -25,6 +25,7 @@ class Filler {
 	 * <code>
 	 * function () use ($generator) { return $generator->text; }
 	 * </code>
+	 * where $generator is a \Faker\Factory.
 	 */
 	public function addData($number = [], $only = false, $custom = []) {
 		require_once $this->vendor . "../db/Propel/generated-conf/config.php";

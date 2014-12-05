@@ -261,10 +261,10 @@ class Builder {
 	}
 
 	/**
-	 * updateDatabase() attempts to 1) Diff the status of the database with build.xml (formed from
-	 * combining Schemas/build.xml and valid.xml), 2) Push any migrations created to the database,
-	 * 3) Generate Propel classes. Note that the Propel migration files are deleted after they are
-	 * used.
+	 * updateDatabase() attempts to 1) Diff the status of the database with Propel/schema.xml
+	 * (formed from combining Schemas/schema.xml and valid.xml), 2) Push any migrations created to
+	 * the database, 3) Generate Propel classes. Note that the Propel migration files are deleted
+	 * after they are used.
 	 * @throws Exception If propel command or project directory is not found.
 	 */
 	public function updateDatabase() {
@@ -460,6 +460,26 @@ class Builder {
 				require_once $require;
 			}
 		}
+	}
+
+	/**
+	 * Guarantees that the database has the latest schema changes and, by extension,
+	 * guarantees the consistency of Propel with the database.
+	 *
+	 * Specifically, this compares the generated schema's file's timestamp with the normal schema's
+	 * timestamp. If the generated schema's timestamp is older, then this means that the normal
+	 * schema has been modified without synchronizing those modifications with the database
+	 * (such as the case after a git pull). So, the function will call updateDatabase(), which will
+	 * generate a new schema and update the database from that, and return true.
+	 * If not, then returns false.
+	 * @return boolean Indicates if the synchronization was carried out.
+	 */
+	public function guarantee() {
+		if (filemtime($this->UserSchema) > filemtime($this->GeneratedSchema)) {
+			$this->updateDatabase();
+			return true;
+		}
+		return false;
 	}
 
 }
