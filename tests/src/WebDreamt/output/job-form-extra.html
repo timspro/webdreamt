@@ -1,68 +1,68 @@
 <form class="">
   <input type="hidden" name="5" value="job"/>
   <div class="form-group" style="display:none">
-    <label for="5-job-id">ID</label>
-    <input class="form-control " type="number" name="5-job-id" size="10" value=""/>
+    <label for="5-id">ID</label>
+    <input class="form-control " type="number" name="5-id" size="10" value=""/>
   </div>
   <div class="form-group">
-    <label for="5-job-customer_id">Customer ID</label>
-    <input class="form-control " type="number" name="5-job-customer_id" size="10" value=""/>
+    <label for="5-customer_id">Customer ID</label>
+    <input class="form-control " type="number" name="5-customer_id" size="10" value=""/>
   </div>
   <div class="form-group">
-    <label for="5-job-location_id">Location ID</label>
-    <input class="form-control " type="number" name="5-job-location_id" size="10" value=""/>
+    <label for="5-location_id">Location ID</label>
+    <input class="form-control " type="number" name="5-location_id" size="10" value=""/>
   </div>
   <div class="form-group">
-    <label for="5-job-driver_id">Driver ID</label>
-    <input class="form-control " type="number" name="5-job-driver_id" size="10" value=""/>
+    <label for="5-driver_id">Driver ID</label>
+    <input class="form-control " type="number" name="5-driver_id" size="10" value=""/>
   </div>
   <div class="form-group">
-    <label for="5-job-commission">Commission</label>
-    <input class="form-control " type="number" name="5-job-commission" step="0.01" value=""/>
+    <label for="5-commission">Commission</label>
+    <input class="form-control " type="number" name="5-commission" step="0.01" value=""/>
   </div>
   <div class="form-group">
-    <label for="5-job-completed_at">Completed At</label>
-    <input class="form-control datetime-control" type="text" name="5-job-completed_at" value=""/>
+    <label for="5-completed_at">Completed At</label>
+    <input class="form-control datetime-control" type="text" name="5-completed_at" value=""/>
   </div>
   <div class="wd-subform ">
     <input type="hidden" name="6" value="service_job"/>
     <div class="form-group">
-      <label for="6-service_job-service_id">Select Service</label>
-      <select name="6-service_job-service_id" size="" value="" class="form-control">
+      <label for="6-service_id">Select Service</label>
+      <select name="6-service_id" size="" value="" class="form-control">
         <option value="" disabled="" selected=""/>
-        <option value="1">Perspiciatis</option>
-        <option value="2">Nemo Sunt</option>
-        <option value="3">Sunt Quis</option>
-        <option value="4">At Dolores</option>
-        <option value="5">Quia Aliquid</option>
-        <option value="6">Voluptatem</option>
-        <option value="7">Eveniet</option>
-        <option value="8">Vel Hic Quo Saepe Quia</option>
-        <option value="9">Repudiandae</option>
-        <option value="10">Quos</option>
+        <option value="1">Repellendus Quae</option>
+        <option value="2">Incidunt</option>
+        <option value="3">Itaque Et</option>
+        <option value="4">Sed Assumenda</option>
+        <option value="5">Et Aut</option>
+        <option value="6">Accusamus Quia Cum Soluta</option>
+        <option value="7">Aut Qui Quidem Aliquid</option>
+        <option value="8">Qui Et Ut Ipsa Animi</option>
+        <option value="9">Tenetur Sequi</option>
+        <option value="10">Id Eum Quis Eum</option>
       </select>
     </div>
     <div class="wd-subform ">
       <input type="hidden" name="7" value="service"/>
       <div class="form-group" style="display:none">
-        <label for="7-service-id">ID</label>
-        <input class="form-control " type="number" name="7-service-id" size="" value=""/>
+        <label for="7-id">ID</label>
+        <input class="form-control " type="number" name="7-id" size="" value=""/>
       </div>
       <div class="form-group">
-        <label for="7-service-name">Name</label>
-        <input class="form-control " type="text" name="7-service-name" size="100" value=""/>
+        <label for="7-name">Name</label>
+        <input class="form-control " type="text" name="7-name" size="100" value=""/>
       </div>
       <div class="form-group">
-        <label for="7-service-description">Description</label>
-        <textarea class="form-control " name="7-service-description" size="255" value=""/>
+        <label for="7-description">Description</label>
+        <textarea class="form-control " name="7-description" size="255" value=""/>
       </div>
       <div class="form-group">
-        <label for="7-service-price">Price</label>
-        <input class="form-control " type="number" name="7-service-price" step="0.01" value=""/>
+        <label for="7-price">Price</label>
+        <input class="form-control " type="number" name="7-price" step="0.01" value=""/>
       </div>
       <div class="form-group">
-        <label for="7-service-active">Active</label>
-        <select name="7-service-active" value="1">
+        <label for="7-active">Active</label>
+        <select name="7-active" value="1">
           <option>Yes</option>
           <option>No</option>
         </select>
@@ -71,4 +71,5 @@
     <button type="button" class="btn btn-default">Add Another</button>
   </div>
   <button type="submit" class="btn btn-default">Submit</button>
+  <input type="hidden" class="next-form-id" value="8"/>
 </form>

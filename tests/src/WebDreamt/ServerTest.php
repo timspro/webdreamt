@@ -61,9 +61,9 @@ class ServerTest extends Test {
 		]);
 		$user->addGroup($sentry->findGroupByName('User'));
 		self::$server = self::$a->server();
-		self::$server->addAction('Administrator', 'driver', 'create');
-		self::$server->addAction('Administrator', 'driver', 'update');
-		self::$server->addAction('Administrator', 'driver', 'delete');
+		self::$server->allow('Administrator', 'driver', 'create');
+		self::$server->allow('Administrator', 'driver', 'update');
+		self::$server->allow('Administrator', 'driver', 'delete');
 	}
 
 	public static function tearDownAfterClass() {

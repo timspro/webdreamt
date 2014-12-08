@@ -124,7 +124,7 @@ class Form extends Component {
 						}
 
 						if ($components === null || $selectComponent !== null) {
-							$name = $count . "-" . $this->tableName . "-" . $column;
+							$name = $count . "-" . $column;
 							$label = ($selectComponent ?
 											'Select ' . static::spaceColumnName($selectComponent->getTableName()) :
 											$options[self::OPT_LABEL]);
@@ -232,6 +232,7 @@ class Form extends Component {
 			} else {
 				?>
 				<button type="submit" class="btn btn-default">Submit</button>
+				<input type='hidden' class='next-form-id' value='<?= static::$count + 1 ?>' />
 			</form>
 			<?php
 		}

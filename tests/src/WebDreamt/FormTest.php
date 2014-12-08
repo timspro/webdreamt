@@ -23,18 +23,17 @@ class FormTest extends Test {
 		self::$build->updatePropel();
 		self::$build->loadAllClasses();
 		self::$a->filler()->addData([
-			"Job" => 10,
-			"Service" => 10,
-			"ServiceJob" => 30,
-			"Customer" => 10,
-			"Location" => 10,
-			"CustomerLocation" => 5,
-			"Driver" => 10,
-			"Groups" => 0,
-			"Users" => 0,
-			"UsersGroups" => 0,
-			"Job" => 20,
-			"Vehicles" => 10
+			"service" => 10,
+			"service_job" => 30,
+			"customer" => 10,
+			"location" => 10,
+			"customer_location" => 5,
+			"driver" => 10,
+			"groups" => 0,
+			"users" => 0,
+			"users_groups" => 0,
+			"job" => 20,
+			"vehicles" => 10
 				], true);
 	}
 

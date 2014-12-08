@@ -10,3 +10,5 @@ new JobForm('job');
 //Better support for labels
 //Order
 //Alias
+//CSRF protection
+//Default group support.

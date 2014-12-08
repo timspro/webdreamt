@@ -42,6 +42,7 @@ class Filler {
 		}
 
 		$map = Propel::getDatabaseMap();
+		$tables = $map->getTables();
 		$numberConverted = [];
 		$customConverted = [];
 		foreach ($number as $tableName => $value) {
