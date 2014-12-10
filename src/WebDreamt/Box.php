@@ -6,13 +6,16 @@ use Cartalyst\Sentry\Facades\Native\Sentry as SentryNative;
 use Cartalyst\Sentry\Sentry as Sentry;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use PDO;
-use WebDreamt\Box\Store;
 
 /**
  * A class to store objects that are configured via constant values or expression.
  */
-class Box extends Store {
+class Box {
 
+	/**
+	 * @var Box
+	 */
+	static private $box;
 	public $DatabaseHost = "localhost";
 	public $DatabaseName = "";
 	public $DatabaseUsername = "root";
@@ -23,10 +26,11 @@ class Box extends Store {
 	 * Constructs a Box.
 	 */
 	function __construct() {
-		parent::__construct();
-
 		$this->VendorDirectory = (\file_exists(__DIR__ . '/../../vendor/') ?
 						__DIR__ . '/../../vendor/' : __DIR__ . '/../../../../');
+		if (!self::$box) {
+			self::$box = $this;
+		}
 	}
 
 	/**
@@ -124,11 +128,25 @@ class Box extends Store {
 	}
 
 	/**
+	 * Checks to see if the property is defined. If not, then will use the initializer to construct
+	 * one.
+	 * @param string $name The property name
+	 * @param callable $initializer The function to use for initialization
+	 * @return mixed
+	 */
+	protected function factory($name, callable $initializer) {
+		if (!isset($this->$name)) {
+			$this->$name = $initializer();
+		}
+		return $this->$name;
+	}
+
+	/**
 	 * Get an instance of Box.
 	 * @return Box
 	 */
 	public static function a() {
-		return parent::a();
+		return self::$box;
 	}
 
 }

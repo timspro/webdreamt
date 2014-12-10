@@ -61,9 +61,7 @@ class ServerTest extends Test {
 		]);
 		$user->addGroup($sentry->findGroupByName('User'));
 		self::$server = self::$a->server();
-		self::$server->allow('Administrator', 'driver', 'create');
-		self::$server->allow('Administrator', 'driver', 'update');
-		self::$server->allow('Administrator', 'driver', 'delete');
+		self::$server->allow('Administrator', ['driver', 'location'], ['create', 'update', 'delete']);
 	}
 
 	public static function tearDownAfterClass() {
@@ -77,7 +75,7 @@ class ServerTest extends Test {
 	}
 
 	protected function tearDown() {
-
+		$this->truncateTables(["driver", "location"]);
 	}
 
 	/**
@@ -146,6 +144,53 @@ class ServerTest extends Test {
 		self::$server->run('driver', 'delete', [
 			'id' => '1'
 		]);
+	}
+
+	/**
+	 * @group Server
+	 */
+	public function testBatch() {
+		self::$sentry->authenticate([
+			'email' => 'admin@email.com',
+			'password' => 'test'
+		]);
+
+		self::$server->batch([
+			"1" => 'driver',
+			"1-first_name" => "Johnny",
+			"1-last_name" => "Smith",
+			"1-salary" => '10000.50',
+			"2" => 'driver',
+			"2-first_name" => "Alex",
+			"2-last_name" => "Smith",
+			"2-salary" => '20000.50',
+			'3' => 'location',
+			'3-city' => 'Richmond',
+			'3-state' => 'Virginia',
+			'3-zip' => '10000',
+			'3-street_address' => 'A Road'
+		]);
+
+		$data = $this->all('SELECT id, salary FROM driver ORDER BY salary');
+		$id = $data[0]['id'];
+		$this->assertEquals('10000.50', $data[0]['salary']);
+		$this->assertEquals('20000.50', $data[1]['salary']);
+
+		self::$server->batch([
+			"4" => 'location',
+			"4-city" => 'Richmond',
+			"4-state" => 'California',
+			'4-zip' => "20000",
+			'4-street_address' => 'Monkey Lane',
+			'5' => 'driver',
+			'5-id' => $id,
+			'5-first_name' => 'James',
+			'5-last_name' => "Monroe",
+			'5-salary' => '30000.50'
+		]);
+
+		$this->is('SELECT salary FROM driver WHERE id = ' . $id, '30000.50');
+		$this->assertEquals(2, $this->countRows('location'));
 	}
 
 }

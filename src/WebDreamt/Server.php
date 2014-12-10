@@ -202,9 +202,9 @@ class Server {
 
 	/**
 	 * Allows an action for a certain group.
-	 * @param string $groupName
-	 * @param string $tableName
-	 * @param string $action
+	 * @param string|array $groupName
+	 * @param string|array $tableName
+	 * @param string|array $action
 	 * @param array $columns
 	 */
 	function allow($groupName, $tableName, $action, $columns = null) {
@@ -213,9 +213,9 @@ class Server {
 
 	/**
 	 * Denies an action for a certain group.
-	 * @param string $groupName
-	 * @param string $tableName
-	 * @param string $action
+	 * @param string|array $groupName
+	 * @param string|array $tableName
+	 * @param string|array $action
 	 * @param array $columns
 	 */
 	function deny($groupName, $tableName, $action, $columns = null) {
@@ -224,44 +224,62 @@ class Server {
 
 	/**
 	 * Allows or denies an action depending on the value of $permission.
-	 * @param string $groupName
+	 * @param string|array $groupNames
 	 * @param int $permission
-	 * @param string $tableName
-	 * @param string $action
+	 * @param string|array $tableNames
+	 * @param string|array $actions
 	 * @param array $columns
 	 * @throws Exception If the requested group is not found.
 	 */
-	protected function codify($groupName, $permission, $tableName, $action, $columns = null) {
-		$group = $this->sentry->findGroupByName($groupName);
-		if (!$group) {
-			throw Exception("Requested group is not found.");
+	protected function codify($groupNames, $permission, $tableNames, $actions, $columns = null) {
+		//Coerce into an array.
+		if (!is_array($groupNames)) {
+			$groupNames = [$groupNames];
 		}
-		//Allow the action.
-		if ($permission === 1) {
-			$permissions = [];
-			//Allow in general.
-			if (empty($columns) || $action === self::ACT_DELETE) {
-				$permissions["api/$tableName/$action"] = 1;
-			} else {
-				//Allow for given columns.
-				foreach ($columns as $column) {
-					$permissions["api/$tableName/$action/$column"] = 1;
+		if (!is_array($tableNames)) {
+			$tableNames = [$tableNames];
+		}
+		if (!is_array($actions)) {
+			$actions = [$actions];
+		}
+
+		foreach ($groupNames as $groupName) {
+			foreach ($tableNames as $tableName) {
+				foreach ($actions as $action) {
+					//Get the group.
+					$group = $this->sentry->findGroupByName($groupName);
+					if (!$group) {
+						throw Exception("Requested group is not found.");
+					}
+					//Allow the action.
+					if ($permission === 1) {
+						$permissions = [];
+						//Allow in general.
+						if (empty($columns) || $action === self::ACT_DELETE) {
+							$permissions["api/$tableName/$action"] = 1;
+						} else {
+							//Allow for given columns.
+							foreach ($columns as $column) {
+								$permissions["api/$tableName/$action/$column"] = 1;
+							}
+						}
+						$group->permissions = array_merge($group->permissions, $permissions);
+						//Deny the action.
+					} else if ($permission === -1) {
+						//Deny in general.
+						if (empty($columns) || $action === self::ACT_DELETE) {
+							unset($permissions["api/$tableName/$action"]);
+						} else {
+							//Deny for given columns.
+							foreach ($columns as $column) {
+								unset($permissions["api/$tableName/$action/$column"]);
+							}
+						}
+					}
+					$group->save();
 				}
 			}
-			$group->permissions = array_merge($group->permissions, $permissions);
-			//Deny the action.
-		} else if ($permission === -1) {
-			//Deny in general.
-			if (empty($columns) || $action === self::ACT_DELETE) {
-				unset($permissions["api/$tableName/$action"]);
-			} else {
-				//Deny for given columns.
-				foreach ($columns as $column) {
-					unset($permissions["api/$tableName/$action/$column"]);
-				}
-			}
 		}
-		$group->save();
 	}
 
 }
