@@ -2,6 +2,8 @@
 
 namespace WebDreamt\Test;
 
+use WebDreamt\Builder;
+
 class DatabaseTest extends Test {
 
 	/** @var Builder */

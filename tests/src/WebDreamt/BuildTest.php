@@ -6,7 +6,7 @@ use DirectoryIterator;
 use WebDreamt\Test\DatabaseTest;
 require_once __DIR__ . '/../../bootstrap.php';
 
-class Build1Test extends DatabaseTest {
+class BuildTest extends DatabaseTest {
 
 	protected static $baseDir;
 
@@ -36,8 +36,8 @@ class Build1Test extends DatabaseTest {
 		}
 		$this->assertEquals(6, $count);
 		$file = file_get_contents(self::$build->BuildSchema);
-		preg_match('/valueSet="([^\"]*)"/', $file, $check);
-		$this->assertEquals("male, female", $check[1]);
+		preg_match('/size="\[([^\"]*)\]"/', $file, $check);
+		$this->assertEquals("'male','female'", $check[1]);
 	}
 
 	/**

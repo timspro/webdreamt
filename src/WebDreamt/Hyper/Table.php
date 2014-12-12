@@ -43,7 +43,7 @@ class Table extends Component {
 	 * @param string $included The class name of the component that is calling render. Null
 	 * if not being called from a component.
 	 */
-	function render($input = null, $included = null) {
+	function render($input = [], $included = null) {
 		ob_start();
 		if ($this->input) {
 			$input = $this->input;

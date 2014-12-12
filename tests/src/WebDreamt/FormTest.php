@@ -172,11 +172,12 @@ class FormTest extends Test {
 	 * @group Table
 	 */
 	public function testTableDeny() {
+		$data = \JobQuery::create()->find();
 		//Set up the table.
 		$table = new Table('job');
 		$table->deny()->allow('id')->show('id')->showLabels(false);
 		//Output
-		$output = $table->render();
+		$output = $table->render($data);
 		$this->output('job-table-deny.html', $output);
 	}
 
@@ -203,7 +204,7 @@ class FormTest extends Test {
 	}
 
 	/**
-	 * @group FormEdit
+	 * @group Form
 	 */
 	public function testFormEditLinked() {
 		$data = \JobQuery::create()->find();

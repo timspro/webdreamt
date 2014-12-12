@@ -4,6 +4,7 @@ namespace WebDreamt\Test;
 
 use PDO;
 use PHPUnit_Framework_TestCase;
+use WebDreamt\Box;
 
 abstract class Test extends PHPUnit_Framework_TestCase {
 

@@ -22,7 +22,7 @@ class ServerTest extends Test {
 		self::$build = self::$a->builder();
 		$build = self::$build;
 		$build->updatePropel();
-		require_once __DIR__ . "/../../../db/Propel/generated-conf/config.php";
+		require_once __DIR__ . "/../../../db/propel/generated-conf/config.php";
 		$build->loadAllClasses();
 		/*
 		  self::$a->filler()->addData([

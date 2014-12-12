@@ -1,9 +1,10 @@
 <?php
-use Faker\Factory;
-use WebDreamt\Test\DatabaseTest;
 
 namespace WebDreamt;
 
+use Exception;
+use Faker\Factory;
+use WebDreamt\Test\DatabaseTest;
 require_once __DIR__ . '/../../bootstrap.php';
 
 class FillerTest extends DatabaseTest {

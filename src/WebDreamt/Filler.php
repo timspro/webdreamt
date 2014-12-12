@@ -28,7 +28,7 @@ class Filler {
 	 * where $generator is a \Faker\Factory.
 	 */
 	public function addData($number = [], $only = false, $custom = []) {
-		require_once $this->vendor . "../db/Propel/generated-conf/config.php";
+		require_once $this->vendor . "../db/propel/generated-conf/config.php";
 
 		$generator = Factory::create();
 		$populator = new Populator($generator);
@@ -36,7 +36,7 @@ class Filler {
 		$constraints = [];
 		$names = [];
 
-		$mapDirectory = $this->vendor . "../db/Propel/generated-classes/Map/";
+		$mapDirectory = $this->vendor . "../db/propel/generated-classes/Map/";
 		foreach (array_diff(scandir($mapDirectory), array('..', '.')) as $file) {
 			require_once $mapDirectory . $file;
 		}
