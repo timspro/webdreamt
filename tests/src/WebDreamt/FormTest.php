@@ -9,6 +9,7 @@ use WebDreamt\Hyper\Form;
 use WebDreamt\Hyper\Group;
 use WebDreamt\Hyper\Select;
 use WebDreamt\Hyper\Table;
+use WebDreamt\Test\Test;
 require_once __DIR__ . '/../../bootstrap.php';
 
 class FormTest extends Test {
@@ -171,12 +172,11 @@ class FormTest extends Test {
 	 * @group Table
 	 */
 	public function testTableDeny() {
-		$data = \JobQuery::create()->find();
 		//Set up the table.
 		$table = new Table('job');
 		$table->deny()->allow('id')->show('id')->showLabels(false);
 		//Output
-		$output = $table->render($data);
+		$output = $table->render();
 		$this->output('job-table-deny.html', $output);
 	}
 
@@ -184,12 +184,34 @@ class FormTest extends Test {
 	 * @group Form
 	 */
 	public function testFormEnumSelect() {
-		$data = \LocationQuery::create()->find();
 		//Set up the table.
 		$table = new Form('customer');
 		//Output
-		$output = $table->render($data);
+		$output = $table->render();
 		$this->output('customer-form-enum.html', $output);
+	}
+
+	/**
+	 * @group Form
+	 */
+	public function testFormEdit() {
+		$data = \CustomerQuery::create()->find();
+		$form = new Form('customer');
+		//Output
+		$output = $form->render($data[0]);
+		$this->output('customer-form-edit.html', $output);
+	}
+
+	/**
+	 * @group FormEdit
+	 */
+	public function testFormEditLinked() {
+		$data = \JobQuery::create()->find();
+		$form = new Form('job');
+		$form->link('customer_id', new Form('customer'));
+		//Output
+		$output = $form->render($data[0]);
+		$this->output('job-form-edit-linked.html', $output);
 	}
 
 }

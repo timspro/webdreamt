@@ -2,6 +2,7 @@
 
 namespace WebDreamt;
 
+use WebDreamt\Test\Test;
 require_once __DIR__ . '/../../bootstrap.php';
 
 class BoxTest extends Test {

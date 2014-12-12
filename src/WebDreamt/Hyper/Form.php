@@ -118,7 +118,7 @@ class Form extends Component {
 								if ($component instanceof Select) {
 									$selectComponent = $component;
 								} else {
-									$components .= $component->render($input, static::class);
+									$components .= $component->render($value, static::class);
 								}
 							}
 						}
@@ -158,6 +158,11 @@ class Form extends Component {
 									$extra = 'step="0.01"';
 									break;
 								case PropelTypes::BOOLEAN:
+									if ($value) {
+										$value = 'Yes';
+									} else {
+										$value = 'No';
+									}
 									$select = ['Yes', 'No'];
 									break;
 								case PropelTypes::CHAR:

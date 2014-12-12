@@ -1,6 +1,6 @@
 <?php
 
-namespace WebDreamt;
+namespace WebDreamt\Test;
 
 use PDO;
 use PHPUnit_Framework_TestCase;

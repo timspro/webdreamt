@@ -61,9 +61,9 @@ class Builder {
 		$this->Vendor = $box->VendorDirectory;
 
 		$this->DB = $this->Vendor . "../db/";
-		$this->PropelProject = $this->Vendor . "../db/Propel/";
+		$this->PropelProject = $this->Vendor . "../db/propel/";
 		$this->PropelPHP = $this->PropelProject . "propel.php";
-		$this->Schemas = $this->Vendor . "../db/Schemas/";
+		$this->Schemas = $this->Vendor . "../db/schemas/";
 		$this->UserSchema = $this->Schemas . "schema.xml";
 		$this->ValidSchema = $this->Schemas . "validation.xml";
 		$this->BuildSchema = $this->PropelProject . "schema.xml";
@@ -262,7 +262,7 @@ class Builder {
 
 	/**
 	 * updateDatabase() attempts to 1) Diff the status of the database with Propel/schema.xml
-	 * (formed from combining Schemas/schema.xml and valid.xml), 2) Push any migrations created to
+	 * (formed from combining schemas/schema.xml and valid.xml), 2) Push any migrations created to
 	 * the database, 3) Generate Propel classes. Note that the Propel migration files are deleted
 	 * after they are used.
 	 * @throws Exception If propel command or project directory is not found.
@@ -289,7 +289,7 @@ class Builder {
 
 	/**
 	 * Generates the models for Propel.
-	 * @throws Exception If Propel/schema.xml is not found.
+	 * @throws Exception If propel/schema.xml is not found.
 	 */
 	private function generateModels() {
 		$build = $this->BuildSchema;
@@ -305,7 +305,7 @@ class Builder {
 	}
 
 	/**
-	 * Merges valid.xml and schema.xml in Schema directory to create Propel/schema.xml
+	 * Merges valid.xml and schema.xml in Schema directory to create propel/schema.xml
 	 * Note this is also where a table is determined if it it should have isCrossRef="true".
 	 * For this to occur, there needs to be two foreign keys that are part of the primary key.
 	 * @throws Exception If user or valid schema is not found.
@@ -475,8 +475,8 @@ class Builder {
 	 * @return boolean Indicates if the synchronization was carried out.
 	 */
 	public static function guarantee(Box $box) {
-		if (filemtime($box->VendorDirectory . "../db/Schemas/schema.xml") >
-				filemtime($box->VendorDirectory . "../db/Propel/schema.xml")) {
+		if (filemtime($box->VendorDirectory . "../db/schemas/schema.xml") >
+				filemtime($box->VendorDirectory . "../db/propel/schema.xml")) {
 			ob_start();
 			$box->builder()->updateDatabase();
 			ob_get_clean();

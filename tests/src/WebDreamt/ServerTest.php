@@ -3,6 +3,7 @@
 namespace WebDreamt;
 
 use Cartalyst\Sentry\Sentry;
+use WebDreamt\Test\Test;
 require_once __DIR__ . '/../../bootstrap.php';
 
 class ServerTest extends Test {

@@ -1,6 +1,6 @@
 <?php
 
-namespace WebDreamt;
+namespace WebDreamt\Test;
 
 class DatabaseTest extends Test {
 

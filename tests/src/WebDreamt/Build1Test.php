@@ -2,6 +2,8 @@
 
 namespace WebDreamt;
 
+use DirectoryIterator;
+use WebDreamt\Test\DatabaseTest;
 require_once __DIR__ . '/../../bootstrap.php';
 
 class Build1Test extends DatabaseTest {
@@ -25,7 +27,7 @@ class Build1Test extends DatabaseTest {
 		$this->createTable();
 		$this->createTable();
 		self::$build->updatePropel();
-		$dir = new \DirectoryIterator(self::$build->GeneratedClasses);
+		$dir = new DirectoryIterator(self::$build->GeneratedClasses);
 		$count = 0;
 		foreach ($dir as $file) {
 			if ($file->isFile()) {

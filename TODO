@@ -1,2 +1,32 @@
 Are scripts secure enough?
 Is setting database information via directly editing Box.php a good idea?
+
+class JobForm extends Form {
+
+}
+
+new JobForm('job');
+
+//Required
+//Better support for labels
+//Order
+//Alias
+//CSRF protection
+//Default group support.
+//How would you do a login form?
+//Search Component
+//Form viewer
+//Integrate Select2.js/Chosen with form component
+
+//Grunt?
+
+Outline for Eventual Layout:
+Different modules of Web Dreamt should be in their own composer projects.
+This might be divided up as follows:
+Server/Authentication/Authorization
+Filler
+Builder
+Hyper (Cache)
+Box/Common Functions/Classes
+
+Furthermore, additional, experimental code can be in its own private repository.
