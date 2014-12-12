@@ -1,6 +1,6 @@
 <?php
 
-namespace WebDreamt;
+namespace WebDreamt\X;
 
 //Check permissions.
 class Router {

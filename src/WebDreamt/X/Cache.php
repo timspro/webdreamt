@@ -1,6 +1,6 @@
 <?php
 
-namespace WebDreamt;
+namespace WebDreamt\X;
 
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Propel;
