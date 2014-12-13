@@ -1,6 +1,6 @@
 <?php
 
-namespace WebDreamt;
+namespace WebDreamt\Extra;
 
 class Select {
 

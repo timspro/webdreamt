@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../../vendor/autoload.php';
 use WebDreamt\Box;
 $box = new Box(false);
 umask(0);
