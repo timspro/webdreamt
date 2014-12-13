@@ -15,7 +15,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	private $id = 0;
 
 	public static function setUpBeforeClass() {
-		static::$a = new Box;
+		static::$a = new Box(false);
 		static::$db = static::$a->db();
 		static::$db->exec("CREATE DATABASE IF NOT EXISTS test; USE test");
 		static::$a->DatabaseName = "test";

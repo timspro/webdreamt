@@ -1,0 +1,42 @@
+{
+	"name": "webdreamt",
+	"authors": [
+		"Tim Sprowl <tim.spr@gmail.com>"
+	],
+	"version": "0.0",
+	"dependencies": {
+		"jquery": ">=1.9",
+		"bootstrap": ">=3.0",
+		"select2": ">=3.0",
+		"select2-bootstrap-css": ">=1.4",
+		"eonasdan-bootstrap-datetimepicker": ">=3.0"
+	},
+	"main": [
+		"js/webdreamt.js",
+		"css/webdreamt.css"
+	],
+	"install": {
+		"path": {
+			"css": "css",
+			"less": "less",
+			"gif": "img",
+			"jpeg": "img",
+			"jpg": "img",
+			"bmp": "img",
+			"png": "img",
+			"tff": "img",
+			"tiff": "img",
+			"js": "js",
+			"eot": "fonts",
+			"svg": "fonts",
+			"ttf": "fonts",
+			"woff": "fonts"
+		}
+	},
+	"ignore": [
+		"./!(webdreamt.js|webdreamt.css)"
+	],
+	"description": "The JavaScript and CSS files for WebDreamt",
+	"license": "Please contact me.",
+	"private": true
+}

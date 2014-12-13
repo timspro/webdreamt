@@ -4,3 +4,12 @@
 /nbproject/
 /src/WebDreamt/Propel/propel.php
 /db/Propel/propel.php
+/fonts/
+/db/
+/bower_components/
+/less/
+/img/
+js/*
+!js/webdreamt.js
+css/*
+!css/webdreamt.css

@@ -24,12 +24,17 @@ class Box {
 
 	/**
 	 * Constructs a Box.
+	 * @param boolean $guarantee If true, then calls Builder::guarantee which helps to maintain
+	 * consistency between the Propel and the database. Defaults to true.
 	 */
-	function __construct() {
+	function __construct($guarantee = true) {
 		$this->VendorDirectory = (\file_exists(__DIR__ . '/../../vendor/') ?
 						__DIR__ . '/../../vendor/' : __DIR__ . '/../../../../');
 		if (!self::$box) {
 			self::$box = $this;
+		}
+		if ($guarantee) {
+			Builder::guarantee($this);
 		}
 	}
 
@@ -115,6 +120,10 @@ class Box {
 		return $this->factory(__FUNCTION__, function() {
 					return new Router($this);
 				});
+	}
+
+	function javascript() {
+
 	}
 
 	/**
