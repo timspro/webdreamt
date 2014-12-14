@@ -3,7 +3,7 @@
 	"authors": [
 		"Tim Sprowl <tim.spr@gmail.com>"
 	],
-	"version": "0.0",
+	"version": "0.0.0",
 	"dependencies": {
 		"jquery": ">=1.9",
 		"bootstrap": ">=3.0",

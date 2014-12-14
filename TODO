@@ -18,7 +18,7 @@ new JobForm('job');
 //Form viewer
 //Integrate Select2.js/Chosen with form component
 
-//Grunt?
+//Grunt? Yeah make task to get results from bower-install and combine them into minified css and js files.
 
 Outline for Eventual Layout:
 Different modules of Web Dreamt should be in their own composer projects.
@@ -33,3 +33,5 @@ Furthermore, additional, experimental code can be in its own private repository.
 
 Rethink Filler
 Rethink Authorization
+
+Change index.php into a router to scripts/forms with test DB information.

@@ -57,7 +57,7 @@ if (isset($_GET['script'])) {
   </head>
 	<body style="background-color: #e3e3e3; padding: 50px;">
 		<div><?= $error ?></div>
-		<div class="panel panel-default" style="max-width: 500px; margin: 20px auto 0 auto; padding: 15px">
+		<div class="panel panel-default" style="max-width: 500px; margin: 40px auto 0 auto; padding: 15px">
 			<form method="get" role="form">
 				<div class="form-group">
 					<label for="option">Option: </label>
