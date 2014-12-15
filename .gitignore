@@ -15,5 +15,3 @@ css/*
 !css/webdreamt.css
 /node_modules/
 dist/*
-!dist/build.min.css
-!dist/build.min.js
