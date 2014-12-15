@@ -122,10 +122,6 @@ class Box {
 				});
 	}
 
-	function javascript() {
-
-	}
-
 	/**
 	 * Gets the web root URL.
 	 * @return string
@@ -156,6 +152,34 @@ class Box {
 	 */
 	public static function a() {
 		return self::$box;
+	}
+
+	/**
+	 * Echoes an HTML footer. Defaults to script tags and closing html and closing body tags.
+	 * @return string
+	 */
+	public function footer() {
+		return '
+		<script src="' . $this->root() . '/dist/build.js"></script>
+		</body>
+		</html>';
+	}
+
+	/**
+	 * Returns an HTML header. Defaults to opening html and body tags and a complete head.
+	 * @return string
+	 */
+	public function header() {
+		return '
+			<html lang="en">
+			<head>
+				<meta charset="utf-8">
+				<meta http-equiv="X-UA-Compatible" content="IE=edge">
+				<meta name="viewport" content="width=device-width, initial-scale=1">
+				<title>WebDreamt</title>
+				<link href="' . $this->root() . '/dist/build.min.css" rel="stylesheet">
+			</head>
+			<body style="background-color: #e3e3e3; padding: 50px;">';
 	}
 
 }
