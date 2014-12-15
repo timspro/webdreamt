@@ -6,7 +6,7 @@ class Script {
 
 	/**
 	 * Constructs an instance of the Script class.
-	 * @param Box $box
+	 * @param Box $box All methods except push() need a $box to be declared.
 	 */
 	function __construct($box) {
 
