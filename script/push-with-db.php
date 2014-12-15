@@ -1,7 +1,14 @@
 <?php
-require_once __DIR__ . '/../../../vendor/autoload.php';
+//This may be included from somewhere else.
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+	require_once __DIR__ . '/../vendor/autoload.php';
+}
 use WebDreamt\Box;
-$box = new Box(false);
+$box = Box::a();
+if (!$box) {
+	echo "Could not find a Box!";
+	return;
+}
 umask(0);
 $root = $box->VendorDirectory . "../";
 chdir($root);
@@ -17,7 +24,5 @@ chdir($root);
 echo shell_exec("composer dumpautoload 2>&1");
 echo "Deleting data\n";
 $box->builder()->deleteData();
-$data = require_once __DIR__ . '/data/amount.php';
-$custom = require_once __DIR__ . '/data/custom.php';
 echo "Adding data\n";
-$box->filler()->addData($data, false, $custom);
+$box->filler()->addData();

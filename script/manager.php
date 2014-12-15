@@ -1,13 +1,17 @@
 <?php
 use WebDreamt\Box;
 use WebDreamt\Extra\Select;
-require_once __DIR__ . '/../../../vendor/autoload.php';
+//This may be included from somewhere else.
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+	require_once __DIR__ . '/../vendor/autoload.php';
+}
 $error = "";
 $box = Box::a();
 if (!$box) {
 	$box = new Box(false);
+	echo "Could not find a Box! <br>";
 }
-if (isset($_GET['script'])) {
+if (!empty($error) && isset($_GET['script'])) {
 	$select = new Select($_GET['script']);
 	try {
 		echo "Trying to: " . $_GET['script'] . "<br>";
@@ -21,11 +25,10 @@ if (isset($_GET['script'])) {
 			$box->builder()->addSchemas();
 		} else if ($_GET['script'] === "fill-database") {
 			$okay = 0;
-			$data = require_once __DIR__ . '/data/amount.php';
-			$custom = require_once __DIR__ . '/data/custom.php';
+			//This loop probably isn't necessary, but it guards against any strange bugs.
 			while ($okay < 10) {
 				try {
-					$box->filler()->addData($data, false, $custom);
+					$box->filler()->addData();
 					$okay = 100;
 				} catch (Exception $e) {
 					$okay++;

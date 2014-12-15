@@ -1,6 +1,10 @@
 <?php
-require_once __DIR__ . '/../../../vendor/autoload.php';
+//This may be included from somewhere else.
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+	require_once __DIR__ . '/../vendor/autoload.php';
+}
 use WebDreamt\Box;
+//Note that there is no reason we need a custom Box here.
 $box = new Box(false);
 umask(0);
 $root = $box->VendorDirectory . "../";

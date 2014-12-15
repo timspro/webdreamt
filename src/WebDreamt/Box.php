@@ -15,7 +15,7 @@ class Box {
 	/**
 	 * @var Box
 	 */
-	static private $box;
+	static protected $box;
 	public $DatabaseHost = "localhost";
 	public $DatabaseName = "";
 	public $DatabaseUsername = "root";
@@ -151,18 +151,10 @@ class Box {
 	 * @return Box
 	 */
 	public static function a() {
-		return self::$box;
-	}
-
-	/**
-	 * Echoes an HTML footer. Defaults to script tags and closing html and closing body tags.
-	 * @return string
-	 */
-	public function footer() {
-		return '
-		<script src="' . $this->root() . '/dist/build.js"></script>
-		</body>
-		</html>';
+//		if (!static::$box) {
+//			static::$box = new static;
+//		}
+		return static::$box;
 	}
 
 	/**
@@ -176,10 +168,36 @@ class Box {
 				<meta charset="utf-8">
 				<meta http-equiv="X-UA-Compatible" content="IE=edge">
 				<meta name="viewport" content="width=device-width, initial-scale=1">
-				<title>WebDreamt</title>
-				<link href="' . $this->root() . '/dist/build.min.css" rel="stylesheet">
+				<title>WebDreamt</title> ' .
+				$this->css() . '
 			</head>
 			<body style="background-color: #e3e3e3; padding: 50px;">';
+	}
+
+	/**
+	 * Returns the link tags representing the CSS.
+	 * @return string
+	 */
+	public function css() {
+		return '<link href="' . $this->root() . '/dist/build.min.css" rel="stylesheet">';
+	}
+
+	/**
+	 * Returns an HTML footer. Defaults to script tags and closing html and closing body tags.
+	 * @return string
+	 */
+	public function footer() {
+		return '
+		</body>
+		</html>';
+	}
+
+	/**
+	 * Returns the script tags representing the javascript.
+	 * @return string
+	 */
+	public function javascript() {
+		return '<script src="' . $this->root() . '/dist/build.js"></script>';
 	}
 
 }

@@ -7,28 +7,60 @@ use WebDreamt\Filler\Populator;
 use WebDreamt\Filler\Topological;
 use Propel\Runtime\Propel;
 
+/**
+ * Fills the database with data. Note that limits for start and end dates can be set via:
+ * //use WebDreamt\Filler\ColumnTypeGuesser;
+ * //ColumnTypeGuesser::$StartDate = '-7 days';
+ * //ColumnTypeGuesser::$EndDate = '+1 days';
+ */
 class Filler {
 
-	private $vendor;
+	protected $vendor;
+	protected $number;
+	protected $only;
+	protected $rules;
 
 	public function __construct(Box $box) {
 		$this->vendor = $box->VendorDirectory;
 	}
 
 	/**
-	 * Adds test data to the database.
-	 * @param array $numberConverted Specifies the number to add for a given Propel class, where the Propel
-	 * class's name is the key and the number to add is the value.
-	 * @param boolean $only If true, then only fills in the given tables.
-	 * @param array $customConverted An array where keys are Propel class names and the values are arrays that
+	 * Adds a given number of rows for each table provided.
+	 * @param array $number Specifies the number to add for a given Propel class,
+	 * where the Propel class's name is the key and the number to add is the value.
+	 * @param boolean $only
+	 * @return self
+	 */
+	public function setNumber($number = [], $only = false) {
+		$this->number = $number;
+		$this->only = $only;
+		return $this;
+	}
+
+	/**
+	 * Set custom function to use to generate certain columns in the database.
+	 * @param array $rules An array where keys are Propel class names and the values are arrays that
 	 * consist of keys that are Propel names and values are functions of the form:
 	 * <code>
 	 * function () use ($generator) { return $generator->text; }
 	 * </code>
 	 * where $generator is a \Faker\Factory.
+	 * @return self
 	 */
-	public function addData($number = [], $only = false, $custom = []) {
+	public function setRules($rules = []) {
+		$this->rules = $rules;
+		return $this;
+	}
+
+	/**
+	 * Adds test data to the database.
+	 * @return self
+	 */
+	public function addData() {
 		require_once $this->vendor . "../db/propel/generated-conf/config.php";
+		$number = $this->number;
+		$custom = $this->custom;
+		$only = $this->only;
 
 		$generator = Factory::create();
 		$populator = new Populator($generator);
@@ -108,6 +140,8 @@ class Filler {
 			}
 		}
 		$populator->execute();
+
+		return $this;
 	}
 
 }

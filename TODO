@@ -17,6 +17,7 @@ new JobForm('job');
 //Search Component
 //Form viewer
 //Integrate Select2.js/Chosen with form component
+//Default group.
 
 //Grunt? Yeah make task to get results from bower-install and combine them into minified css and js files.
 

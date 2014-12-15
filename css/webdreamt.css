@@ -1,3 +1,10 @@
-body {
-	background-color: red !important;
+input::-moz-focus-inner, button::-moz-focus-inner {
+  border: 0;
+}
+a:focus {
+  outline: 0;
+}
+select:-moz-focusring {
+  color: transparent;
+  text-shadow: 0 0 0 #000;
 }
