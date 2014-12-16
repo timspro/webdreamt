@@ -99,6 +99,7 @@ class BuildTest extends DatabaseTest {
 	}
 
 	/**
+	 * Check to see that Build::guarantee works when the generated schema is missing.
 	 * @group Build
 	 */
 	public function testGuaranteeWithSchema() {
@@ -106,6 +107,7 @@ class BuildTest extends DatabaseTest {
 	}
 
 	/**
+	 * Check to see that Build::guarantee works when the generated schema is old.
 	 * @group Build
 	 */
 	public function testGuaranteeWithoutSchema() {

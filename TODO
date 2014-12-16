@@ -7,6 +7,10 @@ class JobForm extends Form {
 
 new JobForm('job');
 
+//Add tests for command line and for guarantee.
+//Fork bower-installer
+
+//Update Septic 360
 //Required
 //Better support for labels
 //Order

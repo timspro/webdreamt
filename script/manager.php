@@ -11,43 +11,40 @@ if (!$box) {
 	$box = new Box(false);
 	echo "Could not find a Box! <br>";
 }
-if (!empty($error) && isset($_GET['script'])) {
-	$select = new Select($_GET['script']);
+if (isset($_GET['script']) || isset($argv[1])) {
+	if (isset($argv[1]) && ($argv[1] === '--help' || $argv[1] === '-h')) {
+		echo 'Options are: update-database, update-propel, add-schemas (authorizatio), fill-database, ' .
+		'delete-database (data), and destroy-database (schemas)';
+	}
+	$value = $_GET['script'] ? : $argv[1];
+	$select = new Select($value);
 	try {
-		echo "Trying to: " . $_GET['script'] . "<br>";
-		if ($_GET['script'] === "build-all") {
+		echo "Trying to: " . $value . "<br>";
+		if ($value === "build-all") {
 			$box->builder()->build();
-		} else if ($_GET['script'] === "update-database") {
+		} else if ($value === "update-database") {
 			$box->builder()->updateDatabase();
-		} else if ($_GET['script'] === "update-propel") {
+		} else if ($value === "update-propel") {
 			$box->builder()->updatePropel();
-		} else if ($_GET['script'] === "add-schemas") {
+		} else if ($value === "add-schemas") {
 			$box->builder()->addSchemas();
-		} else if ($_GET['script'] === "fill-database") {
-			$okay = 0;
-			//This loop probably isn't necessary, but it guards against any strange bugs.
-			while ($okay < 10) {
-				try {
-					$box->filler()->addData();
-					$okay = 100;
-				} catch (Exception $e) {
-					$okay++;
-					if ($okay === 5) {
-						echo $e->getFile() . " " . $e->getLine() . " " . $e->getMessage() . "<br>";
-						echo $e->getTraceAsString();
-					} else {
-						echo $e->getMessage() . " - Retrying... <br>";
-					}
-				}
-			}
-		} else if ($_GET['script'] === "delete-database") {
+		} else if ($value === "fill-database") {
+			$box->filler()->addData();
+		} else if ($value === "delete-database") {
 			$box->builder()->deleteData();
-		} else if ($_GET['script'] === "destroy-database") {
+		} else if ($value === "destroy-database") {
 			$box->builder()->deleteDatabase();
+		} else {
+			throw new Exception("Unknown command. Use --help to see a list of command if you are "
+			. "using a command line.");
 		}
 		$error = "Completed successfully.";
 	} catch (Exception $err) {
 		$error = $err->getMessage();
+	}
+	if (isset($argv[1])) {
+		echo $error;
+		return;
 	}
 } else {
 	$select = new Select();

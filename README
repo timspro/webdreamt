@@ -1,0 +1,51 @@
+# To Install:
+
+## First:
+
+Install WebDreamt via Composer. If you don't know how to do this, it is actually pretty easy, but 
+I won't explain it here; just look at Composer's website.
+
+## Second:
+
+A) If you want to be lazy, just look at the included files in the `js`, `css`, `img`, and `font` folders 
+in the `vendor/timspro/WebDreamt` directory and copy those to the corresponding place in your project.
+
+B) If you want to have a robust solution that takes into account that the CSS and JavaScript 
+dependencies of WebDreamt might change, use Bower to install WebDreamt's JavaScript and CSS files, 
+and then use Grunt to merge the files together and create minified versions of the files. You can
+look at bower.json and Gruntfile.js in `vendor/timspro/WebDreamt` to see how I do this. Note
+that I make use of a tool called `bower-installer` to get only the needed files from given 
+bower repositories, which must be installed separately from bower.
+
+# Third:
+
+Create a new PHP script (It can either be run via command line or browser) and write:
+```
+$box = new \WebDreamt\Box();
+$box->DatabaseHost = "localhost";
+$box->DatabaseName = "";
+$box->DatabaseUsername = "root";
+$box->DatabasePassword = "";
+$box->script()->manager();
+```
+This sets up a way to update the database and Propel schema.
+
+Note just running this script will allow you to use the WebDreamt packages. This because when the Box
+is initialized, WebDreamt checks to see if it can find the generated schema, and if not, generates
+the schema. However, step three will show how you how to use commands to work with WebDreamt.
+At the very least, you will want to use the "Update Propel" command to update Propel when
+database changes are made.
+
+# Fourth:
+
+A) If you want to run the script via command line, you can navigate to the script's directory
+in the command line and run PHP on the script. You can use the argument --help to see a list of 
+commands.
+
+B) If you want to run the script via web browser, you can navigate to the script via a URL and
+use the web form. Given the commands (such as destroy database), you should not let this URL be 
+publicly visible on a production server, although there is no risk of having arbitrary code running
+on the server or database information being leaked via the form.
+
+You can easily make a custom version of this script by looking at the source code in the 
+vendor/timspro/WebDreamt/script folder at the manager.php file.

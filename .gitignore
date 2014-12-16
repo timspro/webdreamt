@@ -9,9 +9,6 @@
 /bower_components/
 /less/
 /img/
-js/*
-!js/webdreamt.js
-css/*
-!css/webdreamt.css
 /node_modules/
 dist/*
+/tests/src/WebDreamt/output/

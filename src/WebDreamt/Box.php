@@ -133,6 +133,16 @@ class Box {
 	}
 
 	/**
+	 *
+	 * @return Script A script instance
+	 */
+	function script() {
+		return $this->factory(__FUNCTION__, function() {
+					return new Script($this);
+				});
+	}
+
+	/**
 	 * Checks to see if the property is defined. If not, then will use the initializer to construct
 	 * one.
 	 * @param string $name The property name
