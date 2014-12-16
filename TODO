@@ -1,5 +1,6 @@
 # Easy:
 Set date/time formats for Components.
+Disable non-option for select.
 
 # Medium: 
 Add tests for command line and for guarantee.
@@ -14,7 +15,7 @@ Add default group support.
 Better support for labels in Groups
 
 # Hard:
-Authorization
+Authorization Manager
 Fork bower-installer.
 Cache forms.
 

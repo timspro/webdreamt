@@ -51,7 +51,8 @@ class FormTest extends Test {
 		$doc->formatOutput = true;
 		$doc->preserveWhiteSpace = false;
 		$doc->loadXML($output);
-		file_put_contents(__DIR__ . '/output/' . $filename, $doc->saveXML($doc->documentElement));
+		$contents = $doc->saveXML($doc->documentElement, LIBXML_NOEMPTYTAG);
+		file_put_contents(__DIR__ . '/output/' . $filename, $contents);
 	}
 
 	/**
@@ -204,7 +205,7 @@ class FormTest extends Test {
 	}
 
 	/**
-	 * @group Form
+	 * @group FormTest
 	 */
 	public function testFormEditLinked() {
 		$data = \JobQuery::create()->find();

@@ -37,4 +37,17 @@ class Select extends Group {
 		$this->value = $value;
 	}
 
+	/**
+	 * Changes the first option in the select box, which defaults to a blank entry.
+	 * If null is passed, then there will be no first option in the select box.
+	 * @param string $text
+	 */
+	function setFirstOption($text = '') {
+		if ($text === null) {
+			$this->setAfterOpeningTag('');
+		} else {
+			$this->setAfterOpeningTag("<option value='' disabled='' selected=''>$text</option>\n");
+		}
+	}
+
 }

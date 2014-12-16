@@ -133,10 +133,11 @@ class Form extends Component {
 							$extra = '';
 							$classes = '';
 							$select = false;
+							$selectNoValues = false;
 							$textarea = false;
 							switch ($options[self::OPT_TYPE]) {
 								case PropelTypes::LONGVARCHAR:
-									$extra = 'size="' . $options[self::OPT_EXTRA] . '"';
+									$extra = 'size="' . $options[self::OPT_EXTRA] . '" value="' . $value . '"';
 									$textarea = true;
 									break;
 								case PropelTypes::VARCHAR:
@@ -144,18 +145,21 @@ class Form extends Component {
 										$textarea = true;
 									} else {
 										$type = 'text';
+										$extra = 'value="' . $value . '"';
 									}
-									$extra = 'size="' . $options[self::OPT_EXTRA] . '"';
+									$extra .= ' size="' . $options[self::OPT_EXTRA] . '"';
 									break;
 								case PropelTypes::INTEGER:
 									$type = 'number';
-									$extra = 'size="' . $options[self::OPT_EXTRA] . '"';
+									if ($selectComponent === null) {
+										$extra = 'size="' . $options[self::OPT_EXTRA] . '" value="' . $value . '"';
+									}
 									break;
 								case PropelTypes::FLOAT:
 								case PropelTypes::DOUBLE:
 								case PropelTypes::DECIMAL:
 									$type = 'number';
-									$extra = 'step="0.01"';
+									$extra = 'step="0.01" value="' . $value . '"';
 									break;
 								case PropelTypes::BOOLEAN:
 									if ($value) {
@@ -163,28 +167,29 @@ class Form extends Component {
 									} else {
 										$value = 'No';
 									}
-									$select = ['Yes', 'No'];
+									$select = ['No', 'Yes'];
 									break;
 								case PropelTypes::CHAR:
 								case PropelTypes::ENUM:
 									$select = $options[self::OPT_EXTRA];
+									$selectNoValues = true;
 									break;
 								case PropelTypes::DATE:
 									$type = 'text';
 									if ($value) {
-										$value = date("m-d-Y", strtotime($value));
+										$extra = " value='" . date("m-d-Y", strtotime($value)) . "'";
 									}
 									$classes = 'date-control';
 									break;
 								case PropelTypes::TIMESTAMP:
 									$type = 'text';
 									if ($value) {
-										$value = date("m-d-Y g:i a", strtotime($value));
+										$extra = " value='" . date("m-d-Y g:i a", strtotime($value)) . "'";
 									}
 									$classes = 'datetime-control';
 									break;
 							}
-							$attributes = "name='$name' $disabled $extra value='$value'";
+							$attributes = "name='$name' $disabled $extra";
 							?>
 							<div class='form-group' <?= $hidden ?>>
 								<label for='<?= $name ?>'><?= $label ?></label>
@@ -194,11 +199,13 @@ class Form extends Component {
 									echo $selectComponent->render($value);
 								} else if ($select) {
 									?>
-									<select <?= $attributes ?>>
+									<select class="form-control" <?= $attributes ?>>
 										<?php
-										foreach ($select as $option) {
+										foreach ($select as $key => $option) {
+											$value = $selectNoValues ? '' : "value='$key'";
+											$selected = $value === $option ? 'selected="selected"' : '';
 											?>
-											<option><?= $option ?></option>
+											<option <?= $value . ' ' . $selected ?>><?= $option ?></option>
 											<?php
 										}
 										?>
