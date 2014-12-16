@@ -98,4 +98,18 @@ class BuildTest extends DatabaseTest {
 		$this->assertEquals(1, $count);
 	}
 
+	/**
+	 * @group Build
+	 */
+	public function testGuaranteeWithSchema() {
+
+	}
+
+	/**
+	 * @group Build
+	 */
+	public function testGuaranteeWithoutSchema() {
+
+	}
+
 }

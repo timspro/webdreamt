@@ -475,7 +475,14 @@ class Builder {
 	 * @return boolean Indicates if the synchronization was carried out.
 	 */
 	public static function guarantee(Box $box) {
-		if (filemtime($box->VendorDirectory . "../db/schemas/schema.xml") >
+		$generatedSchema = $box->VendorDirectory . "../db/schemas/schema.xml";
+		if (!file_exists($generatedSchema)) {
+			ob_start();
+			$box->builder()->updatePropel();
+			ob_get_clean();
+			return true;
+		} else
+		if (filemtime($generatedSchema) >
 				filemtime($box->VendorDirectory . "../db/propel/schema.xml")) {
 			ob_start();
 			$box->builder()->updateDatabase();
