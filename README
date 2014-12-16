@@ -30,8 +30,9 @@ $box->script()->manager();
 ```
 This sets up a way to update the database and Propel schema.
 
-Note just running this script will allow you to use the WebDreamt packages.* However, step four will 
-show how you how to use commands to work with WebDreamt.
+Note just running this script will allow you to use the WebDreamt packages since WebDreamt
+will recognize that it hasn't been setup and so will set itself up based on the database. 
+However, step four will show how you how to use commands to work with WebDreamt.
 At the very least, you will want to use the "Update Propel" command to update Propel when
 database changes are made.
 
@@ -48,7 +49,3 @@ on the server or database information being leaked via the form.
 
 You can easily make a custom version of this script by looking at the source code in the 
 `vendor/timspro/WebDreamt/script` folder at the manager.php file.
-
-* This because when the Box is initialized, WebDreamt checks to see if it can find the 
-generated schema in `db/propel/schema.xml`, and if not, it knows it should generate the schema based 
-on the database.
