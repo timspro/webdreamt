@@ -86,7 +86,7 @@ abstract class Component {
 	 * The table map
 	 * @var TableMap
 	 */
-	protected $tableMap;
+	protected $tableMap = null;
 	/**
 	 * An array of extra components to render.
 	 * @var array
@@ -104,19 +104,22 @@ abstract class Component {
 	protected $showLabels = true;
 
 	/**
-	 * Constructs a component.
+	 * Constructs a component. Note that the provided table name can be null, but such a setting
+	 * might not make sense for the child component.
 	 * @param string $tableName
 	 */
-	function __construct($tableName) {
-		$table = Propel::getDatabaseMap()->getTable($tableName);
-		//Keep a reference to the table map so when something is linked, we can look up the linked table's
-		//information.
-		$this->tableMap = $table;
-		$this->tableName = $tableName;
-		foreach ($table->getColumns() as $column) {
-			$name = $column->getName();
-			$this->columns[$name] = $this->getDefaultOptions();
-			$this->addColumn($column, $this->columns[$name]);
+	function __construct($tableName = null) {
+		if ($tableName) {
+			$table = Propel::getDatabaseMap()->getTable($tableName);
+			//Keep a reference to the table map so when something is linked, we can look up the linked table's
+			//information.
+			$this->tableMap = $table;
+			$this->tableName = $tableName;
+			foreach ($table->getColumns() as $column) {
+				$name = $column->getName();
+				$this->columns[$name] = $this->getDefaultOptions();
+				$this->addColumn($column, $this->columns[$name]);
+			}
 		}
 	}
 
@@ -461,7 +464,10 @@ abstract class Component {
 				return $value;
 			}
 		}
-		return $this->columns[$column][self::OPT_DEFAULT];
+		if (isset($this->columns[$column][self::OPT_DEFAULT])) {
+			return $this->columns[$column][self::OPT_DEFAULT];
+		}
+		return '';
 	}
 
 	/**

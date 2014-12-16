@@ -13,12 +13,12 @@ new JobForm('job');
 //Alias
 //CSRF protection
 //Default group support.
-//How would you do a login form?
+//How would you do a login form? By hand?
 //Search Component
 //Form viewer
 //Integrate Select2.js/Chosen with form component
 //Default group.
-
+//Set date/time formats
 //Grunt? Yeah make task to get results from bower-install and combine them into minified css and js files.
 
 Outline for Eventual Layout:

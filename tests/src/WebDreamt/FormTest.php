@@ -23,7 +23,7 @@ class FormTest extends Test {
 		self::$build = self::$a->builder();
 		self::$build->updatePropel();
 		self::$build->loadAllClasses();
-		self::$a->filler()->addData([
+		self::$a->filler()->setNumber([
 			"service" => 10,
 			"service_job" => 30,
 			"customer" => 10,
@@ -35,7 +35,7 @@ class FormTest extends Test {
 			"users_groups" => 0,
 			"job" => 20,
 			"vehicles" => 10
-				], true);
+				], true)->addData();
 	}
 
 	public static function tearDownAfterClass() {

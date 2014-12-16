@@ -20,7 +20,7 @@ class FillerTest extends DatabaseTest {
 
 		self::$build->updatePropel();
 		self::$build->loadAllClasses();
-		self::$a->filler()->addData(["bigger" => 100]);
+		self::$a->filler()->setNumber(["bigger" => 100])->addData();
 
 		$this->forTables(function($table) {
 			$this->assertGreaterThan(0, $this->countRows($table));
@@ -47,7 +47,7 @@ class FillerTest extends DatabaseTest {
 		self::$build->updatePropel();
 		self::$build->loadAllClasses();
 		$generator = Factory::create();
-		self::$a->filler()->addData([
+		self::$a->filler()->setNumber([
 			"job" => 10,
 			"service" => 10,
 			"service_job" => 5,
@@ -60,13 +60,13 @@ class FillerTest extends DatabaseTest {
 			"users_groups" => 0,
 			"job" => 20,
 			"vehicles" => 10
-				], true, [
+				], true)->setRules([
 			"vehicles" => [
 				'mileage_oil_last' => function () use ($generator ) {
 					return $generator->numberBetween(0, 20000);
 				}
 			]
-		]);
+		])->addData();
 
 		$mileages = $this->column('SELECT mileage_oil_last FROM vehicles');
 		foreach ($mileages as $mileage) {
@@ -86,7 +86,7 @@ class FillerTest extends DatabaseTest {
 
 		self::$build->updatePropel();
 		self::$build->loadAllClasses();
-		self::$a->filler()->addData(["Bigger" => 100]);
+		self::$a->filler()->setNumber(["Bigger" => 100])->addData();
 	}
 
 	/**
@@ -98,7 +98,11 @@ class FillerTest extends DatabaseTest {
 
 		self::$build->updatePropel();
 		self::$build->loadAllClasses();
-		self::$a->filler()->addData(["bigger" => 100], false, ["bigger" => ["Bigs" => null]]);
+		self::$a->filler()->setNumber([
+			"bigger" => 100
+		])->setRules([
+			"bigger" => ["Bigs" => null]
+		])->addData();
 	}
 
 }

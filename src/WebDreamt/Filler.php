@@ -16,9 +16,9 @@ use Propel\Runtime\Propel;
 class Filler {
 
 	protected $vendor;
-	protected $number;
-	protected $only;
-	protected $rules;
+	protected $number = [];
+	protected $only = false;
+	protected $rules = [];
 
 	public function __construct(Box $box) {
 		$this->vendor = $box->VendorDirectory;
@@ -59,7 +59,7 @@ class Filler {
 	public function addData() {
 		require_once $this->vendor . "../db/propel/generated-conf/config.php";
 		$number = $this->number;
-		$custom = $this->custom;
+		$custom = $this->rules;
 		$only = $this->only;
 
 		$generator = Factory::create();

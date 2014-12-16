@@ -12,7 +12,7 @@ class Group extends Component {
 	protected $childPrefix;
 	protected $breaks = false;
 
-	public function __construct($table, $htmlTag = 'div', $childHtmlTag = 'div') {
+	public function __construct($table = null, $htmlTag = 'div', $childHtmlTag = 'div') {
 		parent::__construct($table);
 		$this->htmlTag = $htmlTag;
 		$this->childHtmlTag = $childHtmlTag;
