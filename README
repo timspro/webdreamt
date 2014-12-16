@@ -39,7 +39,7 @@ database changes are made.
 # Fourth:
 
 A) If you want to run the script via command line, you can navigate to the script's directory
-in the command line and run PHP on the script. You can use the argument --help to see a list of 
+in the command line and run PHP on the script. You can use the argument `--help` to see a list of 
 commands.
 
 B) If you want to run the script via web browser, you can navigate to the script via a URL and
@@ -48,4 +48,4 @@ publicly visible on a production server, although there is no risk of having arb
 on the server or database information being leaked via the form.
 
 You can easily make a custom version of this script by looking at the source code in the 
-`vendor/timspro/WebDreamt/script` folder at the manager.php file.
+`vendor/timspro/WebDreamt/script` folder at the `manager.php` file.

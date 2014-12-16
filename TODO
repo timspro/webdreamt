@@ -1,42 +1,34 @@
-Are scripts secure enough?
-Is setting database information via directly editing Box.php a good idea?
+# Easy:
+Set date/time formats for Components.
 
-class JobForm extends Form {
+# Medium: 
+Add tests for command line and for guarantee.
+Update Septic 360
+Make a Search Component.
+Integrate Select2.js with Components.
+Order
+Alias
+Required
+CSRF protection
+Add default group support.
+Better support for labels in Groups
 
-}
+# Hard:
+Authorization
+Fork bower-installer.
+Cache forms.
 
-new JobForm('job');
+# Very Hard:
+Rethink Filler supporting libraries.
+Rethink Authorization supporting libraries.
 
-//Add tests for command line and for guarantee.
-//Fork bower-installer
-
-//Update Septic 360
-//Required
-//Better support for labels
-//Order
-//Alias
-//CSRF protection
-//Default group support.
-//How would you do a login form? By hand?
-//Search Component
-//Form viewer
-//Integrate Select2.js/Chosen with form component
-//Default group.
-//Set date/time formats
-//Grunt? Yeah make task to get results from bower-install and combine them into minified css and js files.
-
-Outline for Eventual Layout:
-Different modules of Web Dreamt should be in their own composer projects.
+# Maybe?:
+Split up WebDreamt components into different repositories.
 This might be divided up as follows:
-Server/Authentication/Authorization
+Server/Authentication/Authorization Classes
 Filler
 Builder
 Hyper (Cache)
-Box/Common Functions/Classes
+Box/Common Functions/Other Classes
 
-Furthermore, additional, experimental code can be in its own private repository.
-
-Rethink Filler
-Rethink Authorization
-
-Change index.php into a router to scripts/forms with test DB information.
+A way to do ad hoc forms. For example, how would you do a login form? By hand?
