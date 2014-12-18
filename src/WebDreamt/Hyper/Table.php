@@ -38,16 +38,12 @@ class Table extends Component {
 	}
 
 	/**
-	 * Renders the component.
+	 * Renders the Table component.
 	 * @param array $input
 	 * @param string $included The class name of the component that is calling render. Null
 	 * if not being called from a component.
 	 */
-	function render($input = [], $included = null) {
-		ob_start();
-		if ($this->input) {
-			$input = $this->input;
-		}
+	protected function renderChild($input = [], $included = null) {
 		?>
 		<table <?= $this->html ?> class="<?= implode(" ", $this->classes) ?>">
 			<?php
@@ -113,7 +109,6 @@ class Table extends Component {
 		</tbody>
 		</table>
 		<?php
-		return ob_get_clean();
 	}
 
 }

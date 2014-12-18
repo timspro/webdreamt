@@ -90,7 +90,7 @@ class FormTest extends Test {
 
 		//Link to a select to pick the location.
 		$locationSelect = new Select('location');
-		$locationSelect->setInput($locationData);
+		$locationSelect->setFirstOption('')->setInput($locationData);
 		$form->link('location_id', $locationSelect);
 
 		//Link to a form to add the customer information.
@@ -187,9 +187,9 @@ class FormTest extends Test {
 	 */
 	public function testFormEnumSelect() {
 		//Set up the table.
-		$table = new Form('customer');
+		$form = new Form('customer');
 		//Output
-		$output = $table->render();
+		$output = $form->render();
 		$this->output('customer-form-enum.html', $output);
 	}
 
@@ -205,7 +205,7 @@ class FormTest extends Test {
 	}
 
 	/**
-	 * @group FormTest
+	 * @group Form
 	 */
 	public function testFormEditLinked() {
 		$data = \JobQuery::create()->find();

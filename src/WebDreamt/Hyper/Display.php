@@ -2,6 +2,9 @@
 
 namespace WebDreamt\Hyper;
 
+/**
+ * A class used to display a Propel object or an array with key names of columns and values to display.
+ */
 class Display extends Group {
 
 	/**
@@ -12,11 +15,22 @@ class Display extends Group {
 		throw new Exception("Cannot set a child component for a display.");
 	}
 
-	function render($input = null, $included = null) {
-		ob_start();
-		if ($this->input) {
-			$input = $this->input;
-		}
+	/**
+	 * Set the child class prefix
+	 * @param string $childPrefix
+	 * @return self
+	 */
+	function setChildPrefix($childPrefix = null) {
+		return parent::setChildPrefix($childPrefix);
+	}
+
+	/**
+	 * Renders the Display component.
+	 * @param array $input
+	 * @param string $included
+	 * @return string
+	 */
+	function renderChild($input = null, $included = null) {
 		if ($this->htmlTag) {
 			echo '<' . $this->htmlTag . ' ' . $this->html . " class='" . implode(" ", $this->classes) . "'>";
 		}
@@ -24,7 +38,7 @@ class Display extends Group {
 			if ($options[self::OPT_ACCESS]) {
 				$value = $this->getValueFromInput($column, $input);
 				$visible = ($options[self::OPT_VISIBLE] ? 'style="display:none"' : '');
-				$class = ($this->childPrefix ? "class='" . $this->childPrefix . "_$column'" : '');
+				$class = ($this->childPrefix ? "class='" . $this->childPrefix . "-$column'" : '');
 				echo '<' . $this->childHtmlTag . ' ' . $this->childHtml . " $class $visible>";
 				$components = $this->renderLinked($column, $value);
 				if ($components !== null) {
@@ -39,7 +53,6 @@ class Display extends Group {
 		if ($this->htmlTag) {
 			echo '</' . $this->htmlTag . '>';
 		}
-		return ob_get_clean();
 	}
 
 }

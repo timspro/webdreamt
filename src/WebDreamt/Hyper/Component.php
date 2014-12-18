@@ -49,6 +49,14 @@ abstract class Component {
 	 * given as a Propel object.
 	 */
 	const OPT_PROPEL_OBJECT = 'object';
+	/**
+	 * Indicates the component should go in a modal.
+	 */
+	const WRAP_MODAL = 'modal';
+	/**
+	 * Indicates the component should go in a panel.
+	 */
+	const WRAP_PANEL = 'panel';
 
 	/**
 	 * An instance of the pluralizer Propel uses for pluralization. Should be accessed through
@@ -102,10 +110,41 @@ abstract class Component {
 	 * @var boolean
 	 */
 	protected $showLabels = true;
+	/**
+	 * Indicates if the component should be put in a wrapper and what kind of wrapper.
+	 * @var string
+	 */
+	protected $wrapper = self::WRAP_PANEL;
+	/**
+	 * The header to use for the wrapper
+	 * @var string
+	 */
+	protected $header = '';
+	/**
+	 * Any buttons to add to the modal.
+	 * @var array
+	 */
+	protected $buttons = [];
+	/**
+	 * The time format
+	 * @var string
+	 */
+	protected $timeFormat = "g:i a";
+	/**
+	 * The date time format
+	 * @var string
+	 */
+	protected $dateTimeFormat = "g:i a, m/d/y";
+	/**
+	 * The date format
+	 * @var string
+	 */
+	protected $dateFormat = 'm/d/y';
 
 	/**
-	 * Constructs a component. Note that the provided table name can be null, but such a setting
-	 * might not make sense for the child component.
+	 * Constructs a component. Note that the provided table name can be null, in which case the
+	 * this constructor will not set any members (so they will be a variation of empty), but such
+	 * a setting might not make sense for the child component.
 	 * @param string $tableName
 	 */
 	function __construct($tableName = null) {
@@ -115,6 +154,7 @@ abstract class Component {
 			//information.
 			$this->tableMap = $table;
 			$this->tableName = $tableName;
+			$this->header = static::convertName($tableName);
 			foreach ($table->getColumns() as $column) {
 				$name = $column->getName();
 				$this->columns[$name] = $this->getDefaultOptions();
@@ -130,19 +170,16 @@ abstract class Component {
 	 * @param array $options
 	 */
 	protected function addColumn(ColumnMap $column, array &$options) {
-		$options[self::OPT_LABEL] = static::spaceColumnName($column->getName());
 		$options[self::OPT_DEFAULT] = $column->getDefaultValue();
 		$options[self::OPT_TYPE] = $column->getType();
+		//Set up enum.
 		if ($options[self::OPT_TYPE] === PropelTypes::ENUM) {
 			$options[self::OPT_EXTRA] = $column->getValueSet();
 		} else {
 			$options[self::OPT_EXTRA] = $column->getSize();
 		}
-
-		if (substr($column->getName(), -2) === 'id') {
-			$remainder = substr($options[self::OPT_LABEL], 0, strlen($options[self::OPT_LABEL]) - 2);
-			$options[self::OPT_LABEL] = $remainder . 'ID';
-		}
+		//Set label.
+		$options[self::OPT_LABEL] = static::convertName($column->getName());
 	}
 
 	/**
@@ -217,6 +254,76 @@ abstract class Component {
 	}
 
 	/**
+	 * Set if a wrapper HTML should be used for the component.
+	 * @param boolean $wrapper
+	 * @return self
+	 */
+	function setWrapper($wrapper = true) {
+		$this->wrapper = $wrapper;
+		return $this;
+	}
+
+	/**
+	 * Add buttons that will be rendered with the modal, if a modal is set as the wrapper HTML element.
+	 * @param array $buttons The keys should be a strings of class names and the value should be the
+	 * text for the button.
+	 */
+	function addButtons($buttons) {
+		$this->buttons = array_merge($this->buttons, $buttons);
+		return $this;
+	}
+
+	/**
+	 * Set the header for the modal/panel. Note that has no effect if setWrapper is called with false/null
+	 * when the Component is rendered. Default depends on the component but is generally based on the
+	 * table's name.
+	 * @param string $text
+	 * @return self
+	 */
+	function setHeader($text) {
+		$this->header = $text;
+		return $this;
+	}
+
+	/**
+	 * Get the header for the component.
+	 * @return string
+	 */
+	function getHeader() {
+		return $this->header;
+	}
+
+	/**
+	 * Sets the time format used by the component.
+	 * @param string $format
+	 * @return self
+	 */
+	function setTimeFormat($format = 'g:i a') {
+		$this->timeFormat = $format;
+		return $this;
+	}
+
+	/**
+	 * Sets the date time format used by the component.
+	 * @param string $format
+	 * @return self
+	 */
+	function setDateTimeFormat($format = 'g:i a, m-d-y') {
+		$this->dateTimeFormat = $format;
+		return $this;
+	}
+
+	/**
+	 * Sets the date format used by the component.
+	 * @param string $format
+	 * @return self
+	 */
+	function setDateFormat($format = 'm-d-y') {
+		$this->dateFormat = $format;
+		return $this;
+	}
+
+	/**
 	 * Set the input of the component. Note that input set this way will override input passed to the
 	 * render method.
 	 * @param array $input
@@ -271,8 +378,7 @@ abstract class Component {
 			$this->linked[$column] = [];
 		}
 		$this->linked[$column][] = $component;
-
-		//Set the propel method that needs to be called to get input for the linked component.
+		//Set the Propel method that needs to be called to get input for the linked component.
 		$columnMap = $this->tableMap->getColumn($column);
 		$propel = 'get' . $columnMap->getRelatedTable()->getPhpName();
 		if (!method_exists($this->tableMap->getPhpName(), $propel)) {
@@ -346,6 +452,52 @@ abstract class Component {
 	}
 
 	/**
+	 * Reorders the columns of the Component. The numerical indexes of the passed array are used as
+	 * the guaranteed positions of the columns in the new ordering. Any gaps in the new ordering are
+	 * filled in with unspecified columns in the old ordering. Thus, if we had ['a', 'b', 'c', 'd', 'e']
+	 * as columns and passed [2 => 'a', 0 => 'e', 4 => 'd'] we would have ['e', 'b', 'a', 'c', 'd'].
+	 * @param array $columns The key is the index of the column in the new list of columns. The value
+	 * is the column name.
+	 */
+	function order($columns = []) {
+		$newColumns = [];
+		$count = count($this->columns);
+		for ($i = 0; $i < $count; $i++) {
+			if (isset($columns[$i]) && isset($this->columns[$columns[$i]])) {
+				$newColumns[] = $this->columns[$columns[$i]];
+				unset($this->columns[$columns[$i]]);
+			} else if ($this->columns) {
+				$newColumns[] = array_shift($this->columns);
+			}
+		}
+		if ($this->columns) {
+			$newColumns = array_merge($newColumns, $this->columns);
+		}
+		$this->columns = $newColumns;
+	}
+
+	/**
+	 * Allows one to specify a different name to use for a column.
+	 * Note that this will also change the label for the column unless $changeLabel is set to false.
+	 * @param array $oldToNewColumns The key should be the old column name and the value should be the
+	 * new column name.
+	 */
+	function alias($oldToNewColumns = [], $changeLabel = true) {
+		$newColumns = [];
+		foreach ($this->columns as $oldColumn => $option) {
+			if (isset($oldToNewColumns[$oldColumn])) {
+				$newColumns[$oldToNewColumns[$oldColumn]] = $option;
+				if ($changeLabel) {
+					$option[self::OPT_LABEL] = static::spaceName($oldToNewColumns[$oldColumn]);
+				}
+			} else {
+				$newColumns[] = $option;
+			}
+		}
+		$this->columns = $newColumns;
+	}
+
+	/**
 	 * Applies the $options for each $columns.
 	 * @param array|string $columns If an array, then column names are values. If a string, then
 	 * $columns = [$columns]. If empty, then assumes option applies to all columns.
@@ -407,7 +559,65 @@ abstract class Component {
 	 * if not being called from a component.
 	 * @return string
 	 */
-	abstract function render($input = null, $included = null);
+	function render($input = null, $included = null) {
+		if ($this->input) {
+			$input = $this->input;
+		}
+		ob_start();
+		switch ($this->wrapper) {
+			case self::WRAP_PANEL:
+				?>
+				<div class="panel panel-default">
+					<div class="panel-heading"><?= $this->header ?></div>
+					<div class="panel-body">
+						<?php $this->renderChild() ?>
+					</div>
+				</div>
+				<?php
+				break;
+			case self::WRAP_MODAL:
+				?>
+				<div class="modal fade">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal">
+									<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+								</button>
+								<h4 class="modal-title"><?= $this->header ?></h4>
+							</div>
+							<div class="modal-body">
+								<?php $this->renderChild() ?>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+								<?php
+								foreach ($this->buttons as $class => $text) {
+									?>
+									<button type="button" class="btn <?= $class ?>"><?= $text ?></button>
+									<?php
+								}
+								?>
+							</div>
+						</div>
+					</div>
+				</div>
+				<?php
+				break;
+			default:
+				$this->renderChild();
+		}
+		return ob_get_clean();
+	}
+
+	/**
+	 * Renders the Child component. Child classes should implement this method. Note that the child
+	 * class can
+	 * @param array $input
+	 * @param string $included The class name of the component that is calling render. Null
+	 * if not being called from a component.
+	 */
+	abstract protected function renderChild($input = null, $included = null);
 	/**
 	 * Renders any linked components for the given column. Returns null if there is no component
 	 * for the given column.
@@ -444,7 +654,8 @@ abstract class Component {
 	}
 
 	/**
-	 * Gets a value from input.
+	 * Gets a value from input. Note that if the $value is a DateTime object, converts it to a string
+	 * in the format specifed by either the $dateTimeFormat, $timeFormat, or $dateFormat members.
 	 * @param string $column
 	 * @param mixed $input
 	 * @return string
@@ -459,7 +670,14 @@ abstract class Component {
 			} else {
 				$value = $input->getByName($column, TableMap::TYPE_FIELDNAME);
 				if ($value instanceof DateTime) {
-					return $value->format('Y-m-d H:i:s');
+					$type = $this->columns[$column][self::OPT_TYPE];
+					if ($type === PropelTypes::DATE) {
+						return $value->format($this->dateFormat);
+					} else if ($type === PropelTypes::TIME) {
+						return $value->format($this->timeFormat);
+					} else {
+						return $value->format($this->dateTimeFormat);
+					}
 				}
 				return $value;
 			}
@@ -471,12 +689,17 @@ abstract class Component {
 	}
 
 	/**
-	 * Spaces out a column name.
+	 * Changes underscores into spaces in a column or table name and capitalizes it.
+	 * Also, changes ' Id' to ' ID' if the string is the last part of the resulting name.
 	 * @param string $name
 	 * @return string
 	 */
-	static protected function spaceColumnName($name) {
-		return ucwords(str_replace('_', ' ', $name));
+	static protected function convertName($name) {
+		$return = ucwords(str_replace('_', ' ', $name));
+		if (substr($return, -3) === ' Id') {
+			$return = substr($return, 0, strlen($return) - 2) . 'ID';
+		}
+		return $return;
 	}
 
 	/**

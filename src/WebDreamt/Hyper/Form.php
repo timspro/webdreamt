@@ -14,6 +14,42 @@ class Form extends Component {
 	 * Whether the input type is disabled.
 	 */
 	const OPT_DISABLE = 'disable';
+	/**
+	 * Whether the input type is required.
+	 */
+	const OPT_REQUIRE = 'require';
+	/**
+	 * Indicate the HTML type
+	 */
+	const OPT_HTML_TYPE = 'htmlType';
+	/**
+	 * Indicate the HTML class
+	 */
+	const OPT_HTML_CLASS = 'htmlClass';
+	/**
+	 * Indicate the HTML extra attributes
+	 */
+	const OPT_HTML_EXTRA = 'htmlExtra';
+	/**
+	 * An input with type 'text'
+	 */
+	const HTML_TEXT = 'text';
+	/**
+	 * A textarea input
+	 */
+	const HTML_TEXTAREA = 'textarea';
+	/**
+	 * A select input with No, Yes entries.
+	 */
+	const HTML_BOOLEAN = 'boolean';
+	/**
+	 * An input with type 'number'
+	 */
+	const HTML_NUMBER = 'number';
+	/**
+	 * A select input
+	 */
+	const HTML_SELECT = 'select';
 
 	/**
 	 * Indicates if the form can handle multiple items.
@@ -25,10 +61,19 @@ class Form extends Component {
 	 * @var int
 	 */
 	protected static $count = 0;
+	/**
+	 * A function to give control to change form inputs.
+	 * @var callable
+	 */
+	protected $inputHook = null;
 
 	protected function getDefaultOptions() {
 		$options = parent::getDefaultOptions();
 		$options[self::OPT_DISABLE] = false;
+		$options[self::OPT_REQUIRE] = false;
+		$options[self::OPT_HTML_TYPE] = '';
+		$options[self::OPT_HTML_CLASS] = '';
+		$options[self::OPT_HTML_EXTRA] = '';
 		return $options;
 	}
 
@@ -40,6 +85,101 @@ class Form extends Component {
 		if ($column->getName() === 'created_at' || $column->getName() === 'updated_at') {
 			$options[self::OPT_ACCESS] = false;
 		}
+		if ($column->isNotNull()) {
+			$options[self::OPT_REQUIRE] = true;
+		}
+		//Set HTML options.
+		switch ($options[self::OPT_TYPE]) {
+			case PropelTypes::VARCHAR:
+				if (intval($options[self::OPT_EXTRA]) < 255) {
+					$options[self::OPT_HTML_EXTRA] = 'size="' . $options[self::OPT_EXTRA] . '"';
+					$options[self::OPT_HTML_TYPE] = self::HTML_TEXT;
+					break;
+				}
+			case PropelTypes::LONGVARCHAR:
+				$options[self::OPT_HTML_EXTRA] = 'size="' . $options[self::OPT_EXTRA] . '"';
+				$options[self::OPT_HTML_TYPE] = self::HTML_TEXTAREA;
+				break;
+			case PropelTypes::INTEGER:
+				$options[self::OPT_HTML_EXTRA] = 'size="' . $options[self::OPT_EXTRA] . '"';
+				$options[self::OPT_HTML_TYPE] = self::HTML_NUMBER;
+				break;
+			case PropelTypes::FLOAT:
+			case PropelTypes::DOUBLE:
+			case PropelTypes::DECIMAL:
+				$options[self::OPT_HTML_EXTRA] = "step='0.01'";
+				$options[self::OPT_HTML_TYPE] = self::HTML_NUMBER;
+				break;
+			case PropelTypes::BOOLEAN:
+				$options[self::OPT_HTML_TYPE] = self::HTML_BOOLEAN;
+				break;
+			case PropelTypes::CHAR:
+			case PropelTypes::ENUM:
+				$options[self::OPT_HTML_TYPE] = self::HTML_SELECT;
+				break;
+			case PropelTypes::TIME:
+				$options[self::OPT_HTML_TYPE] = self::HTML_TEXT;
+				$options[self::OPT_HTML_CLASS] = 'wd-time-control';
+				break;
+			case PropelTypes::DATE:
+				$options[self::OPT_HTML_TYPE] = self::HTML_TEXT;
+				$options[self::OPT_HTML_CLASS] = 'wd-date-control';
+				break;
+			case PropelTypes::TIMESTAMP:
+				$options[self::OPT_HTML_TYPE] = self::HTML_TEXT;
+				$options[self::OPT_HTML_CLASS] = 'wd-datetime-control';
+				break;
+		}
+	}
+
+	/**
+	 * Sets the HTML class string of the columns.
+	 * @param array $columns
+	 * @return this
+	 */
+	function setHtmlClass($columns) {
+		$this->merge($columns, self::OPT_HTML_CLASS);
+		return $this;
+	}
+
+	/**
+	 * Sets the HTML type of the columns.
+	 * @param array $columns
+	 * @return this
+	 */
+	function setHtmlType($columns) {
+		$this->merge($columns, self::OPT_HTML_TYPE);
+		return $this;
+	}
+
+	/**
+	 * Sets the extra HTML attributes of the columns.
+	 * @param array $columns
+	 * @return this
+	 */
+	function setHtmlExtra($columns) {
+		$this->merge($columns, self::OPT_HTML_EXTRA);
+		return $this;
+	}
+
+	/**
+	 * Makes all columns required. Defaults to all columns.
+	 * @param array $columns
+	 * @return self
+	 */
+	function required(array $columns = null) {
+		$this->apply(is_array($columns) ? $columns : func_get_args(), self::OPT_REQUIRE, true);
+		return $this;
+	}
+
+	/**
+	 * Makes columns not required. Defaults to all columns.
+	 * @param array $columns
+	 * @return self
+	 */
+	function optional(array $columns = null) {
+		$this->apply(is_array($columns) ? $columns : func_get_args(), self::OPT_REQUIRE, false);
+		return $this;
 	}
 
 	/**
@@ -81,22 +221,33 @@ class Form extends Component {
 	}
 
 	/**
+	 * Sets a function that provides fine-grain control over the name, value, and possible values
+	 * (for applicable inputs) of the HTML form input. The values passed to function are: (1) column name,
+	 * (2) the options for the column, (3) the form input name, (4) the form value,
+	 * (5) an array of possible values, the last three are passed by reference and so are modifiable.
+	 * @param callable $function
+	 * @return self
+	 */
+	function setInputHook($function = null) {
+		$this->inputHook = $function;
+		return $this;
+	}
+
+	/**
 	 * Renders the component.
 	 * @param array $input
 	 * @param string $included The class name of the component that is calling render. Null
 	 * if not being called from a component.
 	 * @return string
 	 */
-	function render($input = null, $included = null) {
-		ob_start();
-		if ($this->input) {
-			$input = $this->input;
-		}
+	function renderChild($input = null, $included = null) {
+		//Get an ID for the form.
 		static::$count++;
 		$count = static::$count;
 		if ($included === null) {
+			//Output the setup for the form.
 			?>
-			<form <?= $this->html ?> class="<?= implode(" ", $this->classes) ?>">
+			<form <?= $this->html ?> class="wd-form <?= implode(" ", $this->classes) ?>">
 				<?php
 			} else {
 				?>
@@ -108,8 +259,9 @@ class Form extends Component {
 				<?php
 				foreach ($this->columns as $column => $options) {
 					if ($options[self::OPT_ACCESS]) {
+						//Get the value for the given column.
 						$value = $this->getValueFromInput($column, $input);
-
+						//Get the output for any linked components. Note that we do something special for selects.
 						$components = null;
 						$selectComponent = null;
 						if (isset($this->linked[$column])) {
@@ -122,74 +274,22 @@ class Form extends Component {
 								}
 							}
 						}
-
+						//If there are no linked components or if there is a Select component...
 						if ($components === null || $selectComponent !== null) {
 							$name = $count . "-" . $column;
-							$label = ($selectComponent ?
-											'Select ' . static::spaceColumnName($selectComponent->getTableName()) :
-											$options[self::OPT_LABEL]);
-							$disabled = $options[self::OPT_DISABLE] ? 'disabled=""' : '';
+							$label = ($selectComponent ? $selectComponent->getHeader() : $options[self::OPT_LABEL]);
 							$hidden = $options[self::OPT_VISIBLE] ? '' : 'style="display:none"';
-							$extra = '';
-							$classes = '';
-							$select = false;
-							$selectNoValues = false;
-							$textarea = false;
-							switch ($options[self::OPT_TYPE]) {
-								case PropelTypes::LONGVARCHAR:
-									$extra = 'size="' . $options[self::OPT_EXTRA] . '" value="' . $value . '"';
-									$textarea = true;
-									break;
-								case PropelTypes::VARCHAR:
-									if (intval($options[self::OPT_EXTRA]) >= 255) {
-										$textarea = true;
-									} else {
-										$type = 'text';
-										$extra = 'value="' . $value . '"';
-									}
-									$extra .= ' size="' . $options[self::OPT_EXTRA] . '"';
-									break;
-								case PropelTypes::INTEGER:
-									$type = 'number';
-									if ($selectComponent === null) {
-										$extra = 'size="' . $options[self::OPT_EXTRA] . '" value="' . $value . '"';
-									}
-									break;
-								case PropelTypes::FLOAT:
-								case PropelTypes::DOUBLE:
-								case PropelTypes::DECIMAL:
-									$type = 'number';
-									$extra = 'step="0.01" value="' . $value . '"';
-									break;
-								case PropelTypes::BOOLEAN:
-									if ($value) {
-										$value = 'Yes';
-									} else {
-										$value = 'No';
-									}
-									$select = ['No', 'Yes'];
-									break;
-								case PropelTypes::CHAR:
-								case PropelTypes::ENUM:
-									$select = $options[self::OPT_EXTRA];
-									$selectNoValues = true;
-									break;
-								case PropelTypes::DATE:
-									$type = 'text';
-									if ($value) {
-										$extra = " value='" . date("m-d-Y", strtotime($value)) . "'";
-									}
-									$classes = 'date-control';
-									break;
-								case PropelTypes::TIMESTAMP:
-									$type = 'text';
-									if ($value) {
-										$extra = " value='" . date("m-d-Y g:i a", strtotime($value)) . "'";
-									}
-									$classes = 'datetime-control';
-									break;
+							$disabled = $options[self::OPT_DISABLE] ? 'disabled=""' : '';
+							$required .= $options[self::OPT_REQUIRE] && $options[self::OPT_VISIBLE] ? 'required=""' : '';
+							$type = $options[self::OPT_HTML_TYPE];
+							$class = $options[self::OPT_HTML_CLASS];
+							$extra = $options[self::OPT_HTML_EXTRA];
+							$attributes = "name='$name' class='form-control $class' $disabled $required $extra";
+							$possibleValues = '';
+							if ($this->inputHook) {
+								$function = $this->inputHook;
+								$function($column, $options, &$name, &$value, &$possibleValues);
 							}
-							$attributes = "name='$name' $disabled $extra";
 							?>
 							<div class='form-group' <?= $hidden ?>>
 								<label for='<?= $name ?>'><?= $label ?></label>
@@ -197,34 +297,41 @@ class Form extends Component {
 								if (isset($selectComponent)) {
 									$selectComponent->appendHtml($attributes);
 									echo $selectComponent->render($value);
-								} else if ($select) {
-									?>
-									<select class="form-control" <?= $attributes ?>>
-										<?php
-										foreach ($select as $key => $option) {
-											$value = $selectNoValues ? '' : "value='$key'";
-											$selected = $value === $option ? 'selected="selected"' : '';
-											?>
-											<option <?= $value . ' ' . $selected ?>><?= $option ?></option>
-											<?php
-										}
-										?>
-									</select>
-									<?php
-								} else if ($textarea) {
-									?>
-									<textarea class='form-control <?= $classes ?>' <?= $attributes ?>><?= $value ?></textarea>
-									<?php
 								} else {
-									?>
-									<input class='form-control <?= $classes ?>' type='<?= $type ?>' <?= $attributes ?>/>
-									<?php
+									switch ($type) {
+										case self::HTML_NUMBER:
+											break;
+										case self::HTML_TEXT:
+											echo "<input type='text' value='$value' $attributes />";
+											break;
+										case self::HTML_TEXTAREA:
+											echo "<textarea $attributes>$value</textarea>";
+											break;
+										case self::HTML_BOOLEAN:
+											$value = $value ? 'Yes' : 'No';
+											$possibleValues = ['No', 'Yes'];
+										case self::HTML_SELECT:
+											?>
+											<select class="form-control" <?= $attributes ?>>
+												<?php
+												$possibleValues = $possibleValues ? : $options[self::OPT_EXTRA];
+												foreach ($possibleValues as $option) {
+													$selected = $value === $option ? 'selected=""' : '';
+													?>
+													<option <?= $selected ?>><?= $option ?></option>
+													<?php
+												}
+												?>
+											</select>
+											<?php
+											break;
+									}
 								}
 								?>
 							</div>
 							<?php
 						}
-
+						//Output the components
 						if ($components !== null) {
 							echo $components;
 							continue;
@@ -242,13 +349,18 @@ class Form extends Component {
 				</div>
 				<?php
 			} else {
+				if ($this->wrapper !== self::WRAP_MODAL) {
+					?>
+					<button type="submit" class="btn btn-default">Submit</button>
+					<?php
+				} else {
+					$this->setButtons(["btn-primary wd-submit" => 'Submit']);
+				}
 				?>
-				<button type="submit" class="btn btn-default">Submit</button>
 				<input type='hidden' class='next-form-id' value='<?= static::$count + 1 ?>' />
 			</form>
 			<?php
 		}
-		return ob_get_clean();
 	}
 
 }

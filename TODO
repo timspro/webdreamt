@@ -1,35 +1,47 @@
 # Easy:
-Set date/time formats for Components.
-Disable non-option for select.
+Date time tests.
+Required tests.
+Add tests for command line and for guarantee.
+Order Test
+Alias Test
 
 # Medium: 
-Add tests for command line and for guarantee.
-Update Septic 360
 Make a Search Component.
 Integrate Select2.js with Components.
-Order
-Alias
-Required
 CSRF protection
-Add default group support.
-Better support for labels in Groups
+Add default group support for authorization.
+Better support for labels in Groups. Also class labels?
+Better form tests.
+File upload.
+Add extra component before a column.
+Ajax Form
+Draggability
+Expand table rows.
 
 # Hard:
 Authorization Manager
 Fork bower-installer.
-Cache forms.
+Validation
 
 # Very Hard:
 Rethink Filler supporting libraries.
 Rethink Authorization supporting libraries.
+Cache forms, but how to do it for rows?
 
 # Maybe?:
+Update Septic 360
+A way to do ad hoc forms. For example, how would you do a login form? Maybe make login form a script.
+
+# Not Implemented:
+Placeholders?
+Better input controls - currency, phone-number - although this could probably be handled by third party.
+Maybe split up Group into two classes.
 Split up WebDreamt components into different repositories.
-This might be divided up as follows:
+
+Other Thoughts:
+WebDreamt might be divided up as follows:
 Server/Authentication/Authorization Classes
 Filler
 Builder
 Hyper (Cache)
 Box/Common Functions/Other Classes
-
-A way to do ad hoc forms. For example, how would you do a login form? By hand?
