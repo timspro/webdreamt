@@ -6,6 +6,9 @@ use PDO;
 use PHPUnit_Framework_TestCase;
 use WebDreamt\Box;
 
+/**
+ * A better test base class that provides helpful methods and creates and uses a database.
+ */
 abstract class Test extends PHPUnit_Framework_TestCase {
 
 	/** @var Box */
@@ -110,6 +113,20 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 		foreach ($tables as $table) {
 			static::$db->exec("TRUNCATE $table");
 		}
+	}
+
+	/**
+	 *
+	 * @param type $tables
+	 */
+	public function deleteTables($tables) {
+		$db = static::$db;
+		$db->exec("SET FOREIGN_KEY_CHECKS=0");
+		$tables = $db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+		foreach ($tables as $table) {
+			$db->exec("DROP TABLE $table");
+		}
+		$db->exec("SET FOREIGN_KEY_CHECKS=1");
 	}
 
 }

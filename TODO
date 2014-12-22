@@ -4,19 +4,26 @@ Required tests.
 Add tests for command line and for guarantee.
 Order Test
 Alias Test
+Label in Display Test
+Class Label Test
+Examine why presidents won.
+getValueFromInput
 
 # Medium: 
 Make a Search Component.
 Integrate Select2.js with Components.
 CSRF protection
 Add default group support for authorization.
-Better support for labels in Groups. Also class labels?
 Better form tests.
 File upload.
-Add extra component before a column.
 Ajax Form
 Draggability
 Expand table rows.
+Editable table rows
+Make a display column function for group/display. Refactor group. Refactor table as a group with display
+Set html tag. Make a function that iterates over columns. Perhaps make render linked just return empty.
+"Snap to grid"
+Refactor some functions into "Common" class that contains pluralize, deleteDirectory, etc.
 
 # Hard:
 Authorization Manager

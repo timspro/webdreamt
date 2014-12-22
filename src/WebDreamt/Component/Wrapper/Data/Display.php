@@ -16,40 +16,42 @@ class Display extends Group {
 	}
 
 	/**
-	 * Set the child class prefix
-	 * @param string $childPrefix
-	 * @return self
-	 */
-	function setChildPrefix($childPrefix = null) {
-		return parent::setChildPrefix($childPrefix);
-	}
-
-	/**
 	 * Renders the Display component.
 	 * @param array $input
 	 * @param string $included
 	 * @return string
 	 */
-	function renderChild($input = null, $included = null) {
+	function renderChildComponent($input = null, $included = null) {
 		if ($this->htmlTag) {
-			echo '<' . $this->htmlTag . ' ' . $this->html . " class='" . implode(" ", $this->classes) . "'>";
+			echo '<' . $this->htmlTag . ' ' . $this->html . " class='" . implode(" ", $this->class) . "'>";
 		}
+		echo $this->afterOpening;
 		foreach ($this->columns as $column => $options) {
+			echo $this->renderExtraComponents($column, $input);
+
 			if ($options[self::OPT_ACCESS]) {
+				$childTag = $this->childHtmlTag;
+				if ($this->showLabels) {
+					echo "<$childTag class='wd-display-label'>" . $options[self::OPT_LABEL] . "</$childTag>";
+				}
 				$value = $this->getValueFromInput($column, $input);
 				$visible = ($options[self::OPT_VISIBLE] ? 'style="display:none"' : '');
-				$class = ($this->childPrefix ? "class='" . $this->childPrefix . "-$column'" : '');
-				echo '<' . $this->childHtmlTag . ' ' . $this->childHtml . " $class $visible>";
-				$components = $this->renderLinked($column, $value);
+				$class = ($this->cssPrefix ? "class='" . $this->cssPrefix . "-$column'" : '');
+				echo "<$childTag " . $this->childHtml . " $class $visible>";
+				$components = $this->renderLinkedComponents($column, $value);
 				if ($components !== null) {
 					echo $components;
 				} else {
 					echo $value;
 				}
-				echo '</' . $this->childHtmlTag . '>';
+				echo "</$childTag>";
+				if ($this->breaks) {
+					echo '<br />';
+				}
 			}
 		}
-		echo $this->renderExtra($input);
+		echo $this->renderExtraComponents('', $input);
+		echo $this->beforeClosing;
 		if ($this->htmlTag) {
 			echo '</' . $this->htmlTag . '>';
 		}

@@ -8,7 +8,7 @@ use Propel\Runtime\Map\ColumnMap;
 /**
  * A class to easily render a form for a table in the database.
  */
-class Form extends Component {
+class Form extends Columned {
 
 	/**
 	 * Whether the input type is disabled.
@@ -66,6 +66,11 @@ class Form extends Component {
 	 * @var callable
 	 */
 	protected $inputHook = null;
+	/**
+	 * Defaults to WRAP_PANEL.
+	 * @var string
+	 */
+	protected $wrapper = self::WRAP_PANEL;
 
 	protected function getDefaultOptions() {
 		$options = parent::getDefaultOptions();
@@ -240,24 +245,26 @@ class Form extends Component {
 	 * if not being called from a component.
 	 * @return string
 	 */
-	function renderChild($input = null, $included = null) {
+	function renderChildComponent($input = null, $included = null) {
 		//Get an ID for the form.
 		static::$count++;
 		$count = static::$count;
 		if ($included === null) {
 			//Output the setup for the form.
 			?>
-			<form <?= $this->html ?> class="wd-form <?= implode(" ", $this->classes) ?>">
+			<form <?= $this->html ?> class="wd-form <?= implode(" ", $this->class) ?>">
 				<?php
 			} else {
 				?>
-				<div <?= $this->html ?> class="wd-subform <?= implode(" ", $this->classes) ?>">
+				<div <?= $this->html ?> class="wd-subform <?= implode(" ", $this->class) ?>">
 					<?php
 				}
+				echo $this->afterOpening;
 				?>
 				<input type='hidden' name='<?= $count ?>' value='<?= $this->tableName ?>'/>
 				<?php
 				foreach ($this->columns as $column => $options) {
+					echo $this->renderExtraComponents($column, $input);
 					if ($options[self::OPT_ACCESS]) {
 						//Get the value for the given column.
 						$value = $this->getValueFromInput($column, $input);
@@ -290,8 +297,9 @@ class Form extends Component {
 								$function = $this->inputHook;
 								$function($column, $options, &$name, &$value, &$possibleValues);
 							}
+							$cssPrefix = ($this->cssPrefix ? "class='" . $this->cssPrefix . "-$column'" : '');
 							?>
-							<div class='form-group' <?= $hidden ?>>
+							<div class='form-group' <?= $hidden . ' ' . $cssPrefix ?>>
 								<label for='<?= $name ?>'><?= $label ?></label>
 								<?php
 								if (isset($selectComponent)) {
@@ -300,6 +308,7 @@ class Form extends Component {
 								} else {
 									switch ($type) {
 										case self::HTML_NUMBER:
+											echo "<input type='number' value='$value' $attributes />";
 											break;
 										case self::HTML_TEXT:
 											echo "<input type='text' value='$value' $attributes />";
@@ -343,7 +352,8 @@ class Form extends Component {
 					<button type='button' class="btn btn-default">Add Another</button>
 					<?php
 				}
-				echo $this->renderExtra($input);
+				echo $this->renderExtraComponents('', $input);
+				echo $this->beforeClosing;
 				if ($included) {
 					?>
 				</div>

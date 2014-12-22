@@ -6,6 +6,7 @@ use Cartalyst\Sentry\Facades\Native\Sentry as SentryNative;
 use Cartalyst\Sentry\Sentry as Sentry;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use PDO;
+use Propel\Common\Pluralizer\StandardEnglishPluralizer;
 
 /**
  * A class to store objects that are configured via constant values or expression.
@@ -25,15 +26,16 @@ class Box {
 	/**
 	 * Constructs a Box.
 	 * @param boolean $guarantee If true, then calls Builder::guarantee which helps to maintain
-	 * consistency between the Propel and the database. Defaults to true.
+	 * consistency between the Propel and the database. Defaults to true. Use false when its unnecessary
+	 * to peform this check, such as when not using the database.
 	 */
 	function __construct($guarantee = true) {
 		$this->VendorDirectory = (\file_exists(__DIR__ . '/../../vendor/') ?
 						__DIR__ . '/../../vendor/' : __DIR__ . '/../../../../');
-		if (!self::$box) {
-			self::$box = $this;
-		}
 		if ($guarantee) {
+			if (!self::$box) {
+				self::$box = $this;
+			}
 			Builder::guarantee($this);
 		}
 	}
@@ -79,6 +81,18 @@ class Box {
 		return $this->factory(__FUNCTION__, function() {
 					return new Filler($this);
 				});
+	}
+
+	/**
+	 * Pluralizes a string using Propel's pluralizer.
+	 * @param string $string
+	 * @return string
+	 */
+	function pluralize($string) {
+		$pluralizer = $this->factory(__FUNCTION__, function() {
+			new StandardEnglishPluralizer();
+		});
+		return $pluralizer->getPluralForm($string);
 	}
 
 	/**
@@ -160,11 +174,17 @@ class Box {
 	 * Get an instance of Box.
 	 * @return Box
 	 */
-	public static function a() {
-//		if (!static::$box) {
-//			static::$box = new static;
-//		}
+	static function get() {
 		return static::$box;
+	}
+
+	/**
+	 * Get an instance of Box or create a new one that does not guarantee consistency between the
+	 * database and Propel (and so has lower overhead).
+	 * @return Box
+	 */
+	static function now() {
+		return static::$box ? : new Box(false);
 	}
 
 	/**

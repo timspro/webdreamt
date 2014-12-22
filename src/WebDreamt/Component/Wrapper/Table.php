@@ -7,11 +7,16 @@ use Propel\Runtime\Map\ColumnMap;
 /**
  * A class to easily render a table based on a database table.
  */
-class Table extends Component {
+class Table extends Columned {
 
 	protected $showRowNumbers = false;
 	protected $rowNumberHeader = '#';
 	protected $classes = ['table'];
+	/**
+	 * Defaults to WRAP_PANEL.
+	 * @var string
+	 */
+	protected $wrapper = self::WRAP_PANEL;
 
 	protected function addColumn(ColumnMap $column, array &$options) {
 		parent::addColumn($column, $options);
@@ -43,9 +48,9 @@ class Table extends Component {
 	 * @param string $included The class name of the component that is calling render. Null
 	 * if not being called from a component.
 	 */
-	protected function renderChild($input = [], $included = null) {
+	protected function renderChildComponent($input = [], $included = null) {
 		?>
-		<table <?= $this->html ?> class="<?= implode(" ", $this->classes) ?>">
+		<table <?= $this->html ?> class="<?= implode(" ", $this->class) ?>">
 			<?php
 			if ($this->showLabels) {
 				?>
@@ -60,9 +65,10 @@ class Table extends Component {
 				<?php
 				foreach ($this->columns as $column => $options) {
 					if ($options[self::OPT_ACCESS]) {
+						$cssPrefix = ($this->cssPrefix ? "class='" . $this->cssPrefix . "-$column'" : '');
 						$visible = ($options[self::OPT_VISIBLE] ? '' : 'style="display:none"');
 						?>
-						<th <?= $visible ?>><?= $options[self::OPT_LABEL] ?></th>
+						<th <?= $visible . ' ' . $cssPrefix ?>><?= $options[self::OPT_LABEL] ?></th>
 						<?php
 					}
 				}
@@ -73,6 +79,7 @@ class Table extends Component {
 		?>
 		<tbody>
 			<?php
+			echo $this->beforeOpening;
 			foreach ($input as $index => $row) {
 				?>
 				<tr>
@@ -83,19 +90,21 @@ class Table extends Component {
 						<?php
 					}
 					foreach ($this->columns as $column => $options) {
+						echo $this->renderExtraComponents($column, $row);
 						$value = $this->getValueFromInput($column, $row);
-						$components = $this->renderLinked($column, $value);
+						$components = $this->renderLinkedComponents($column, $value);
 						if ($components !== null) {
 							$value = $components;
 						}
 						if ($options[self::OPT_ACCESS]) {
+							$cssPrefix = ($this->cssPrefix ? "class='" . $this->cssPrefix . "-$column'" : '');
 							$visible = ($options[self::OPT_VISIBLE] ? '' : 'style="display:none"');
 							?>
-							<td <?= $visible ?>><?= $value ?></td>
+							<td <?= $visible . ' ' . $cssPrefix ?>><?= $value ?></td>
 							<?php
 						}
 					}
-					$extra = $this->renderExtra($row);
+					$extra = $this->renderExtraComponents('', $row);
 					if (!empty($extra)) {
 						?>
 						<td><?= $extra ?></td>
@@ -105,6 +114,7 @@ class Table extends Component {
 				</tr>
 				<?php
 			}
+			echo $this->beforeClosing;
 			?>
 		</tbody>
 		</table>

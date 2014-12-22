@@ -4,6 +4,10 @@ namespace WebDreamt\Test;
 
 use WebDreamt\Builder;
 
+/**
+ * An extension of the Test class that truncates the database before every test and removes
+ * the db directory.
+ */
 class DatabaseTest extends Test {
 
 	/** @var Builder */

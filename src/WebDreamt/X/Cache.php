@@ -5,7 +5,7 @@ namespace WebDreamt\X;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Propel;
 use WebDreamt\Cache\Resource;
-use WebDreamt\Hyper\Component;
+use WebDreamt\Hyper\Columned;
 use WebDreamt\Hyper\Form;
 use WebDreamt\Hyper\Group;
 use WebDreamt\Hyper\Select;
@@ -97,10 +97,10 @@ class Cache {
 
 	/**
 	 * Caches the component and returns the rendered template as a string.
-	 * @param Component $component
+	 * @param Columned $component
 	 * @return string
 	 */
-	static function add(Component $component) {
+	static function add(Data $component) {
 		$template = $component->getTemplate();
 		$tokens = token_get_all($template);
 		$tokens = self::portTags($tokens);
