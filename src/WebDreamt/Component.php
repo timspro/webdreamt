@@ -294,8 +294,23 @@ class Component {
 	 * @param array $input
 	 * @param string $included
 	 */
-	function renderMe($input = null, $included = null) {
+	protected function renderMe($input = null, $included = null) {
 		echo $input;
+	}
+
+	/**
+	 * A robust function for getting a value from a generic input.
+	 * @param string $key
+	 * @param array|\WebDreamt\ActiveRecordInterface $input
+	 * @return type
+	 */
+	protected function getValueFromInput($key, $input) {
+		if (is_array($input) && isset($input[$key])) {
+			return $input[$key];
+		} else if ($input instanceof ActiveRecordInterface) {
+			return $input->getByName($key, TableMap::TYPE_FIELDNAME);
+		}
+		return null;
 	}
 
 }

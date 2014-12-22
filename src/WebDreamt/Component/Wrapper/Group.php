@@ -47,8 +47,8 @@ class Group extends Wrapper {
 		$display = $this->display;
 		$oldHtml = $display->getHtml();
 		foreach ($input as $key => $value) {
-			$id = $this->getValueFrom
-			if ($this->childId) {
+			$id = $this->getValueFromInput('id', $value);
+			if ($this->childId && $id) {
 				$display->setHtml($oldHtml . " id='" . $this->childId . "-$id'");
 			}
 			$display->render($value, static::class);

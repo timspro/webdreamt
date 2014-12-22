@@ -4,6 +4,9 @@ namespace WebDreamt\Component;
 
 use WebDreamt\Component;
 
+/**
+ * Allows one to set a component inside another component.
+ */
 class Wrapper extends Component {
 
 	/**
