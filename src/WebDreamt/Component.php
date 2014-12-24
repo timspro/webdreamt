@@ -5,15 +5,6 @@ namespace WebDreamt;
 class Component {
 
 	/**
-	 * The method to use to get input for the extra component.
-	 */
-	const EXTRA_METHOD = 'method';
-	/**
-	 * The extra component.
-	 */
-	const EXTRA_COMPONENT = 'component';
-
-	/**
 	 * A string to go after the opening tag.
 	 * @var string
 	 */
@@ -37,7 +28,7 @@ class Component {
 	 * The HTML tag of the top-level element.
 	 * @var string
 	 */
-	protected $htmlTag = 'div';
+	protected $htmlTag;
 	/**
 	 * CSS classes for the top-level element.
 	 * @var string
@@ -47,25 +38,68 @@ class Component {
 	 * An array of components to render. Note that null means the child component.
 	 * @var array
 	 */
-	protected $components = [null];
+	protected $components;
 	/**
 	 * The input to be passed to the render method. If set, then overrides what is passed via the render()
 	 * method.
 	 * @var array
 	 */
 	protected $input;
+	/**
+	 * A callback to add input-dependent classes.
+	 * @var callable
+	 */
+	protected $cssCallback;
+	/**
+	 * A callback to add input-dependent HTML.
+	 * @var callable
+	 */
+	protected $htmlCallback;
+	/**
+	 * A string used after the opening tag.
+	 * @var string
+	 */
+	protected $withAfterOpening;
+	/**
+	 * A string used before the closing tag.
+	 * @var string
+	 */
+	protected $withBeforeClosing;
+	/**
+	 * A string used for the HTML of the element.
+	 * @var string
+	 */
+	protected $withHtml;
+	/**
+	 * A string used for the class of the element.
+	 * @var string
+	 */
+	protected $withCssClass;
+
+	/**
+	 * Get a new component.
+	 * @param string $htmlTag
+	 */
+	function __construct($htmlTag = 'div', $class = null, $html = null) {
+		$this->htmlTag = $htmlTag;
+		$this->class = $class;
+		$this->html = $html;
+		$this->components = [null];
+	}
 
 	/**
 	 * Set the title of the component. The effect of this depends on the child component.
 	 * @param string $title
+	 * @return self
 	 */
-	function setTitle($title = '') {
+	function setTitle($title) {
 		$this->title = $title;
+		return $this;
 	}
 
 	/**
 	 * Get the title of the component.
-	 * @param string $title
+	 * @return string $title
 	 */
 	function getTitle() {
 		return $this->title;
@@ -76,7 +110,7 @@ class Component {
 	 * @param string $after
 	 * @return self
 	 */
-	function setAfterOpeningTag($after = '') {
+	function setAfterOpeningTag($after) {
 		$this->afterOpening = $after;
 		return $this;
 	}
@@ -90,6 +124,16 @@ class Component {
 	}
 
 	/**
+	 * Set a string to go after the opening tag and will be reset by render().
+	 * @param string $after
+	 * @return self
+	 */
+	protected function useAfterOpeningTag($after) {
+		$this->withAfterOpening .= " $after";
+		return $this;
+	}
+
+	/**
 	 * Set a string to go before the closing tag.
 	 * @param string $before
 	 * @return self
@@ -100,11 +144,21 @@ class Component {
 	}
 
 	/**
-	 * Get the stirng set to go before closing tag.
+	 * Get the string set to go before closing tag.
 	 * @return string
 	 */
 	function getBeforeClosingTag() {
 		return $this->beforeClosing;
+	}
+
+	/**
+	 * Set a string to go before the closing tag and will be reset by render().
+	 * @param string $before
+	 * @return self
+	 */
+	protected function useBeforeClosingTag($before) {
+		$this->withBeforeClosing .= " $before";
+		return $this;
 	}
 
 	/**
@@ -113,7 +167,7 @@ class Component {
 	 * @param string $className
 	 * @return self
 	 */
-	function setCssClass($className = '') {
+	function setCssClass($className) {
 		$this->class = $className;
 		return $this;
 	}
@@ -132,9 +186,37 @@ class Component {
 	 * @param string
 	 * @return self
 	 */
-	function appendCssClass($className = '') {
+	function appendCssClass($className) {
 		$this->class .= " $className";
 		return $this;
+	}
+
+	/**
+	 * Set the CSS class(es) to be used with the top-level element. These will be reset by render().
+	 * @param string $className
+	 */
+	protected function useCssClass($className) {
+		$this->withCssClass .= " $className";
+		return $this;
+	}
+
+	/**
+	 * Set a callback that can generate input-dependent classes.
+	 * @param callable $callable This is called with the input and object that are passed to the
+	 * render function.
+	 * @return self
+	 */
+	function setCssClassCallback($callable) {
+		$this->cssCallback = $callable;
+		return $this;
+	}
+
+	/**
+	 * Get the class callback.
+	 * @return string
+	 */
+	function getCssClassCallback() {
+		return $this->cssCallback;
 	}
 
 	/**
@@ -142,7 +224,7 @@ class Component {
 	 * @param string $htmlTag
 	 * @return self
 	 */
-	function setHtmlTag($htmlTag = 'div') {
+	function setHtmlTag($htmlTag) {
 		$this->htmlTag = $htmlTag;
 		return $this;
 	}
@@ -161,7 +243,7 @@ class Component {
 	 * @param string $html
 	 * @return self
 	 */
-	function setHtml($html = '') {
+	function setHtml($html) {
 		$this->html = $html;
 		return $this;
 	}
@@ -180,9 +262,38 @@ class Component {
 	 * @param string $html
 	 * @return self
 	 */
-	function appendHtml($html = '') {
+	function appendHtml($html) {
 		$this->html .= $html;
 		return $this;
+	}
+
+	/**
+	 * Set HTML to use with the top-level element. This will be reset by render().
+	 * @param string $html
+	 * @return self
+	 */
+	protected function useHtml($html) {
+		$this->withHtml .= " $html";
+		return $this;
+	}
+
+	/**
+	 * Add a callback function to generate HTML attributes based on input.
+	 * @param callable $callable This takes as a parameter the current input and class object that
+	 * called the render() method and should return the HTML attributes.
+	 * @return self
+	 */
+	function setHtmlCallback($callable) {
+		$this->htmlCallback = $callable;
+		return $this;
+	}
+
+	/**
+	 * Get the HTML callback if set.
+	 * @return callable
+	 */
+	function getHtmlCallback() {
+		return $this->htmlCallback;
 	}
 
 	/**
@@ -191,7 +302,7 @@ class Component {
 	 * @param array|ActiveRecordInterface $input
 	 * @return self
 	 */
-	function setInput($input = null) {
+	function setInput($input) {
 		$this->input = $input;
 		return $this;
 	}
@@ -208,8 +319,9 @@ class Component {
 	 * Set the child component index and thus the order that the child component appears along with
 	 * extra components.
 	 * @param int $newIndex
+	 * @return self
 	 */
-	function setChildComponentIndex($newIndex = 0) {
+	function setChildComponentIndex($newIndex) {
 		$array = [];
 		foreach ($this->components as $index => $component) {
 			if ($index === $newIndex) {
@@ -221,6 +333,7 @@ class Component {
 			}
 		}
 		$this->components = $array;
+		return $this;
 	}
 
 	/**
@@ -238,9 +351,11 @@ class Component {
 	/**
 	 * Add an extra component.
 	 * @param Component $component
+	 * @return self
 	 */
 	function addExtraComponent(Component $component) {
 		$this->components[] = $component;
+		return $this;
 	}
 
 	/**
@@ -255,22 +370,35 @@ class Component {
 	 * Renders the component.
 	 * @param mixed $input Any input for the component. The effect of the input depends on the child
 	 * class of the component. By default, it is simply echoed.
-	 * @param string $included The class that included the component. Null if no class.
+	 * @param Component $included The component that is calling render(). Should be null if render()
+	 * is not called by a component.
 	 */
-	function render($input = null, $included = null) {
+	function render($input = null, Component $included = null) {
 		if ($this->input) {
 			$input = $this->input;
 		}
 		$htmlTag = $this->htmlTag;
 		if ($htmlTag !== null) {
-			echo "<$htmlTag " . $this->html . " class='" . $this->class . "'>";
+			//Get HTML
+			$htmlCallback = $this->htmlCallback;
+			$htmlCallback = $htmlCallback ? $htmlCallback($input, $included) . ' ' : '';
+			//Get CSS classes
+			$cssCallback = $this->cssCallback;
+			$cssCallback = $cssCallback ? $cssCallback($input, $included) . ' ' : '';
+			$classes = $cssCallback . $this->class . $this->withCssClass;
+			$classes = $classes ? "classes='$classes'" : '';
+			echo "<$htmlTag $htmlCallback" . $this->html . $this->withHtml . " class='$classes'>";
 		}
-		echo $this->afterOpening;
+		echo $this->afterOpening . $this->withAfterOpening;
 		$this->renderComponents($input, $included);
-		echo $this->beforeClosing;
+		echo $this->beforeClosing . $this->withBeforeClosing;
 		if ($htmlTag !== null) {
 			echo "</$htmlTag>";
 		}
+		$this->withHtml = null;
+		$this->withCssClass = null;
+		$this->withAfterOpening = null;
+		$this->withBeforeClosing = null;
 	}
 
 	/**
@@ -299,18 +427,17 @@ class Component {
 	}
 
 	/**
-	 * A robust function for getting a value from a generic input.
-	 * @param string $key
-	 * @param array|\WebDreamt\ActiveRecordInterface $input
-	 * @return type
+	 * Change underscores into spaces in a column or table name and capitalize the result.
+	 * Also, this will change ' Id' to ' ID' if the string is the last part of the resulting name.
+	 * @param string $name
+	 * @return string
 	 */
-	protected function getValueFromInput($key, $input) {
-		if (is_array($input) && isset($input[$key])) {
-			return $input[$key];
-		} else if ($input instanceof ActiveRecordInterface) {
-			return $input->getByName($key, TableMap::TYPE_FIELDNAME);
+	static protected function beautify($name) {
+		$return = ucwords(str_replace('_', ' ', $name));
+		if (substr($return, -3) === ' Id') {
+			$return = substr($return, 0, strlen($return) - 2) . 'ID';
 		}
-		return null;
+		return $return;
 	}
 
 }

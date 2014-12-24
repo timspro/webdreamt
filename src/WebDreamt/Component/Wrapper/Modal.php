@@ -18,8 +18,7 @@ class Modal extends Wrapper {
 	 * @param Component $display
 	 */
 	protected function __construct(Component $display) {
-		parent::__construct($display);
-		$this->appendCssClass('modal fade');
+		parent::__construct($display, 'modal fade');
 	}
 
 	/**
@@ -28,7 +27,7 @@ class Modal extends Wrapper {
 	 * text for the button.
 	 * @return self
 	 */
-	function addButtons(array $buttons = []) {
+	function addButtons(array $buttons) {
 		$this->buttons = array_merge($this->buttons, $buttons);
 		return $this;
 	}
@@ -54,7 +53,7 @@ class Modal extends Wrapper {
 						<span class="modal-title"><?= $this->title ?></span>
 					</div>
 					<div class="modal-body">
-						<?php $this->renderMe($input, static::class) ?>
+						<?php $this->renderMe($input, $this) ?>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default wd-btn-close" data-dismiss="modal">Close</button>

@@ -20,14 +20,30 @@ class Wrapper extends Component {
 	 * component.
 	 * @param Component $display Specify a component which the wrapper goes around.
 	 */
-	function __construct(Component $display) {
-		parent::__construct();
+	function __construct(Component $display, $htmlTag = 'div', $class = null, $html = null) {
+		parent::__construct($htmlTag, $class, $html);
 		$this->display = $display;
 		$this->title = $display->getTitle();
 	}
 
+	/**
+	 * Get the display component.
+	 * @return Component
+	 */
+	function getDisplayComponent() {
+		return $this->display;
+	}
+
+	/**
+	 * Set the display component.
+	 * @param Component $display
+	 */
+	function setDisplayComponent(Component $display) {
+		$this->display = $display;
+	}
+
 	function renderMe($input = null, $included = null) {
-		$this->display->render($input, static::class);
+		$this->display->render($input, $this);
 	}
 
 }

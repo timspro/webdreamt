@@ -5,7 +5,7 @@ namespace WebDreamt\Component;
 use WebDreamt\Component;
 
 /**
- * A class that allows one to basically use a function to render input.
+ * A class that allows one to use a function to render input.
  */
 class Custom extends Component {
 
@@ -23,7 +23,7 @@ class Custom extends Component {
 	/**
 	 * Give a function that will be used to render any input.
 	 * @param callable $function The function should output (i.e. via echo) its output. It is called with
-	 * two parameters: the input and the class name that are passed to the render function.
+	 * two parameters: the input and the object that called the render function.
 	 * @param boolean $always If false, then the function will only be called when the input is not null.
 	 * If true, then the function will be called everytime.
 	 */
@@ -36,10 +36,10 @@ class Custom extends Component {
 	/**
 	 * Renders the custom component.
 	 * @param array $input
-	 * @param string $included
+	 * @param Component $included
 	 * @return string
 	 */
-	function renderMe($input = null, $included = null) {
+	function renderMe($input = null, Component $included = null) {
 		$function = $this->function;
 		if ($this->always || $input !== null) {
 			$function($input, $included);

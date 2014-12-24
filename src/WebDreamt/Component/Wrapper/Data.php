@@ -1,6 +1,6 @@
 <?php
 
-namespace WebDreamt\Component;
+namespace WebDreamt\Component\Wrapper;
 
 use DateTime;
 use Propel\Generator\Model\PropelTypes;
@@ -10,6 +10,8 @@ use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
 use WebDreamt\Box;
 use WebDreamt\Component;
+use WebDreamt\Component\Wrapper;
+use WebDreamt\Component\Wrapper\Data;
 
 /**
  * A class used as a base to render data from the database.
@@ -50,6 +52,14 @@ class Data extends Wrapper {
 	 * given as a Propel object.
 	 */
 	const OPT_PROPEL_OBJECT = 'object';
+	/**
+	 * The method to use to get input for the extra component.
+	 */
+	const EXTRA_METHOD = 'method';
+	/**
+	 * The extra component.
+	 */
+	const EXTRA_COMPONENT = 'component';
 
 	/**
 	 * An array where the keys are column names and the values are the options for each column.
@@ -71,22 +81,27 @@ class Data extends Wrapper {
 	 * The name of the table.
 	 * @var string
 	 */
-	protected $tableName = '';
+	protected $tableName;
 	/**
 	 * The Propel table map.
 	 * @var TableMap
 	 */
-	protected $tableMap = null;
+	protected $tableMap;
 	/**
-	 * Indicates whether the labels should be shown.
+	 * A component to show labels in.
+	 * @var Component
+	 */
+	protected $label;
+	/**
+	 * Indicates if the labels should output alongside the data.
 	 * @var boolean
 	 */
-	protected $labelable = true;
+	protected $outputLabel;
 	/**
 	 * The css prefix used to identify column data.
 	 * @var string
 	 */
-	protected $dataClass = '';
+	protected $dataClass;
 	/**
 	 * The time format.
 	 * @var string
@@ -104,23 +119,21 @@ class Data extends Wrapper {
 	protected $dateFormat = 'm/d/y';
 
 	/**
-	 * Construct a component. Note that the provided table name can be null, in which case the
-	 * constructor will not set any members, but this not work with the child component.
+	 * Construct a component that represents a table in the database.
 	 * @param string $tableName
 	 */
-	function __construct($tableName = null) {
-		if ($tableName === null) {
-			$table = Propel::getDatabaseMap()->getTable($tableName);
-			//Keep a reference to the table map so when something is linked, we can look up the linked
-			//table's information.
-			$this->tableMap = $table;
-			$this->tableName = $tableName;
-			$this->header = static::convertName($tableName);
-			foreach ($table->getColumns() as $column) {
-				$name = $column->getName();
-				$this->columns[$name] = $this->getDefaultOptions();
-				$this->addColumn($column, $this->columns[$name]);
-			}
+	function __construct(Component $display, $tableName, $htmlTag = 'div', $class = null, $html = null) {
+		parent::__construct($display, $htmlTag, $class, $html);
+		$table = Propel::getDatabaseMap()->getTable($tableName);
+		//Keep a reference to the table map so when something is linked, we can look up the linked
+		//table's information.
+		$this->tableMap = $table;
+		$this->tableName = $tableName;
+		$this->title = static::beautify($tableName);
+		foreach ($table->getColumns() as $column) {
+			$name = $column->getName();
+			$this->columns[$name] = $this->getDefaultOptions();
+			$this->addColumn($column, $this->columns[$name]);
 		}
 	}
 
@@ -140,7 +153,7 @@ class Data extends Wrapper {
 			$options[self::OPT_EXTRA] = $column->getSize();
 		}
 		//Set label.
-		$options[self::OPT_LABEL] = static::convertName($column->getName());
+		$options[self::OPT_LABEL] = static::beautify($column->getName());
 	}
 
 	/**
@@ -176,12 +189,12 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Set a CSS class prefix that will be used to identify column data. If null, then no prefix will
-	 * be used.
+	 * Set a CSS class prefix that will be used to identify column data. If null, then no CSS class
+	 * will be used.
 	 * @param string $dataClass
 	 * @return self
 	 */
-	function setDataClass($dataClass = null) {
+	function setDataClass($dataClass) {
 		$this->dataClass = $dataClass;
 		return $this;
 	}
@@ -249,21 +262,24 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Show or hide labels. Default to true.
-	 * @param boolean $labels
+	 * Set a component to show labels in. Defaults to null. Also, can specify whether the output should
+	 * automatically render the label alongside the data. Defaults to true
+	 * @param Component $label
+	 * @param boolean $outputWithLabel
 	 * @return self;
 	 */
-	function setLabelable($labels = true) {
-		$this->labelable = $labels;
+	function setLabelComponent(Component $label = null, $outputWithLabel = true) {
+		$this->label = $label;
+		$this->outputLabel = $outputWithLabel;
 		return $this;
 	}
 
 	/**
-	 * Get if labels shown.
+	 * Get the label component.
 	 * @return string
 	 */
-	function getLabelable() {
-		return $this->labelable;
+	function getLabelComponent() {
+		return $this->label;
 	}
 
 	/**
@@ -291,9 +307,9 @@ class Data extends Wrapper {
 	 * Add an extra component that will be rendered within the context of the current component.
 	 * This also will check the table name of the given component and compute the method to call
 	 * to get the input for the extra component.
+	 * @param Component $component
 	 * @param string $column The column that goes after the extra component. If null, then will put the
 	 * component after the last column.
-	 * @param Component $component
 	 * @param string $inputIdColumn If there are multiple methods to call on the input (i.e.
 	 * multiple "RelatedBy" methods), then specify the ID column to use.
 	 * @return self
@@ -310,7 +326,7 @@ class Data extends Wrapper {
 		//Figure out the Propel method if applicable.
 		$propel = null;
 		if ($component instanceof Data) {
-			if ($component) $table = Propel::getDatabaseMap()->getTable($component->getTableName());
+			$table = Propel::getDatabaseMap()->getTable($component->getTableName());
 			$propel = 'get' . Box::now()->pluralize($table->getPhpName());
 			if ($inputIdColumn) {
 				$propel .= 'RelatedBy' . $table->getColumn($inputIdColumn)->getPhpName();
@@ -388,6 +404,22 @@ class Data extends Wrapper {
 	 */
 	function setLabels(array $columns) {
 		$this->merge($columns, self::OPT_LABEL);
+		return $this;
+	}
+
+	/**
+	 * Output the HTML of the labels.
+	 * @return self
+	 */
+	function printLabels() {
+		foreach ($this->columns as $options) {
+			if ($options[self::OPT_ACCESS]) {
+				if ($options[self::OPT_VISIBLE]) {
+					$this->display->useHtml('style="display:none"');
+				}
+				$this->label->render($options[self::OPT_LABEL], static::class);
+			}
+		}
 		return $this;
 	}
 
@@ -504,19 +536,27 @@ class Data extends Wrapper {
 	 * if not being called from a component.
 	 */
 	protected function renderMe($input = null, $included = null) {
-		$htmlTag = $this->htmlTag;
-		if ($htmlTag !== null) {
-			echo '<' . $this->htmlTag . ' class="' . $this->class . '">';
-		}
-		echo $this->afterOpening;
 		foreach ($this->columns as $column => $options) {
 			if ($options[self::OPT_ACCESS]) {
-				$this->renderColumn($column, $options);
+				if ($options[self::OPT_VISIBLE]) {
+					$this->display->useHtml('style="display:none"');
+				}
+				if ($this->dataClass) {
+					$this->display->useCssClass($this->dataClass . "-$column");
+				}
+				if ($this->label && $this->outputLabel) {
+					if ($options[self::OPT_VISIBLE]) {
+						$this->label->useHtml('style="display:none"');
+					}
+					$this->label->render($options[self::OPT_LABEL], static::class);
+				}
+				$value = $this->getValueFromInput($column, $input);
+				$linked = $this->renderLinkedComponents($column, $value);
+				if (!$linked) {
+					$this->display->renderMe($value, $this);
+				}
+				$this->renderColumnComponents($column, $input);
 			}
-		}
-		echo $this->beforeClosing;
-		if ($htmlTag !== null) {
-			echo '</' . $this->htmlTag . '>';
 		}
 	}
 
@@ -525,17 +565,35 @@ class Data extends Wrapper {
 	 * for the given column.
 	 * @param string $column
 	 * @param array|ActiveRecordInterface $input The input to be given to the component.
-	 * @return string
+	 * @return boolean True if something was rendered; false otherwise.
 	 */
 	protected function renderLinkedComponents($column, $input = null) {
+		$result = false;
 		if (isset($this->linked[$column])) {
-			$result = '';
 			foreach ($this->linked[$column] as $component) {
-				$result .= $component->render($input, static::class);
+				$component->render($input, static::class);
+				$result = true;
 			}
-			return $result;
 		}
-		return null;
+		return $result;
+	}
+
+	/**
+	 * Render any extra components for the given column. Return null if there is no component
+	 * for the given column.
+	 * @param string $column
+	 * @param array|ActiveRecordInterface $input The input to be given to the component.
+	 * @return boolean True if something was rendered; false otherwise.
+	 */
+	protected function renderColumnComponents($column, $input = null) {
+		$result = false;
+		if (isset($this->columnComponents[$column])) {
+			foreach ($this->columnComponents[$column] as $component) {
+				$component->render($input, static::class);
+				$result = true;
+			}
+		}
+		return $result;
 	}
 
 	/**
@@ -544,8 +602,8 @@ class Data extends Wrapper {
 	 * @param string $included
 	 */
 	protected function renderComponents($input = null, $included = null) {
-		foreach ($this->components as $component) {
-			if (!$component) {
+		foreach ($this->components as $object) {
+			if (!$object) {
 				$this->renderMe($input, $included);
 			} else {
 				$method = $object[self::EXTRA_METHOD];
@@ -594,20 +652,6 @@ class Data extends Wrapper {
 			return $this->columns[$key][self::OPT_DEFAULT];
 		}
 		return null;
-	}
-
-	/**
-	 * Change underscores into spaces in a column or table name and capitalize the result.
-	 * Also, this will change ' Id' to ' ID' if the string is the last part of the resulting name.
-	 * @param string $name
-	 * @return string
-	 */
-	static protected function convertName($name) {
-		$return = ucwords(str_replace('_', ' ', $name));
-		if (substr($return, -3) === ' Id') {
-			$return = substr($return, 0, strlen($return) - 2) . 'ID';
-		}
-		return $return;
 	}
 
 }

@@ -1,14 +1,16 @@
 <?php
 
-namespace WebDreamt\Hyper;
+namespace WebDreamt\Component\Wrapper\Data;
 
 use Propel\Generator\Model\PropelTypes;
 use Propel\Runtime\Map\ColumnMap;
+use WebDreamt\Component\Wrapper\Data;
+use WebDreamt\Component\Wrapper\Group\Select;
 
 /**
  * A class to easily render a form for a table in the database.
  */
-class Form extends Columned {
+class Form extends Data {
 
 	/**
 	 * Whether the input type is disabled.
@@ -245,131 +247,93 @@ class Form extends Columned {
 	 * if not being called from a component.
 	 * @return string
 	 */
-	function renderChildComponent($input = null, $included = null) {
+	function renderMe($input = null, $included = null) {
 		//Get an ID for the form.
 		static::$count++;
 		$count = static::$count;
-		if ($included === null) {
-			//Output the setup for the form.
-			?>
-			<form <?= $this->html ?> class="wd-form <?= implode(" ", $this->class) ?>">
-				<?php
-			} else {
-				?>
-				<div <?= $this->html ?> class="wd-subform <?= implode(" ", $this->class) ?>">
-					<?php
-				}
-				echo $this->afterOpening;
-				?>
-				<input type='hidden' name='<?= $count ?>' value='<?= $this->tableName ?>'/>
-				<?php
-				foreach ($this->columns as $column => $options) {
-					echo $this->renderExtraComponents($column, $input);
-					if ($options[self::OPT_ACCESS]) {
-						//Get the value for the given column.
-						$value = $this->getValueFromInput($column, $input);
-						//Get the output for any linked components. Note that we do something special for selects.
-						$components = null;
-						$selectComponent = null;
-						if (isset($this->linked[$column])) {
-							$components = '';
-							foreach ($this->linked[$column] as $component) {
-								if ($component instanceof Select) {
-									$selectComponent = $component;
-								} else {
-									$components .= $component->render($value, static::class);
-								}
-							}
-						}
-						//If there are no linked components or if there is a Select component...
-						if ($components === null || $selectComponent !== null) {
-							$name = $count . "-" . $column;
-							$label = ($selectComponent ? $selectComponent->getHeader() : $options[self::OPT_LABEL]);
-							$hidden = $options[self::OPT_VISIBLE] ? '' : 'style="display:none"';
-							$disabled = $options[self::OPT_DISABLE] ? 'disabled=""' : '';
-							$required .= $options[self::OPT_REQUIRE] && $options[self::OPT_VISIBLE] ? 'required=""' : '';
-							$type = $options[self::OPT_HTML_TYPE];
-							$class = $options[self::OPT_HTML_CLASS];
-							$extra = $options[self::OPT_HTML_EXTRA];
-							$attributes = "name='$name' class='form-control $class' $disabled $required $extra";
-							$possibleValues = '';
-							if ($this->inputHook) {
-								$function = $this->inputHook;
-								$function($column, $options, &$name, &$value, &$possibleValues);
-							}
-							$cssPrefix = ($this->cssPrefix ? "class='" . $this->cssPrefix . "-$column'" : '');
-							?>
-							<div class='form-group' <?= $hidden . ' ' . $cssPrefix ?>>
-								<label for='<?= $name ?>'><?= $label ?></label>
-								<?php
-								if (isset($selectComponent)) {
-									$selectComponent->appendHtml($attributes);
-									echo $selectComponent->render($value);
-								} else {
-									switch ($type) {
-										case self::HTML_NUMBER:
-											echo "<input type='number' value='$value' $attributes />";
-											break;
-										case self::HTML_TEXT:
-											echo "<input type='text' value='$value' $attributes />";
-											break;
-										case self::HTML_TEXTAREA:
-											echo "<textarea $attributes>$value</textarea>";
-											break;
-										case self::HTML_BOOLEAN:
-											$value = $value ? 'Yes' : 'No';
-											$possibleValues = ['No', 'Yes'];
-										case self::HTML_SELECT:
-											?>
-											<select class="form-control" <?= $attributes ?>>
-												<?php
-												$possibleValues = $possibleValues ? : $options[self::OPT_EXTRA];
-												foreach ($possibleValues as $option) {
-													$selected = $value === $option ? 'selected=""' : '';
-													?>
-													<option <?= $selected ?>><?= $option ?></option>
-													<?php
-												}
-												?>
-											</select>
-											<?php
-											break;
-									}
-								}
-								?>
-							</div>
-							<?php
-						}
-						//Output the components
-						if ($components !== null) {
-							echo $components;
-							continue;
+		echo "<input type='hidden' name='$count' value='" . $this->tableName . "'/>";
+		foreach ($this->columns as $column => $options) {
+			if ($options[self::OPT_ACCESS]) {
+				//Get the value for the given column.
+				$value = $this->getValueFromInput($column, $input);
+				//Get the output for any linked components. Note that we do something special for selects.
+				$components = null;
+				$selectComponent = null;
+				if (isset($this->linked[$column])) {
+					$components = '';
+					foreach ($this->linked[$column] as $component) {
+						if ($component instanceof Select) {
+							$selectComponent = $component;
+						} else {
+							$components .= $component->render($value, static::class);
 						}
 					}
 				}
-				if ($this->multiple) {
+				//If there are no linked components or if there is a Select component...
+				if ($components === null || $selectComponent !== null) {
+					$name = $count . "-" . $column;
+					$label = $selectComponent ? $selectComponent->getHeader() : $options[self::OPT_LABEL];
+					$hidden = $options[self::OPT_VISIBLE] ? '' : 'style="display:none"';
+					$disabled = $options[self::OPT_DISABLE] ? 'disabled=""' : '';
+					$required .= $options[self::OPT_REQUIRE] && $options[self::OPT_VISIBLE] ? 'required=""' : '';
+					$type = $options[self::OPT_HTML_TYPE];
+					$class = $options[self::OPT_HTML_CLASS];
+					$extra = $options[self::OPT_HTML_EXTRA];
+					$attributes = "name='$name' class='form-control $class' $disabled $required $extra";
+					$possibleValues = '';
+					if ($this->inputHook) {
+						$function = $this->inputHook;
+						$function($column, $options, &$name, &$value, &$possibleValues);
+					}
+					$cssPrefix = $this->dataClass ? "class='" . $this->dataClass . "-$column'" : '';
 					?>
-					<button type='button' class="btn btn-default">Add Another</button>
+					<div class='form-group' <?= $hidden . ' ' . $cssPrefix ?>>
+						<label for='<?= $name ?>'><?= $label ?></label>
+						<?php
+						if (isset($selectComponent)) {
+							$selectComponent->appendHtml($attributes);
+							echo $selectComponent->render($value);
+						} else {
+							switch ($type) {
+								case self::HTML_NUMBER:
+									echo "<input type='number' value='$value' $attributes />";
+									break;
+								case self::HTML_TEXT:
+									echo "<input type='text' value='$value' $attributes />";
+									break;
+								case self::HTML_TEXTAREA:
+									echo "<textarea $attributes>$value</textarea>";
+									break;
+								case self::HTML_BOOLEAN:
+									$value = $value ? 'Yes' : 'No';
+									$possibleValues = ['No', 'Yes'];
+								case self::HTML_SELECT:
+									?>
+									<select class="form-control" <?= $attributes ?>>
+										<?php
+										$possibleValues = $possibleValues ? : $options[self::OPT_EXTRA];
+										foreach ($possibleValues as $option) {
+											$selected = $value === $option ? 'selected=""' : '';
+											?>
+											<option <?= $selected ?>><?= $option ?></option>
+											<?php
+										}
+										?>
+									</select>
+									<?php
+									break;
+							}
+						}
+						?>
+					</div>
 					<?php
 				}
-				echo $this->renderExtraComponents('', $input);
-				echo $this->beforeClosing;
-				if ($included) {
-					?>
-				</div>
-				<?php
-			} else {
-				if ($this->wrapper !== self::WRAP_MODAL) {
-					?>
-					<button type="submit" class="btn btn-default">Submit</button>
-					<?php
-				} else {
-					$this->setButtons(["btn-primary wd-submit" => 'Submit']);
-				}
-				?>
-				<input type='hidden' class='next-form-id' value='<?= static::$count + 1 ?>' />
-			</form>
-			<?php
+				//Output the components
+				echo $components;
+			}
+		}
+		if ($this->multiple) {
+			echo "<button type='button' class='btn btn-default'>Add Another</button>";
 		}
 	}
 
