@@ -27,8 +27,8 @@ class Select extends Group {
 	 * Construct a select box.
 	 * @param string $table
 	 */
-	function __construct() {
-		$option = new Component('option');
+	function __construct($class = null, $html = null) {
+		$option = new Component('option', $class, $html);
 		parent::__construct($option, 'select');
 		$this->addCssClass('form-control');
 		$option->setHtmlCallback(function($value) {

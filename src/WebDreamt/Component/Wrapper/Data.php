@@ -96,7 +96,7 @@ class Data extends Wrapper {
 	 * Indicates if the labels should output alongside the data.
 	 * @var boolean
 	 */
-	protected $outputLabel;
+	protected $labelInDisplay;
 	/**
 	 * The css prefix used to identify column data.
 	 * @var string
@@ -263,14 +263,16 @@ class Data extends Wrapper {
 
 	/**
 	 * Set a component to show labels in. Defaults to null. Also, can specify whether the output should
-	 * automatically render the label alongside the data. Defaults to true
+	 * automatically render the label in the display component. If true, then will put the label inside
+	 * the component. If false, then will put the label alongside the component. If null, will
+	 * not output the label.
 	 * @param Component $label
-	 * @param boolean $outputWithLabel
+	 * @param boolean $labelInDisplay Can be
 	 * @return self;
 	 */
-	function setLabelComponent(Component $label = null, $outputWithLabel = true) {
+	function setLabelComponent(Component $label = null, $labelInDisplay = true) {
 		$this->label = $label;
-		$this->outputLabel = $outputWithLabel;
+		$this->labelInDisplay = $labelInDisplay;
 		return $this;
 	}
 
@@ -544,20 +546,35 @@ class Data extends Wrapper {
 				if ($this->dataClass) {
 					$this->display->useCssClass($this->dataClass . "-$column");
 				}
-				if ($this->label && $this->outputLabel) {
+				if ($this->label && $this->labelInDisplay !== null) {
 					if ($options[self::OPT_VISIBLE]) {
 						$this->label->useHtml('style="display:none"');
 					}
-					$this->label->render($options[self::OPT_LABEL], static::class);
+					if ($this->labelInDisplay) {
+						ob_start();
+						$this->label->render($options[self::OPT_LABEL], static::class);
+						$this->display->setAfterOpeningTag(ob_get_clean());
+					} else {
+						$this->label->render($options[self::OPT_LABEL], static::class);
+					}
 				}
 				$value = $this->getValueFromInput($column, $input);
 				$linked = $this->renderLinkedComponents($column, $value);
 				if (!$linked) {
-					$this->display->renderMe($value, $this);
+					$this->renderColumn($column, $value);
 				}
 				$this->renderColumnComponents($column, $input);
 			}
 		}
+	}
+
+	/**
+	 * Render a column.
+	 * @param string $column
+	 * @param mixed $value
+	 */
+	protected function renderColumn($column, $value) {
+		$this->display->renderMe($value, $this);
 	}
 
 	/**

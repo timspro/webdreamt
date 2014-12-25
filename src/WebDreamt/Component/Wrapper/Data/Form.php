@@ -64,6 +64,11 @@ class Form extends Data {
 	 */
 	protected static $count = 0;
 	/**
+	 * The form ID
+	 * @var int
+	 */
+	protected $count;
+	/**
 	 * A function to give control to change form inputs.
 	 * @var callable
 	 */
@@ -73,6 +78,21 @@ class Form extends Data {
 	 * @var string
 	 */
 	protected $wrapper = self::WRAP_PANEL;
+	/**
+	 * Linked select components.
+	 * @var array
+	 */
+	protected $selectComponent = [];
+
+	/**
+	 * Construct a Form.
+	 * @param string $tableName
+	 */
+	function __construct($tableName, $class = null, $html = null) {
+		$display = new Wrapper($this->input, 'div', "form-group $class", $html);
+		parent::__construct($display, $tableName, 'form', null, 'role="form"');
+		$this->setLabelComponent(new Component('label'), null);
+	}
 
 	protected function getDefaultOptions() {
 		$options = parent::getDefaultOptions();
@@ -240,101 +260,92 @@ class Form extends Data {
 		return $this;
 	}
 
-	/**
-	 * Renders the component.
-	 * @param array $input
-	 * @param string $included The class name of the component that is calling render. Null
-	 * if not being called from a component.
-	 * @return string
-	 */
-	function renderMe($input = null, $included = null) {
+	function render($input = null, $included = null) {
+		if ($included instanceof Modal) {
+			$this->setHtmlTag('div');
+			$included->useButtons(['btn-primary wd-btn-submit' => 'Submit']);
+		} else {
+			$this->setHtmlTag('form');
+		}
 		//Get an ID for the form.
 		static::$count++;
 		$count = static::$count;
-		echo "<input type='hidden' name='$count' value='" . $this->tableName . "'/>";
-		foreach ($this->columns as $column => $options) {
-			if ($options[self::OPT_ACCESS]) {
-				//Get the value for the given column.
-				$value = $this->getValueFromInput($column, $input);
-				//Get the output for any linked components. Note that we do something special for selects.
-				$components = null;
-				$selectComponent = null;
-				if (isset($this->linked[$column])) {
-					$components = '';
-					foreach ($this->linked[$column] as $component) {
-						if ($component instanceof Select) {
-							$selectComponent = $component;
-						} else {
-							$components .= $component->render($value, static::class);
-						}
-					}
-				}
-				//If there are no linked components or if there is a Select component...
-				if ($components === null || $selectComponent !== null) {
-					$name = $count . "-" . $column;
-					$label = $selectComponent ? $selectComponent->getHeader() : $options[self::OPT_LABEL];
-					$hidden = $options[self::OPT_VISIBLE] ? '' : 'style="display:none"';
-					$disabled = $options[self::OPT_DISABLE] ? 'disabled=""' : '';
-					$required .= $options[self::OPT_REQUIRE] && $options[self::OPT_VISIBLE] ? 'required=""' : '';
-					$type = $options[self::OPT_HTML_TYPE];
-					$class = $options[self::OPT_HTML_CLASS];
-					$extra = $options[self::OPT_HTML_EXTRA];
-					$attributes = "name='$name' class='form-control $class' $disabled $required $extra";
-					$possibleValues = '';
-					if ($this->inputHook) {
-						$function = $this->inputHook;
-						$function($column, $options, &$name, &$value, &$possibleValues);
-					}
-					$cssPrefix = $this->dataClass ? "class='" . $this->dataClass . "-$column'" : '';
-					?>
-					<div class='form-group' <?= $hidden . ' ' . $cssPrefix ?>>
-						<label for='<?= $name ?>'><?= $label ?></label>
-						<?php
-						if (isset($selectComponent)) {
-							$selectComponent->appendHtml($attributes);
-							echo $selectComponent->render($value);
-						} else {
-							switch ($type) {
-								case self::HTML_NUMBER:
-									echo "<input type='number' value='$value' $attributes />";
-									break;
-								case self::HTML_TEXT:
-									echo "<input type='text' value='$value' $attributes />";
-									break;
-								case self::HTML_TEXTAREA:
-									echo "<textarea $attributes>$value</textarea>";
-									break;
-								case self::HTML_BOOLEAN:
-									$value = $value ? 'Yes' : 'No';
-									$possibleValues = ['No', 'Yes'];
-								case self::HTML_SELECT:
-									?>
-									<select class="form-control" <?= $attributes ?>>
-										<?php
-										$possibleValues = $possibleValues ? : $options[self::OPT_EXTRA];
-										foreach ($possibleValues as $option) {
-											$selected = $value === $option ? 'selected=""' : '';
-											?>
-											<option <?= $selected ?>><?= $option ?></option>
-											<?php
-										}
-										?>
-									</select>
-									<?php
-									break;
-							}
-						}
-						?>
-					</div>
-					<?php
-				}
-				//Output the components
-				echo $components;
+		$this->count = $count;
+		$this->useAfterOpeningTag("<input type='hidden' name='$count' value='" . $this->tableName . "'/>");
+		if ($this->multiple) {
+			$this->useBeforeClosingTag("<button type='button' class='btn btn-default'>Add Another</button>");
+		}
+		parent::render($input, $included);
+	}
+
+	/**
+	 * Link a column value with another Data component.
+	 * @param string $column
+	 * @param Data $component
+	 * @return self
+	 */
+	function link($column, Data $component) {
+		if ($component instanceof Select) {
+			$this->selectComponent[$column] = $component;
+		} else {
+			parent::link($column, $component);
+		}
+		return $this;
+	}
+
+	/**
+	 * Renders the column.
+	 * @param string $column
+	 * @param mixed $value
+	 */
+	function renderColumn($column, $value) {
+		$options = $this->columns[$column];
+		$selectComponent = isset($this->selectComponent[$column]) ? $this->selectComponent[$column] : null;
+		$name = $this->count . "-" . $column;
+		$label = $selectComponent ? $selectComponent->getHeader() : $options[self::OPT_LABEL];
+		ob_start();
+		$this->label->useHtml("for='$name'")->render($label, $this);
+		$labelHtml = ob_get_clean();
+		$hidden = $options[self::OPT_VISIBLE] ? '' : 'style="display:none"';
+		$disabled = $options[self::OPT_DISABLE] ? 'disabled=""' : '';
+		$required .= $options[self::OPT_REQUIRE] && $options[self::OPT_VISIBLE] ? 'required=""' : '';
+		$type = $options[self::OPT_HTML_TYPE];
+		$class = $options[self::OPT_HTML_CLASS];
+		$extra = $options[self::OPT_HTML_EXTRA];
+		$possibleValues = '';
+		if ($this->inputHook) {
+			$function = $this->inputHook;
+			$function($column, $options, &$name, &$value, &$possibleValues);
+		}
+		$attributes = "name='$name' $disabled $required $extra";
+		$classes = "form-control $class";
+		$cssPrefix = $this->dataClass ? "class='" . $this->dataClass . "-$column'" : '';
+		$this->display->useHtml("$hidden $cssPrefix")->setAfterOpeningTag($labelHtml);
+		if (isset($selectComponent)) {
+			$this->display->setDisplayComponent($selectComponent->useHtml($attributes));
+		} else {
+			switch ($type) {
+				case self::HTML_NUMBER:
+					$component = new Component('input', $classes, "type='number' value='$value' $attributes");
+					$this->display->setDisplayComponent($component->setInput('', $this));
+					break;
+				case self::HTML_TEXT:
+					$component = new Component('input', $classes, "value='$value' $attributes");
+					$this->display->setDisplayComponent($component->setInput('', $this));
+					break;
+				case self::HTML_TEXTAREA:
+					$this->display->setDisplayComponent(new Component('textarea', $classes, $attributes));
+					break;
+				case self::HTML_BOOLEAN:
+					$value = $value ? 'Yes' : 'No';
+					$possibleValues = ['No', 'Yes'];
+				case self::HTML_SELECT:
+					$component = new Select('form-control', $attributes);
+					$component->setSelected($value)->setInput($possibleValues);
+					$this->display->setDisplayComponent($component);
 			}
 		}
-		if ($this->multiple) {
-			echo "<button type='button' class='btn btn-default'>Add Another</button>";
-		}
+		$this->display->render($value, $this);
 	}
 
 }

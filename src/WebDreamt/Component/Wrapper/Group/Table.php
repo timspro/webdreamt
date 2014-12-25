@@ -31,13 +31,13 @@ class Table extends Group {
 	 * Create a table.
 	 * @param string $tableName
 	 */
-	function __construct($tableName = null) {
-		$header = new Component('th');
+	function __construct($tableName = null, $class = null, $html = null) {
+		$header = new Component('th', $class, $html);
 		$this->header = $header;
 		$cell = new Component('td');
 		if ($tableName) {
 			$row = new Data($cell, $tableName, 'tr');
-			$row->hide('id')->setLabelComponent($header, false);
+			$row->hide('id')->setLabelComponent($header, null);
 		} else {
 			$row = new Group($cell, 'tr');
 		}

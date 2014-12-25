@@ -11,8 +11,8 @@ class Panel extends Wrapper {
 	 * Construct a Panel.
 	 * @param Component $display
 	 */
-	function __construct(Component $display) {
-		parent::__construct($display, 'panel panel-default');
+	function __construct(Component $display, $class = null, $html = null) {
+		parent::__construct($display, "panel panel-default $class", $html);
 	}
 
 	function renderMe($input = null, $included = null) {
@@ -21,7 +21,7 @@ class Panel extends Wrapper {
 			<span class="panel-title"><?= $this->title ?></span>
 		</div>
 		<div class="panel-body">
-			<?= $this->render($input, $this) ?>
+		<?= $this->render($input, $this) ?>
 		</div>
 		<?php
 	}

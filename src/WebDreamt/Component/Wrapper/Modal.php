@@ -12,13 +12,18 @@ class Modal extends Wrapper {
 	 * @var array
 	 */
 	protected $buttons = [];
+	/**
+	 * Buttons to be used by the modal.
+	 * @var array
+	 */
+	protected $withButtons = [];
 
 	/**
 	 * Constructs a modal.
 	 * @param Component $display
 	 */
-	protected function __construct(Component $display) {
-		parent::__construct($display, 'modal fade');
+	protected function __construct(Component $display, $class = null, $html = null) {
+		parent::__construct($display, "modal fade $class", $html);
 	}
 
 	/**
@@ -29,6 +34,16 @@ class Modal extends Wrapper {
 	 */
 	function addButtons(array $buttons) {
 		$this->buttons = array_merge($this->buttons, $buttons);
+		return $this;
+	}
+
+	/**
+	 * Set buttons that will be reset by render().
+	 * @param array $buttons
+	 * @return self
+	 */
+	function useButtons(array $buttons) {
+		$this->withButtons = array_merge($this->withButtons, $buttons);
 		return $this;
 	}
 
@@ -58,7 +73,7 @@ class Modal extends Wrapper {
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default wd-btn-close" data-dismiss="modal">Close</button>
 						<?php
-						foreach ($this->buttons as $class => $text) {
+						foreach (array_merge($this->buttons, $this->withButtons) as $class => $text) {
 							?>
 							<button type="button" class="btn <?= $class ?>"><?= $text ?></button>
 							<?php
@@ -69,6 +84,7 @@ class Modal extends Wrapper {
 			</div>
 		</div>
 		<?php
+		$this->withButtons = [];
 	}
 
 }

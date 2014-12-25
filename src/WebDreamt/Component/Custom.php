@@ -27,8 +27,8 @@ class Custom extends Component {
 	 * @param boolean $always If false, then the function will only be called when the input is not null.
 	 * If true, then the function will be called everytime.
 	 */
-	function __construct($function, $always = false) {
-		parent::__construct();
+	function __construct($function, $always = false, $htmlTag = null, $class = null, $html = null) {
+		parent::__construct($htmlTag, $class, $html);
 		$this->function = $function;
 		$this->always = $always;
 	}
