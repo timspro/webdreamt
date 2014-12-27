@@ -39,7 +39,7 @@ class Custom extends Component {
 	 * @param Component $included
 	 * @return string
 	 */
-	function renderMe($input = null, Component $included = null) {
+	function renderSpecial($input = null, Component $included = null) {
 		$function = $this->function;
 		if ($this->always || $input !== null) {
 			$function($input, $included);

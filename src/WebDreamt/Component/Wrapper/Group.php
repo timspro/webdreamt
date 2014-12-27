@@ -21,7 +21,7 @@ class Group extends Wrapper {
 		$this->title = Box::now()->pluralize($this->getTitle());
 	}
 
-	protected function renderMe($input = null, $included = null) {
+	protected function renderSpecial($input = null, $included = null) {
 		if (!$input) {
 			return;
 		}

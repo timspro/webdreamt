@@ -56,7 +56,7 @@ class Modal extends Wrapper {
 		return $this->buttons;
 	}
 
-	protected function renderMe($input = null, $included = null) {
+	protected function renderSpecial($input = null, $included = null) {
 		?>
 		<div class="modal fade">
 			<div class="modal-dialog">
@@ -68,7 +68,7 @@ class Modal extends Wrapper {
 						<span class="modal-title"><?= $this->title ?></span>
 					</div>
 					<div class="modal-body">
-						<?php $this->renderMe($input, $this) ?>
+						<?php $this->renderSpecial($input, $this) ?>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default wd-btn-close" data-dismiss="modal">Close</button>

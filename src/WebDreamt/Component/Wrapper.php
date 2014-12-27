@@ -42,7 +42,7 @@ class Wrapper extends Component {
 		$this->display = $display;
 	}
 
-	function renderMe($input = null, $included = null) {
+	function renderSpecial($input = null, $included = null) {
 		$this->display->render($input, $this);
 	}
 

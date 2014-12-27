@@ -372,11 +372,13 @@ class Component {
 	 * class of the component. By default, it is simply echoed.
 	 * @param Component $included The component that is calling render(). Should be null if render()
 	 * is not called by a component.
+	 * @return string
 	 */
 	function render($input = null, Component $included = null) {
 		if ($this->input) {
 			$input = $this->input;
 		}
+		$output = null;
 		$htmlTag = $this->htmlTag;
 		if ($htmlTag !== null) {
 			//Get HTML
@@ -387,43 +389,47 @@ class Component {
 			$cssCallback = $cssCallback ? $cssCallback($input, $included) . ' ' : '';
 			$classes = $cssCallback . $this->class . $this->withCssClass;
 			$classes = $classes ? "classes='$classes'" : '';
-			echo "<$htmlTag $htmlCallback" . $this->html . $this->withHtml . " class='$classes'>";
+			$output .= "<$htmlTag $htmlCallback" . $this->html . $this->withHtml . " class='$classes'>";
 		}
-		echo $this->afterOpening . $this->withAfterOpening;
-		$this->renderComponents($input, $included);
-		echo $this->beforeClosing . $this->withBeforeClosing;
+		$output .= $this->afterOpening . $this->withAfterOpening;
+		$output .= $this->renderComponents($input, $included);
+		$output .= $this->beforeClosing . $this->withBeforeClosing;
 		if ($htmlTag !== null) {
-			echo "</$htmlTag>";
+			$output .= "</$htmlTag>";
 		}
 		$this->withHtml = null;
 		$this->withCssClass = null;
 		$this->withAfterOpening = null;
 		$this->withBeforeClosing = null;
+		return $output;
 	}
 
 	/**
 	 * Render the components.
 	 * @param array|ActiveRecordInterface $input
-	 * @param string $included
+	 * @param Component $included
+	 * @return string
 	 */
-	protected function renderComponents($input = null, $included = null) {
+	protected function renderComponents($input = null, Component $included = null) {
+		$output = null;
 		foreach ($this->components as $component) {
 			if (!$component) {
-				$this->renderMe($input, $included);
+				$output .= $this->renderSpecial($input, $included);
 			} else {
-				$component->render($input, static::class);
+				$output .= $component->render($input, static::class);
 			}
 		}
-		return null;
+		return $output;
 	}
 
 	/**
 	 * Renders the child class of this component.
 	 * @param array $input
-	 * @param string $included
+	 * @param Component $included
+	 * @return string
 	 */
-	protected function renderMe($input = null, $included = null) {
-		echo $input;
+	protected function renderSpecial($input = null, Component $included = null) {
+		return $input;
 	}
 
 	/**

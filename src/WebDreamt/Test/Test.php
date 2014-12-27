@@ -2,8 +2,10 @@
 
 namespace WebDreamt\Test;
 
+use DOMDocument;
 use PDO;
 use PHPUnit_Framework_TestCase;
+use Symfony\Component\CssSelector\CssSelector;
 use WebDreamt\Box;
 
 /**
@@ -116,10 +118,13 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 *
-	 * @param type $tables
+	 * Delete the tables in the database.
+	 * @param string|array $tables
 	 */
 	public function deleteTables($tables) {
+		if (!is_array($tables)) {
+			$tables = [$tables];
+		}
 		$db = static::$db;
 		$db->exec("SET FOREIGN_KEY_CHECKS=0");
 		$tables = $db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
@@ -127,6 +132,35 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 			$db->exec("DROP TABLE $table");
 		}
 		$db->exec("SET FOREIGN_KEY_CHECKS=1");
+	}
+
+	/**
+	 * Output XML to a file.
+	 * @param string $filename The filename to output to
+	 * @param string $output The XML to output
+	 */
+	public function output($filename, $output) {
+		file_put_contents($filename, $output);
+		$doc = new DOMDocument();
+		$doc->formatOutput = true;
+		$doc->preserveWhiteSpace = false;
+		$doc->loadXML($output);
+		$contents = $doc->saveXML($doc->documentElement, LIBXML_NOEMPTYTAG);
+		file_put_contents($filename, $contents);
+	}
+
+	/**
+	 * Count the number of elements in the HTML that match the selector.
+	 * @param string $selector
+	 * @param string $output
+	 * @return int
+	 */
+	public function countElements($selector, $output) {
+		$doc = new DOMDocument();
+		$doc->loadHTML($output);
+		$xpath = new DOMXpath($doc);
+		$elements = $xpath->query(CssSelector::toXPath($selector));
+		return count($elements);
 	}
 
 }

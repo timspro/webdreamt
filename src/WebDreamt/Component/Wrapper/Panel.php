@@ -15,7 +15,7 @@ class Panel extends Wrapper {
 		parent::__construct($display, "panel panel-default $class", $html);
 	}
 
-	function renderMe($input = null, $included = null) {
+	function renderSpecial($input = null, $included = null) {
 		?>
 		<div class="panel-heading">
 			<span class="panel-title"><?= $this->title ?></span>

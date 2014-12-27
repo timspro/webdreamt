@@ -537,7 +537,7 @@ class Data extends Wrapper {
 	 * @param string $included The class name of the component that is calling render. Null
 	 * if not being called from a component.
 	 */
-	protected function renderMe($input = null, $included = null) {
+	protected function renderSpecial($input = null, $included = null) {
 		foreach ($this->columns as $column => $options) {
 			if ($options[self::OPT_ACCESS]) {
 				if ($options[self::OPT_VISIBLE]) {
@@ -574,7 +574,7 @@ class Data extends Wrapper {
 	 * @param mixed $value
 	 */
 	protected function renderColumn($column, $value) {
-		$this->display->renderMe($value, $this);
+		$this->display->renderSpecial($value, $this);
 	}
 
 	/**
@@ -621,7 +621,7 @@ class Data extends Wrapper {
 	protected function renderComponents($input = null, $included = null) {
 		foreach ($this->components as $object) {
 			if (!$object) {
-				$this->renderMe($input, $included);
+				$this->renderSpecial($input, $included);
 			} else {
 				$method = $object[self::EXTRA_METHOD];
 				$component = $object[self::EXTRA_COMPONENT];
