@@ -21,7 +21,7 @@ class Panel extends Wrapper {
 			<span class="panel-title"><?= $this->title ?></span>
 		</div>
 		<div class="panel-body">
-		<?= $this->render($input, $this) ?>
+			<?= $this->display->render($input, $this) ?>
 		</div>
 		<?php
 	}

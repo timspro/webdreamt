@@ -3,8 +3,10 @@
 namespace WebDreamt\Test;
 
 use DOMDocument;
+use DOMXPath;
 use PDO;
 use PHPUnit_Framework_TestCase;
+use ReflectionMethod;
 use Symfony\Component\CssSelector\CssSelector;
 use WebDreamt\Box;
 
@@ -144,23 +146,72 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 		$doc = new DOMDocument();
 		$doc->formatOutput = true;
 		$doc->preserveWhiteSpace = false;
-		$doc->loadXML($output);
+		$doc->loadHTML($output);
 		$contents = $doc->saveXML($doc->documentElement, LIBXML_NOEMPTYTAG);
 		file_put_contents($filename, $contents);
 	}
 
 	/**
 	 * Count the number of elements in the HTML that match the selector.
-	 * @param string $selector
 	 * @param string $output
+	 * @param string|array $selectors Can be an array, in which case $count is ignored.
+	 * @param int $count
 	 * @return int
 	 */
-	public function countElements($selector, $output) {
+	public function countElements($output, $selectors, $count = null) {
 		$doc = new DOMDocument();
-		$doc->loadHTML($output);
-		$xpath = new DOMXpath($doc);
-		$elements = $xpath->query(CssSelector::toXPath($selector));
-		return count($elements);
+		$doc->loadXML($output);
+		$xpath = new DOMXPath($doc);
+		if (!is_array($selectors)) {
+			$selectors = [$selectors => $count];
+		}
+		foreach ($selectors as $selector => $count) {
+			$convert = CssSelector::toXPath($selector);
+			$this->assertEquals($count, $xpath->query($convert)->length);
+		}
+	}
+
+	/**
+	 * Check the index of the elements that match the selector.
+	 * @param string $output HTML
+	 * @param string|array $selectors Can be an array, in which case $index is ignored.
+	 * @param int $index
+	 */
+	public function indexElements($output, $selectors, $index = null) {
+		$doc = new DOMDocument();
+		$doc->loadXML($output);
+		$xpath = new DOMXPath($doc);
+		if (!is_array($selectors)) {
+			$selectors = [$selectors => $index];
+		}
+		foreach ($selectors as $selector => $givenIndex) {
+			$convert = CssSelector::toXPath($selector);
+			$elements = $xpath->query($convert);
+			$this->assertNotEquals(0, $elements->length);
+			foreach ($elements as $element) {
+				$index = 0;
+				while ($element = $element->previousSibling) {
+					$index++;
+				}
+				$this->assertEquals($givenIndex, $index);
+			}
+		}
+	}
+
+	/**
+	 * Class a private/protected method.
+	 * @param mixed $obj
+	 * @param string $method
+	 * @param array $args
+	 * @return mixed
+	 */
+	protected function method($obj, $method, $args = array()) {
+		if (!is_array($args)) {
+			$args = [$args];
+		}
+		$method = new ReflectionMethod(get_class($obj), $method);
+		$method->setAccessible(true);
+		return $method->invokeArgs($obj, $args);
 	}
 
 }

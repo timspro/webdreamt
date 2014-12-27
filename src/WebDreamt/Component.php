@@ -79,12 +79,15 @@ class Component {
 	/**
 	 * Get a new component.
 	 * @param string $htmlTag
+	 * @param string $class
+	 * @param string $html
 	 */
-	function __construct($htmlTag = 'div', $class = null, $html = null) {
+	function __construct($htmlTag = 'div', $class = null, $html = null, $input = null) {
 		$this->htmlTag = $htmlTag;
 		$this->class = $class;
 		$this->html = $html;
 		$this->components = [null];
+		$this->input = $input;
 	}
 
 	/**
@@ -124,12 +127,22 @@ class Component {
 	}
 
 	/**
+	 * Append a string to go after the opening tag.
+	 * @param string $after
+	 * @return self
+	 */
+	function appendAfterOpeningTag($after) {
+		$this->afterOpening .= $after;
+		return $this;
+	}
+
+	/**
 	 * Set a string to go after the opening tag and will be reset by render().
 	 * @param string $after
 	 * @return self
 	 */
 	protected function useAfterOpeningTag($after) {
-		$this->withAfterOpening .= " $after";
+		$this->withAfterOpening .= $after;
 		return $this;
 	}
 
@@ -152,12 +165,22 @@ class Component {
 	}
 
 	/**
+	 * Prepend a string to go before the closing tag.
+	 * @param string $before
+	 * @return self
+	 */
+	function prependBeforeClosingTag($before) {
+		$this->beforeClosing = $before . $this->beforeClosing;
+		return $this;
+	}
+
+	/**
 	 * Set a string to go before the closing tag and will be reset by render().
 	 * @param string $before
 	 * @return self
 	 */
 	protected function useBeforeClosingTag($before) {
-		$this->withBeforeClosing .= " $before";
+		$this->withBeforeClosing = $before . $this->withBeforeClosing;
 		return $this;
 	}
 
@@ -263,7 +286,7 @@ class Component {
 	 * @return self
 	 */
 	function appendHtml($html) {
-		$this->html .= $html;
+		$this->html .= " $html";
 		return $this;
 	}
 
@@ -323,13 +346,22 @@ class Component {
 	 */
 	function setChildComponentIndex($newIndex) {
 		$array = [];
+		$before = false;
 		foreach ($this->components as $index => $component) {
 			if ($index === $newIndex) {
-				$array[] = null;
+				if ($before) {
+					$array[] = $component;
+					$array[] = null;
+				} else {
+					$array[] = null;
+					$array[] = $component;
+				}
 				continue;
 			}
 			if ($component) {
 				$array[] = $component;
+			} else {
+				$before = true;
 			}
 		}
 		$this->components = $array;
@@ -359,6 +391,14 @@ class Component {
 	}
 
 	/**
+	 * Get the components to be rendered. Note that null represents this component.
+	 * @return array
+	 */
+	function getComponents() {
+		return $this->components;
+	}
+
+	/**
 	 * Syntactic sugar for the render(...) method.
 	 * @return string
 	 */
@@ -375,7 +415,7 @@ class Component {
 	 * @return string
 	 */
 	function render($input = null, Component $included = null) {
-		if ($this->input) {
+		if ($this->input !== null) {
 			$input = $this->input;
 		}
 		$output = null;
@@ -383,17 +423,19 @@ class Component {
 		if ($htmlTag !== null) {
 			//Get HTML
 			$htmlCallback = $this->htmlCallback;
-			$htmlCallback = $htmlCallback ? $htmlCallback($input, $included) . ' ' : '';
+			$htmlCallback = $htmlCallback ? ' ' . $htmlCallback($input, $included) . ' ' : '';
 			//Get CSS classes
 			$cssCallback = $this->cssCallback;
 			$cssCallback = $cssCallback ? $cssCallback($input, $included) . ' ' : '';
 			$classes = $cssCallback . $this->class . $this->withCssClass;
-			$classes = $classes ? "classes='$classes'" : '';
-			$output .= "<$htmlTag $htmlCallback" . $this->html . $this->withHtml . " class='$classes'>";
+			if ($classes) {
+				$classes = " class='$classes'";
+			}
+			$output .= "<$htmlTag" . $htmlCallback . $this->html . $this->withHtml . "$classes>";
 		}
 		$output .= $this->afterOpening . $this->withAfterOpening;
 		$output .= $this->renderComponents($input, $included);
-		$output .= $this->beforeClosing . $this->withBeforeClosing;
+		$output .= $this->withBeforeClosing . $this->beforeClosing;
 		if ($htmlTag !== null) {
 			$output .= "</$htmlTag>";
 		}
@@ -416,7 +458,7 @@ class Component {
 			if (!$component) {
 				$output .= $this->renderSpecial($input, $included);
 			} else {
-				$output .= $component->render($input, static::class);
+				$output .= $component->render($input, $this);
 			}
 		}
 		return $output;
