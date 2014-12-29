@@ -12,22 +12,46 @@ use WebDreamt\Component\Wrapper;
 class Group extends Wrapper {
 
 	/**
-	 * Construct a Group. This sets the title to the plural form of the display component's title.
+	 * Construct a group. This sets the title to the plural form of the display component's title.
 	 * This takes as input something that is iterable.
 	 * @param Component $display
+	 * @param string $htmlTag
+	 * @param string $class
+	 * @param string $html
+	 * @param mixed $input
 	 */
-	function __construct(Component $display, $htmlTag = 'div', $class = null, $html = null) {
-		parent::__construct($display, $htmlTag, $class, $html);
-		$this->title = Box::now()->pluralize($this->getTitle());
+	function __construct(Component $display, $htmlTag = 'div', $class = null, $html = null, $input = null) {
+		parent::__construct($display, $htmlTag, $class, $html, $input);
+		$this->title = Box::now()->pluralize($display->getTitle());
 	}
 
-	protected function renderSpecial($input = null, $included = null) {
+	/**
+	 * Set the display component. Note that the title is set to the plural fom of the display component's
+	 * title.
+	 * @param Component $display
+	 * @return self
+	 */
+	function setDisplayComponent(Component $display) {
+		$this->display = $display;
+		$this->title = Box::now()->pluralize($display->getTitle());
+		return $this;
+	}
+
+	/**
+	 * Render the group.
+	 * @param string|array $input
+	 * @param Component $included
+	 * @return string
+	 */
+	protected function renderSpecial($input = null, Component $included = null) {
 		if (!$input) {
 			return;
 		}
+		$output = '';
 		foreach ($input as $key => $value) {
-			$this->display->render($value, $this);
+			$output .= $this->display->render($value, $this);
 		}
+		return $output;
 	}
 
 }

@@ -5,6 +5,9 @@ namespace WebDreamt\Component\Wrapper;
 use WebDreamt\Component;
 use WebDreamt\Component\Wrapper;
 
+/**
+ * Create a Bootstrap modal.
+ */
 class Modal extends Wrapper {
 
 	/**
@@ -21,9 +24,12 @@ class Modal extends Wrapper {
 	/**
 	 * Constructs a modal.
 	 * @param Component $display
+	 * @param string $class
+	 * @param string $html
+	 * @param mixed $input
 	 */
-	protected function __construct(Component $display, $class = null, $html = null) {
-		parent::__construct($display, "modal fade $class", $html);
+	function __construct(Component $display, $class = null, $html = null, $input = null) {
+		parent::__construct($display, 'div', "modal fade $class", $html, $input);
 	}
 
 	/**
@@ -56,35 +62,39 @@ class Modal extends Wrapper {
 		return $this->buttons;
 	}
 
-	protected function renderSpecial($input = null, $included = null) {
+	/**
+	 * Render the modal. Note that the modal HTML includes unnecessary white space.
+	 * @param array $input
+	 * @param Component $included
+	 * @return string
+	 */
+	protected function renderSpecial($input = null, Component $included = null) {
+		ob_start();
 		?>
-		<div class="modal fade">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal">
-							<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-						</button>
-						<span class="modal-title"><?= $this->title ?></span>
-					</div>
-					<div class="modal-body">
-						<?php $this->display->render($input, $this) ?>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-default wd-btn-close" data-dismiss="modal">Close</button>
-						<?php
-						foreach (array_merge($this->buttons, $this->withButtons) as $class => $text) {
-							?>
-							<button type="button" class="btn <?= $class ?>"><?= $text ?></button>
-							<?php
-						}
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+					</button>
+					<span class="modal-title"><?= $this->title ?></span>
+				</div>
+				<div class="modal-body"><?= $this->display->render($input, $this) ?></div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default wd-btn-close" data-dismiss="modal">Close</button>
+					<?php
+					foreach (array_merge($this->buttons, $this->withButtons) as $class => $text) {
 						?>
-					</div>
+						<button type="button" class="btn <?= $class ?>"><?= $text ?></button>
+						<?php
+					}
+					?>
 				</div>
 			</div>
 		</div>
 		<?php
 		$this->withButtons = [];
+		return ob_get_clean();
 	}
 
 }

@@ -31,7 +31,7 @@ class Table extends Group {
 	 * Create a table.
 	 * @param string $tableName
 	 */
-	function __construct($tableName = null, $class = null, $html = null) {
+	function __construct($tableName = null, $class = null, $html = null, $input = null) {
 		$header = new Component('th', $class, $html);
 		$this->header = $header;
 		$cell = new Component('td');
@@ -41,7 +41,7 @@ class Table extends Group {
 		} else {
 			$row = new Group($cell, 'tr');
 		}
-		parent::__construct($row, 'table');
+		parent::__construct($row, 'table', $class, $html, $input);
 
 		$this->appendCssClass('table');
 	}
@@ -63,7 +63,7 @@ class Table extends Group {
 	}
 
 	/**
-	 * Get the row component.
+	 * Get the row component. This has the same effect as getDisplay().
 	 * @return Component
 	 */
 	function getRowComponent() {
@@ -71,7 +71,7 @@ class Table extends Group {
 	}
 
 	/**
-	 * Set the row component.
+	 * Set the row component. This has the same effect as setDisplay().
 	 * @param Component $row
 	 */
 	function setRowComponent(Component $row) {

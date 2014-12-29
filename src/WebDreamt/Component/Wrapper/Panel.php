@@ -5,25 +5,33 @@ namespace WebDreamt\Component\Wrapper;
 use WebDreamt\Component;
 use WebDreamt\Component\Wrapper;
 
+/**
+ * Create a Bootstrap panel.
+ */
 class Panel extends Wrapper {
 
 	/**
-	 * Construct a Panel.
+	 * Construct a panel.
 	 * @param Component $display
+	 * @param string $class
+	 * @param string $html
+	 * @param mixed $input
 	 */
-	function __construct(Component $display, $class = null, $html = null) {
-		parent::__construct($display, "panel panel-default $class", $html);
+	function __construct(Component $display, $class = null, $html = null, $input = null) {
+		parent::__construct($display, 'div', "panel panel-default $class", $html, $input);
 	}
 
-	function renderSpecial($input = null, $included = null) {
-		?>
-		<div class="panel-heading">
-			<span class="panel-title"><?= $this->title ?></span>
-		</div>
-		<div class="panel-body">
-			<?= $this->display->render($input, $this) ?>
-		</div>
-		<?php
+	/**
+	 * Render the panel.
+	 * @param array $input
+	 * @param Component $included
+	 * @return string
+	 */
+	protected function renderSpecial($input = null, Component $included = null) {
+		$output = '';
+		$output .= '<div class="panel-heading"><span class="panel-title">' . $this->title . '</span></div>';
+		$output .= '<div class="panel-body">' . $this->display->render($input, $this) . '</div>';
+		return $output;
 	}
 
 }

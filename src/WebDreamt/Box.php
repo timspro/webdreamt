@@ -89,8 +89,11 @@ class Box {
 	 * @return string
 	 */
 	function pluralize($string) {
+		if ($string === null || $string === '') {
+			return '';
+		}
 		$pluralizer = $this->factory(__FUNCTION__, function() {
-			new StandardEnglishPluralizer();
+			return new StandardEnglishPluralizer();
 		});
 		return $pluralizer->getPluralForm($string);
 	}

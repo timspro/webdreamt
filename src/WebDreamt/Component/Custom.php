@@ -26,9 +26,14 @@ class Custom extends Component {
 	 * two parameters: the input and the object that called the render function.
 	 * @param boolean $always If false, then the function will only be called when the input is not null.
 	 * If true, then the function will be called everytime.
+	 * @param string $htmlTag
+	 * @param string $class
+	 * @param string $html
+	 * @param mixed $input
 	 */
-	function __construct($function, $always = false, $htmlTag = null, $class = null, $html = null) {
-		parent::__construct($htmlTag, $class, $html);
+	function __construct($function, $always = false, $htmlTag = null, $class = null, $html = null,
+			$input = null) {
+		parent::__construct($htmlTag, $class, $html, $input);
 		$this->function = $function;
 		$this->always = $always;
 	}
@@ -39,10 +44,10 @@ class Custom extends Component {
 	 * @param Component $included
 	 * @return string
 	 */
-	function renderSpecial($input = null, Component $included = null) {
+	protected function renderSpecial($input = null, Component $included = null) {
 		$function = $this->function;
 		if ($this->always || $input !== null) {
-			$function($input, $included);
+			return $function($input, $included);
 		}
 		return '';
 	}

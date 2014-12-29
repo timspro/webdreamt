@@ -3,6 +3,8 @@
 namespace WebDreamt\Test;
 
 use DOMDocument;
+use DOMNode;
+use DOMText;
 use DOMXPath;
 use PDO;
 use PHPUnit_Framework_TestCase;
@@ -20,6 +22,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	/** @var PDO */
 	protected static $db;
 	private $id = 0;
+	protected $ret;
 
 	public static function setUpBeforeClass() {
 		static::$a = new Box(false);
@@ -160,7 +163,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 */
 	public function countElements($output, $selectors, $count = null) {
 		$doc = new DOMDocument();
-		$doc->loadXML($output);
+		$doc->loadHTML($output);
 		$xpath = new DOMXPath($doc);
 		if (!is_array($selectors)) {
 			$selectors = [$selectors => $count];
@@ -179,7 +182,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 */
 	public function indexElements($output, $selectors, $index = null) {
 		$doc = new DOMDocument();
-		$doc->loadXML($output);
+		$doc->loadHTML($output);
 		$xpath = new DOMXPath($doc);
 		if (!is_array($selectors)) {
 			$selectors = [$selectors => $index];
@@ -187,13 +190,38 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 		foreach ($selectors as $selector => $givenIndex) {
 			$convert = CssSelector::toXPath($selector);
 			$elements = $xpath->query($convert);
-			$this->assertNotEquals(0, $elements->length);
+			$this->assertNotEquals(0, $elements->length, $selector);
 			foreach ($elements as $element) {
 				$index = 0;
 				while ($element = $element->previousSibling) {
-					$index++;
+					if (!($element instanceof DOMText)) {
+						$index++;
+					}
 				}
-				$this->assertEquals($givenIndex, $index);
+				$this->assertEquals($givenIndex, $index, $selector);
+			}
+		}
+	}
+
+	/**
+	 * Check the HTML of the elements that match the selector.
+	 * @param string $output
+	 * @param string|array $selectors
+	 * @param string $html
+	 */
+	public function html($output, $selectors, $html = null) {
+		$doc = new DOMDocument();
+		$doc->loadHTML($output);
+		$xpath = new DOMXPath($doc);
+		if (!is_array($selectors)) {
+			$selectors = [$selectors => $html];
+		}
+		foreach ($selectors as $selector => $html) {
+			$convert = CssSelector::toXPath($selector);
+			$elements = $xpath->query($convert);
+			$this->assertNotEquals(0, $elements->length, $selector);
+			foreach ($elements as $element) {
+				$this->assertEquals($html, $this->innerHtml($element), $selector);
 			}
 		}
 	}
@@ -205,13 +233,43 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * @param array $args
 	 * @return mixed
 	 */
-	protected function method($obj, $method, $args = array()) {
+	public function method($obj, $method, $args = array()) {
 		if (!is_array($args)) {
 			$args = [$args];
 		}
 		$method = new ReflectionMethod(get_class($obj), $method);
 		$method->setAccessible(true);
 		return $method->invokeArgs($obj, $args);
+	}
+
+	/**
+	 * Get the inner HTML for a DOMNode element.
+	 * @param DOMNode $element
+	 * @return string
+	 */
+	function innerHtml(DOMNode $element) {
+		$innerHTML = "";
+		$children = $element->childNodes;
+		foreach ($children as $child) {
+			$innerHTML .= $element->ownerDocument->saveHTML($child);
+		}
+		return $innerHTML;
+	}
+
+	/**
+	 * Tests if the passed object is an instance of the set class.
+	 * @param mixed $test
+	 */
+	function ret($test) {
+		$this->assertTrue($test instanceof $this->ret);
+	}
+
+	/**
+	 * Set a class to test.
+	 * @param string $class
+	 */
+	function setRet($class) {
+		$this->ret = $class;
 	}
 
 }

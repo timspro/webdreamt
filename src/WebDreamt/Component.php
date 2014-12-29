@@ -75,12 +75,18 @@ class Component {
 	 * @var string
 	 */
 	protected $withCssClass;
+	/**
+	 * A key used to get input.
+	 * @var string
+	 */
+	protected $key;
 
 	/**
 	 * Get a new component.
 	 * @param string $htmlTag
 	 * @param string $class
 	 * @param string $html
+	 * @param mixed $input
 	 */
 	function __construct($htmlTag = 'div', $class = null, $html = null, $input = null) {
 		$this->htmlTag = $htmlTag;
@@ -151,7 +157,7 @@ class Component {
 	 * @param string $before
 	 * @return self
 	 */
-	function setBeforeClosingTag($before = '') {
+	function setBeforeClosingTag($before) {
 		$this->beforeClosing = $before;
 		return $this;
 	}
@@ -205,7 +211,7 @@ class Component {
 
 	/**
 	 * Append the CSS class(es) to the top-level element. If you append multiple classes, just separate
-	 * them with a space.
+	 * them with a space. Note that a space is automatically prefixed to $className.
 	 * @param string
 	 * @return self
 	 */
@@ -281,7 +287,7 @@ class Component {
 
 	/**
 	 * Append on to the HTML of the top-level element. Use setCssClass or appendCssClass to
-	 * add classes.
+	 * add classes. Note that a space is automatically prefixed to $html.
 	 * @param string $html
 	 * @return self
 	 */
@@ -407,6 +413,26 @@ class Component {
 	}
 
 	/**
+	 * Set the key used to get input for rendered components. Note that this is not used for the
+	 * input to setHtmlCallback() and setCssCallback(). Instead, the input is passed to these functions
+	 * as if a key was never set.
+	 * @param string $key
+	 * @return self
+	 */
+	function setKey($key) {
+		$this->key = $key;
+		return $this;
+	}
+
+	/**
+	 * Get the key used to get input.
+	 * @return string
+	 */
+	function getKey() {
+		return $this->key;
+	}
+
+	/**
 	 * Renders the component.
 	 * @param mixed $input Any input for the component. The effect of the input depends on the child
 	 * class of the component. By default, it is simply echoed.
@@ -431,10 +457,14 @@ class Component {
 			if ($classes) {
 				$classes = " class='$classes'";
 			}
-			$output .= "<$htmlTag" . $htmlCallback . $this->html . $this->withHtml . "$classes>";
+			$html = $htmlCallback . $this->html . $this->withHtml;
+			if ($html) {
+				$html = " $html";
+			}
+			$output .= "<$htmlTag" . $html . "$classes>";
 		}
 		$output .= $this->afterOpening . $this->withAfterOpening;
-		$output .= $this->renderComponents($input, $included);
+		$output .= $this->renderComponents($this->getValueFromInput($this->key, $input), $included);
 		$output .= $this->withBeforeClosing . $this->beforeClosing;
 		if ($htmlTag !== null) {
 			$output .= "</$htmlTag>";
@@ -444,6 +474,23 @@ class Component {
 		$this->withAfterOpening = null;
 		$this->withBeforeClosing = null;
 		return $output;
+	}
+
+	/**
+	 * Get a value from the input using a key. If key is null, then the $input is returned. If
+	 * $input[$key] is not set, than null is returned.
+	 * @param string $key
+	 * @param mixed $input
+	 * @return string
+	 */
+	protected function getValueFromInput($key, $input) {
+		if ($key === null) {
+			return $input;
+		}
+		if (isset($input[$key])) {
+			return $input[$key];
+		}
+		return null;
 	}
 
 	/**

@@ -12,10 +12,21 @@ class ComponentTest extends Test {
 	function setUp() {
 		parent::setUp();
 		$this->component = new Component();
+		$this->setRet(Component::class);
 	}
 
-	function ret($test) {
-		$this->assertTrue($test instanceof Component);
+	/**
+	 * @group Component
+	 */
+	function testConstruct() {
+		$component = new Component("span", 'test', 'data-test=""', 'dog');
+		$output = $component->render('cat');
+		$this->countElements($output, [
+			'span' => 1,
+			'.test' => 1,
+			'[data-test=""]' => 1
+		]);
+		$this->html($output, 'span', 'dog');
 	}
 
 	/**
@@ -98,7 +109,6 @@ class ComponentTest extends Test {
 		$this->assertEquals('<div class="dog"></div><div class="hamster"></div>', $this->component->getAfterOpeningTag());
 		$this->ret($this->method($this->component, 'useAfterOpeningTag', '<div class="bird"></div>'));
 		$output = $this->component->render();
-		echo $output;
 		$this->indexElements($output, [
 			'.dog' => 0,
 			'.hamster' => 1,
@@ -202,6 +212,27 @@ class ComponentTest extends Test {
 	 */
 	function testRender() {
 		$this->assertEquals($this->component->__toString(), $this->component->render());
+	}
+
+	/**
+	 * @group Component
+	 */
+	function testBlank() {
+		$this->component->setHtmlTag(null);
+		$this->assertEquals('dog', $this->component->render('dog'));
+	}
+
+	/**
+	 * @group Coemponent
+	 */
+	function testKey() {
+		$this->assertEquals(null, $this->component->getKey());
+		$this->component->setKey('test');
+		$this->assertEquals('test', $this->component->getKey());
+		$output = $this->component->render(['test' => 'value']);
+		$this->assertEquals('<div>value</div>', $output);
+		$output = $this->component->render(['one' => 'value']);
+		$this->assertEquals('<div></div>', $output);
 	}
 
 }

@@ -13,34 +13,39 @@ class Select extends Group {
 	 */
 	protected $value;
 	/**
-	 * Indicates the first option to display in the dropdown.
-	 * @var string
-	 */
-	protected $firstOption = null;
-	/**
 	 * The option component
 	 * @var Component
 	 */
 	protected $optionComponent;
 
 	/**
-	 * Construct a select box.
-	 * @param string $table
+	 * Construct a select component. Also, this creates a component with an HTML tag of 'option' and
+	 * sets it be the select component's display component.
+	 * @param string $key The key to use for setKey() for the option. This allows the options to be
+	 * filled in using a column of an input array (while the 'id' column will automatically be filled
+	 * in). Can be null in which case the options will just be filled in with the array elements.
+	 * @param string $class
+	 * @param string $html
+	 * @param mixed $input
 	 */
-	function __construct($class = null, $html = null) {
-		$option = new Component('option', $class, $html);
-		parent::__construct($option, 'select');
-		$this->addCssClass('form-control');
-		$option->setHtmlCallback(function($value) {
-			$id = $this->getValueFromInput('id', $value);
-			if ($id) {
-				if ($value && $id === $this->value) {
-					return "selected value='$id'";
+	function __construct($key = null, $class = null, $html = null, $input = null) {
+		$option = new Component('option');
+		$option->setKey($key);
+		parent::__construct($option, 'select', "form-control $class", $html, $input);
+		$option->setHtmlCallback(function($value, Component $included = null) {
+			$component = $included ? : $this;
+			$id = $component->getValueFromInput('id', $value);
+			if ($this->key !== null) {
+				$value = $component->getValueFromInput($this->key, $value);
+			}
+			if ($id !== null) {
+				if ($value !== null && $id === $this->value) {
+					return "selected='' value='$id'";
 				} else {
 					return "value='$id'";
 				}
-			} else if ($value && $value === $this->value) {
-				return 'selected';
+			} else if ($value !== null && $value === $this->value) {
+				return 'selected=""';
 			}
 			return '';
 		});
@@ -51,7 +56,7 @@ class Select extends Group {
 	 * @param string $value
 	 * @return self
 	 */
-	function setSelected($value = null) {
+	function setSelected($value) {
 		$this->value = $value;
 		return $this;
 	}
@@ -62,35 +67,6 @@ class Select extends Group {
 	 */
 	function getSelected() {
 		return $this->value;
-	}
-
-	/**
-	 * Allows inserting a non-selectable first option in the select box.
-	 * If null is passed, then there will be no first option in the select box, as is default.
-	 * @param string $text The first option's text
-	 * @return self
-	 */
-	function setFirstOption($text) {
-		$this->firstOption = $text;
-		return $this;
-	}
-
-	/**
-	 * Get the first option.
-	 * @return string
-	 */
-	function getFirstOption() {
-		return $this->firstOption;
-	}
-
-	/**
-	 * Render the component.
-	 * @param array $input
-	 * @param string $included
-	 */
-	function render($input = null, $included = null) {
-		$this->useAfterOpeningTag($this->firstOption);
-		parent::render($input, $included);
 	}
 
 }
