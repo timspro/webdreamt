@@ -54,15 +54,15 @@ class Form extends Data {
 	const HTML_SELECT = 'select';
 
 	/**
-	 * Indicates if the form can handle multiple items.
-	 * @var boolean
-	 */
-	protected $multiple = false;
-	/**
 	 * A count of the number of forms rendered.
 	 * @var int
 	 */
 	protected static $count = 0;
+	/**
+	 * Indicates if the form can handle multiple items.
+	 * @var boolean
+	 */
+	protected $multiple = false;
 	/**
 	 * The form ID
 	 * @var int
@@ -73,11 +73,6 @@ class Form extends Data {
 	 * @var callable
 	 */
 	protected $inputHook = null;
-	/**
-	 * Defaults to WRAP_PANEL.
-	 * @var string
-	 */
-	protected $wrapper = self::WRAP_PANEL;
 	/**
 	 * Linked select components.
 	 * @var array
@@ -341,6 +336,9 @@ class Form extends Data {
 					$possibleValues = ['No', 'Yes'];
 				case self::HTML_SELECT:
 					$component = new Select('form-control', $attributes);
+					if (!$possibleValues) {
+						$possibleValues = $options[self::OPT_EXTRA];
+					}
 					$component->setSelected($value)->setInput($possibleValues);
 					$this->display->setDisplayComponent($component);
 			}

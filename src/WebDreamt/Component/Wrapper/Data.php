@@ -469,7 +469,7 @@ class Data extends Wrapper {
 			if (isset($oldToNewColumns[$oldColumn])) {
 				$newColumns[$oldToNewColumns[$oldColumn]] = $option;
 				if ($changeLabel) {
-					$option[self::OPT_LABEL] = static::spaceName($oldToNewColumns[$oldColumn]);
+					$option[self::OPT_LABEL] = static::beautify($oldToNewColumns[$oldColumn]);
 				}
 			} else {
 				$newColumns[] = $option;
@@ -644,6 +644,9 @@ class Data extends Wrapper {
 	 * @return string
 	 */
 	protected function getValueFromInput($key, $input) {
+		if ($key === null) {
+			return $input;
+		}
 		if (is_array($input) && isset($input[$key])) {
 			return $input[$key];
 		} else if ($input instanceof ActiveRecordInterface) {

@@ -2,7 +2,7 @@
 
 namespace WebDreamt;
 
-use WebDreamt\Test\Test;
+use WebDreamt\Test;
 require_once __DIR__ . '/../../bootstrap.php';
 
 class ScriptTest extends Test {

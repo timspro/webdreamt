@@ -3,6 +3,7 @@
 namespace WebDreamt\Test;
 
 use WebDreamt\Builder;
+use WebDreamt\Test;
 
 /**
  * An extension of the Test class that truncates the database before every test and removes
@@ -15,7 +16,7 @@ class DatabaseTest extends Test {
 
 	public static function setUpBeforeClass() {
 		parent::setUpBeforeClass();
-		self::$build = self::$a->builder();
+		self::$build = self::$box->builder();
 	}
 
 	public static function tearDownAfterClass() {

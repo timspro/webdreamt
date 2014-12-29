@@ -1,9 +1,10 @@
 <?php
+use WebDreamt\Component;
+use WebDreamt\Test;
 
 namespace WebDreamt;
 
-use WebDreamt\Test\Test;
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
 class ComponentTest extends Test {
 
@@ -12,7 +13,7 @@ class ComponentTest extends Test {
 	function setUp() {
 		parent::setUp();
 		$this->component = new Component();
-		$this->setRet(Component::class);
+		$this->set(Component::class);
 	}
 
 	/**
@@ -21,12 +22,12 @@ class ComponentTest extends Test {
 	function testConstruct() {
 		$component = new Component("span", 'test', 'data-test=""', 'dog');
 		$output = $component->render('cat');
-		$this->countElements($output, [
+		$this->checkCount($output, [
 			'span' => 1,
 			'.test' => 1,
 			'[data-test=""]' => 1
 		]);
-		$this->html($output, 'span', 'dog');
+		$this->checkHtml($output, 'span', 'dog');
 	}
 
 	/**
@@ -46,9 +47,9 @@ class ComponentTest extends Test {
 		$this->assertEquals('data-test="" data-stay=""', $this->component->getHtml());
 		$this->assertEquals(true, is_callable($this->component->getHtmlCallback()));
 		$this->assertEquals('li', $this->component->getHtmlTag());
-		$this->ret($this->method($this->component, 'useHtml', 'data-dog=""'));
+		$this->ret($this->getMethod($this->component, 'useHtml', 'data-dog=""'));
 		$output = $this->component->render('monkey');
-		$this->countElements($output, [
+		$this->checkCount($output, [
 			'li' => 1,
 			'[data-input="monkey"]' => 1,
 			'[data-place]' => 0,
@@ -56,7 +57,7 @@ class ComponentTest extends Test {
 			'[data-dog]' => 1
 		]);
 		$output = $this->component->render('monkey');
-		$this->countElements($output, [
+		$this->checkCount($output, [
 			'li' => 1,
 			'[data-input="monkey"]' => 1,
 			'[data-place]' => 0,
@@ -79,9 +80,9 @@ class ComponentTest extends Test {
 				}));
 		$this->assertEquals('test-class test-b', $this->component->getCssClass());
 		$this->assertEquals(true, is_callable($this->component->getCssClassCallback()));
-		$this->ret($this->method($this->component, 'useCssClass', 'class-dog'));
+		$this->ret($this->getMethod($this->component, 'useCssClass', 'class-dog'));
 		$output = $this->component->render('monkey');
-		$this->countElements($output, [
+		$this->checkCount($output, [
 			'.test-class' => 1,
 			'.class-monkey' => 1,
 			'.test-a' => 0,
@@ -89,7 +90,7 @@ class ComponentTest extends Test {
 			'.class-dog' => 1
 		]);
 		$output = $this->component->render('monkey');
-		$this->countElements($output, [
+		$this->checkCount($output, [
 			'.test-class' => 1,
 			'.class-monkey' => 1,
 			'.test-a' => 0,
@@ -107,15 +108,15 @@ class ComponentTest extends Test {
 		$this->ret($this->component->setAfterOpeningTag('<div class="dog"></div>'));
 		$this->ret($this->component->appendAfterOpeningTag('<div class="hamster"></div>'));
 		$this->assertEquals('<div class="dog"></div><div class="hamster"></div>', $this->component->getAfterOpeningTag());
-		$this->ret($this->method($this->component, 'useAfterOpeningTag', '<div class="bird"></div>'));
+		$this->ret($this->getMethod($this->component, 'useAfterOpeningTag', '<div class="bird"></div>'));
 		$output = $this->component->render();
-		$this->indexElements($output, [
+		$this->checkIndex($output, [
 			'.dog' => 0,
 			'.hamster' => 1,
 			'.bird' => 2
 		]);
 		$output = $this->component->render();
-		$this->countElements($output, [
+		$this->checkCount($output, [
 			'.dog' => 1,
 			'.hamster' => 1,
 			'.bird' => 0
@@ -131,15 +132,15 @@ class ComponentTest extends Test {
 		$this->ret($this->component->setBeforeClosingTag('<div class="dog"></div>'));
 		$this->ret($this->component->prependBeforeClosingTag('<div class="hamster"></div>'));
 		$this->assertEquals('<div class="hamster"></div><div class="dog"></div>', $this->component->getBeforeClosingTag());
-		$this->ret($this->method($this->component, 'useBeforeClosingTag', '<div class="bird"></div>'));
+		$this->ret($this->getMethod($this->component, 'useBeforeClosingTag', '<div class="bird"></div>'));
 		$output = $this->component->render();
-		$this->indexElements($output, [
+		$this->checkIndex($output, [
 			'.dog' => 2,
 			'.hamster' => 1,
 			'.bird' => 0
 		]);
 		$output = $this->component->render();
-		$this->countElements($output, [
+		$this->checkCount($output, [
 			'.dog' => 1,
 			'.hamster' => 1,
 			'.bird' => 0
@@ -176,7 +177,7 @@ class ComponentTest extends Test {
 		$this->assertEquals(4, count($this->component->getComponents()));
 		$this->assertEquals(0, $this->component->getChildComponentIndex());
 		$this->component->setInput('<div class="me"></div>');
-		$this->indexElements($this->component->render(), [
+		$this->checkIndex($this->component->render(), [
 			'.me' => 0,
 			'.a' => 1,
 			'.b' => 2,
@@ -184,7 +185,7 @@ class ComponentTest extends Test {
 		]);
 		$this->ret($this->component->setChildComponentIndex(3));
 		$this->assertEquals(3, $this->component->getChildComponentIndex());
-		$this->indexElements($this->component->render(), [
+		$this->checkIndex($this->component->render(), [
 			'.a' => 0,
 			'.b' => 1,
 			'.c' => 2,
@@ -192,7 +193,7 @@ class ComponentTest extends Test {
 		]);
 		$this->ret($this->component->setChildComponentIndex(1));
 		$this->assertEquals(1, $this->component->getChildComponentIndex());
-		$this->indexElements($this->component->render(), [
+		$this->checkIndex($this->component->render(), [
 			'.a' => 0,
 			'.me' => 1,
 			'.b' => 2,
@@ -204,7 +205,7 @@ class ComponentTest extends Test {
 	 * @group Component
 	 */
 	function testBeautify() {
-		$this->assertEquals($this->method($this->component, 'beautify', 'some_other_id'), 'Some Other ID');
+		$this->assertEquals($this->getMethod($this->component, 'beautify', 'some_other_id'), 'Some Other ID');
 	}
 
 	/**
@@ -223,7 +224,7 @@ class ComponentTest extends Test {
 	}
 
 	/**
-	 * @group Coemponent
+	 * @group Component
 	 */
 	function testKey() {
 		$this->assertEquals(null, $this->component->getKey());

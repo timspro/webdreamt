@@ -1,6 +1,6 @@
 <?php
 
-namespace WebDreamt\Test;
+namespace WebDreamt;
 
 use DOMDocument;
 use DOMNode;
@@ -10,7 +10,6 @@ use PDO;
 use PHPUnit_Framework_TestCase;
 use ReflectionMethod;
 use Symfony\Component\CssSelector\CssSelector;
-use WebDreamt\Box;
 
 /**
  * A better test base class that provides helpful methods and creates and uses a database.
@@ -18,24 +17,31 @@ use WebDreamt\Box;
 abstract class Test extends PHPUnit_Framework_TestCase {
 
 	/** @var Box */
-	protected static $a;
+	protected static $box;
 	/** @var PDO */
 	protected static $db;
+	/**
+	 * @var int The ID for a new table.
+	 */
 	private $id = 0;
+	/**
+	 * A class name that can be used to check return values
+	 * @var string
+	 */
 	protected $ret;
 
-	public static function setUpBeforeClass() {
-		static::$a = new Box(false);
-		static::$db = static::$a->db();
+	static function setUpBeforeClass() {
+		static::$box = new Box(false);
+		static::$db = static::$box->db();
 		static::$db->exec("CREATE DATABASE IF NOT EXISTS test; USE test");
-		static::$a->DatabaseName = "test";
+		static::$box->DatabaseName = "test";
 	}
 
 	/**
 	 * Creates a table with five columns.
 	 * @param string $name
 	 */
-	public function createTable($name = '') {
+	function createTable($name = '') {
 		if (!$name) {
 			$name = "table" . strval($this->id);
 			$this->id++;
@@ -48,7 +54,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * Count how many tables are in the database.
 	 * @return string
 	 */
-	public function countTables() {
+	function countTables() {
 		return count(static::$db->query("SHOW TABLES")->fetchAll());
 	}
 
@@ -57,7 +63,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * @param string $query
 	 * @return array
 	 */
-	public function all($query) {
+	function all($query) {
 		return static::$db->query($query)->fetchAll();
 	}
 
@@ -66,7 +72,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * @param string $query
 	 * @return array
 	 */
-	public function column($query) {
+	function column($query) {
 		return static::$db->query($query)->fetchAll(PDO::FETCH_COLUMN);
 	}
 
@@ -75,7 +81,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * @param string $query
 	 * @param string $value
 	 */
-	public function inColumn($query, $value) {
+	function inColumn($query, $value) {
 		$array = $this->column($query);
 		$this->assertContains($value, $array);
 	}
@@ -85,7 +91,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * @param string $query
 	 * @param string $value
 	 */
-	public function is($query, $value) {
+	function is($query, $value) {
 		$this->assertEquals($value, $this->column($query)[0]);
 	}
 
@@ -94,7 +100,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * @param string $table
 	 * @return int
 	 */
-	public function countRows($table) {
+	function countRows($table) {
 		return intval(static::$db->query("SELECT COUNT(*) FROM $table")->fetchAll(PDO::FETCH_COLUMN)[0]);
 	}
 
@@ -102,7 +108,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * Do a function for each table in the database.
 	 * @param function $callable
 	 */
-	public function forTables($callable) {
+	function forTables($callable) {
 		$tables = static::$db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
 		foreach ($tables as $table) {
 			$callable($table);
@@ -113,7 +119,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * Truncates each table in the array.
 	 * @param string|array $tables
 	 */
-	public function truncateTables($tables) {
+	function truncateTables($tables) {
 		if (!is_array($tables)) {
 			$tables = [$tables];
 		}
@@ -126,7 +132,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * Delete the tables in the database.
 	 * @param string|array $tables
 	 */
-	public function deleteTables($tables) {
+	function deleteTables($tables) {
 		if (!is_array($tables)) {
 			$tables = [$tables];
 		}
@@ -140,11 +146,11 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Output XML to a file.
+	 * Output HTML to a file.
 	 * @param string $filename The filename to output to
 	 * @param string $output The XML to output
 	 */
-	public function output($filename, $output) {
+	function output($filename, $output) {
 		file_put_contents($filename, $output);
 		$doc = new DOMDocument();
 		$doc->formatOutput = true;
@@ -161,7 +167,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * @param int $count
 	 * @return int
 	 */
-	public function countElements($output, $selectors, $count = null) {
+	function checkCount($output, $selectors, $count = null) {
 		$doc = new DOMDocument();
 		$doc->loadHTML($output);
 		$xpath = new DOMXPath($doc);
@@ -180,7 +186,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * @param string|array $selectors Can be an array, in which case $index is ignored.
 	 * @param int $index
 	 */
-	public function indexElements($output, $selectors, $index = null) {
+	function checkIndex($output, $selectors, $index = null) {
 		$doc = new DOMDocument();
 		$doc->loadHTML($output);
 		$xpath = new DOMXPath($doc);
@@ -209,7 +215,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * @param string|array $selectors
 	 * @param string $html
 	 */
-	public function html($output, $selectors, $html = null) {
+	function checkHtml($output, $selectors, $html = null) {
 		$doc = new DOMDocument();
 		$doc->loadHTML($output);
 		$xpath = new DOMXPath($doc);
@@ -221,7 +227,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 			$elements = $xpath->query($convert);
 			$this->assertNotEquals(0, $elements->length, $selector);
 			foreach ($elements as $element) {
-				$this->assertEquals($html, $this->innerHtml($element), $selector);
+				$this->assertEquals($html, $this->getInnerHtml($element), $selector);
 			}
 		}
 	}
@@ -233,7 +239,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * @param array $args
 	 * @return mixed
 	 */
-	public function method($obj, $method, $args = array()) {
+	function getMethod($obj, $method, $args = array()) {
 		if (!is_array($args)) {
 			$args = [$args];
 		}
@@ -247,7 +253,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * @param DOMNode $element
 	 * @return string
 	 */
-	function innerHtml(DOMNode $element) {
+	function getInnerHtml(DOMNode $element) {
 		$innerHTML = "";
 		$children = $element->childNodes;
 		foreach ($children as $child) {
@@ -268,8 +274,40 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * Set a class to test.
 	 * @param string $class
 	 */
-	function setRet($class) {
+	function set($class) {
 		$this->ret = $class;
+	}
+
+	/**
+	 * Setup the database by putting in example schemas and data.
+	 */
+	static function setupDatabase() {
+		static::setupSchema();
+		self::$box->filler()->setNumber([
+			"job" => 20,
+			"service" => 10,
+			"service_job" => 5,
+			"customer" => 10,
+			"location" => 10,
+			"customer_location" => 5,
+			"driver" => 10,
+			"groups" => 0,
+			"users" => 0,
+			"users_groups" => 0,
+			"vehicles" => 10
+				], true)->addData();
+	}
+
+	/**
+	 * Setup the database schema. Does not add data.
+	 */
+	static function setupSchema() {
+		$sql = file_get_contents(__DIR__ . '/Test/test.sql');
+		self::$box->db()->exec($sql);
+		$build = self::$box->builder();
+		$build->updatePropel();
+		require_once __DIR__ . "/../../db/propel/generated-conf/config.php";
+		$build->loadAllClasses();
 	}
 
 }

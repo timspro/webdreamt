@@ -14,7 +14,7 @@ class BuildTest extends DatabaseTest {
 	 * @group Build
 	 */
 	public function testBuild() {
-		self::$a->db()->exec("DROP DATABASE " . self::$a->DatabaseName);
+		self::$box->db()->exec("DROP DATABASE " . self::$box->DatabaseName);
 		self::$build->build();
 		$this->assertGreaterThan(0, $this->countTables());
 	}
@@ -47,10 +47,10 @@ class BuildTest extends DatabaseTest {
 		$build = self::$build;
 		$build->build();
 
-		$name = self::$a->DatabaseName;
-		$password = self::$a->DatabasePassword;
-		$host = self::$a->DatabaseHost;
-		$username = self::$a->DatabaseUsername;
+		$name = self::$box->DatabaseName;
+		$password = self::$box->DatabasePassword;
+		$host = self::$box->DatabaseHost;
+		$username = self::$box->DatabaseUsername;
 		$goodOutput = shell_exec("mysqldump --no-data --skip-comments --user=$username --password=$password " .
 				"--host=$host $name");
 		$build->deleteDatabase();
@@ -74,7 +74,7 @@ class BuildTest extends DatabaseTest {
 	public function testDeleteData() {
 		$build = self::$build;
 		parent::createTable("addtest");
-		$db = self::$a->db();
+		$db = self::$box->db();
 		$stmt = $db->prepare("INSERT INTO addtest(letters, number, big)"
 				. " VALUES('helo',2,''),('money',5,'town'),('big',8,'tes');");
 		$stmt->execute();

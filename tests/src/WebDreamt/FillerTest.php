@@ -20,7 +20,7 @@ class FillerTest extends DatabaseTest {
 
 		self::$build->updatePropel();
 		self::$build->loadAllClasses();
-		self::$a->filler()->setNumber(["bigger" => 100])->addData();
+		self::$box->filler()->setNumber(["bigger" => 100])->addData();
 
 		$this->forTables(function($table) {
 			$this->assertGreaterThan(0, $this->countRows($table));
@@ -42,12 +42,9 @@ class FillerTest extends DatabaseTest {
 	 * @group Filler
 	 */
 	public function testBigData() {
-		$sql = file_get_contents(__DIR__ . '/test.sql');
-		self::$a->db()->exec($sql);
-		self::$build->updatePropel();
-		self::$build->loadAllClasses();
+		self::setupSchema();
 		$generator = Factory::create();
-		self::$a->filler()->setNumber([
+		self::$box->filler()->setNumber([
 			"job" => 10,
 			"service" => 10,
 			"service_job" => 5,
@@ -86,7 +83,7 @@ class FillerTest extends DatabaseTest {
 
 		self::$build->updatePropel();
 		self::$build->loadAllClasses();
-		self::$a->filler()->setNumber(["Bigger" => 100])->addData();
+		self::$box->filler()->setNumber(["Bigger" => 100])->addData();
 	}
 
 	/**
@@ -98,7 +95,7 @@ class FillerTest extends DatabaseTest {
 
 		self::$build->updatePropel();
 		self::$build->loadAllClasses();
-		self::$a->filler()->setNumber([
+		self::$box->filler()->setNumber([
 			"bigger" => 100
 		])->setRules([
 			"bigger" => ["Bigs" => null]

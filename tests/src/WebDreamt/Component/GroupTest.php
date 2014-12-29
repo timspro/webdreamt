@@ -4,23 +4,23 @@ namespace WebDreamt;
 
 use WebDreamt\Component\Wrapper\Group;
 use WebDreamt\Component\Wrapper\Group\Select;
-use WebDreamt\Test\Test;
-require_once __DIR__ . '/../../bootstrap.php';
+use WebDreamt\Test;
+require_once __DIR__ . '/../../../bootstrap.php';
 
 class GroupTest extends Test {
 
 	/**
-	 * @group Group
+	 * @group ComGroup
 	 */
 	function testGroup() {
-		$this->setRet(Group::class);
+		$this->set(Group::class);
 		$group = new Group(new Component(), 'span', 'test', 'data-test=""', ['a', 'b', 'c']);
 		$this->assertEquals('', $group->getTitle());
 		$component = new Component();
 		$this->ret($group->setDisplayComponent($component->setTitle('apple')));
 		$this->assertEquals('apples', $group->getTitle());
 		$output = $group->render(['e', 'f']);
-		$this->countElements($output, [
+		$this->checkCount($output, [
 			'span' => 1,
 			'.test' => 1,
 			'[data-test=""]' => 1,
@@ -28,7 +28,7 @@ class GroupTest extends Test {
 		]);
 		$group->setInput(null);
 		$output = $group->render(['e', 'f']);
-		$this->countElements($output, [
+		$this->checkCount($output, [
 			'span' => 1,
 			'.test' => 1,
 			'[data-test=""]' => 1,
@@ -37,20 +37,20 @@ class GroupTest extends Test {
 	}
 
 	/**
-	 * @group GroupSelect
+	 * @group ComSelect
 	 */
 	function testSelect() {
-		$this->setRet(Select::class);
+		$this->set(Select::class);
 		$select = new Select(null, 'test', 'data-test=""', ['a', 'b', 'c']);
 		$output = $select->render(['q']);
-		$this->countElements($output, [
+		$this->checkCount($output, [
 			'.test' => 1,
 			'[data-test=""]' => 1,
 			'option' => 3,
 			'selected' => 0
 		]);
 		$select->setSelected('c');
-		$this->html($select->render(), [
+		$this->checkHtml($select->render(), [
 			'[selected=""]' => 'c'
 		]);
 		$select->setInput(null)->getDisplayComponent()->setKey('value');
@@ -60,19 +60,19 @@ class GroupTest extends Test {
 			['id' => '2', 'value' => 'lizard']
 		];
 		$output = $select->render($data);
-		$this->indexElements($output, [
+		$this->checkIndex($output, [
 			'[value=0]' => 0,
 			'[value=1]' => 1,
 			'[value=2]' => 2
 		]);
-		$this->html($output, [
+		$this->checkHtml($output, [
 			'[value=0]' => 'cat',
 			'[value=1]' => 'dog',
 			'[value=2]' => 'lizard'
 		]);
 		$this->ret($select->setSelected('2'));
 		$output = $select->render($data);
-		$this->html($output, [
+		$this->checkHtml($output, [
 			"[selected='']" => 'lizard'
 		]);
 	}

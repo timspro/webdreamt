@@ -71,6 +71,8 @@ class Filler {
 		$mapDirectory = $this->vendor . "../db/propel/generated-classes/Map/";
 		foreach (array_diff(scandir($mapDirectory), array('..', '.')) as $file) {
 			require_once $mapDirectory . $file;
+			//$class = "\\Map\\" . preg_replace('/\\.[^.\\s]{3,4}$/', '', $file);
+			//$class::buildTableMap();
 		}
 
 		$map = Propel::getDatabaseMap();

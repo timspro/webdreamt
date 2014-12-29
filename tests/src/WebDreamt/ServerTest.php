@@ -3,7 +3,7 @@
 namespace WebDreamt;
 
 use Cartalyst\Sentry\Sentry;
-use WebDreamt\Test\Test;
+use WebDreamt\Test;
 require_once __DIR__ . '/../../bootstrap.php';
 
 class ServerTest extends Test {
@@ -17,30 +17,8 @@ class ServerTest extends Test {
 
 	public static function setUpBeforeClass() {
 		parent::setUpBeforeClass();
-		$sql = file_get_contents(__DIR__ . '/test.sql');
-		self::$a->db()->exec($sql);
-		self::$build = self::$a->builder();
-		$build = self::$build;
-		$build->updatePropel();
-		require_once __DIR__ . "/../../../db/propel/generated-conf/config.php";
-		$build->loadAllClasses();
-		/*
-		  self::$a->filler()->addData([
-		  "Job" => 10,
-		  "Service" => 10,
-		  "ServiceJob" => 5,
-		  "Customer" => 10,
-		  "Location" => 10,
-		  "CustomerLocation" => 5,
-		  "Driver" => 10,
-		  "Groups" => 0,
-		  "Users" => 0,
-		  "UsersGroups" => 0,
-		  "Job" => 20,
-		  "Vehicles" => 10
-		  ]);
-		 */
-		self::$sentry = self::$a->sentry();
+		self::setupSchema();
+		self::$sentry = self::$box->sentry();
 		$sentry = self::$sentry;
 		$sentry->getThrottleProvider()->disable();
 		$sentry->createGroup([
@@ -61,14 +39,15 @@ class ServerTest extends Test {
 			'activated' => true
 		]);
 		$user->addGroup($sentry->findGroupByName('User'));
-		self::$server = self::$a->server();
+		self::$server = self::$box->server();
 		self::$server->allow('Administrator', ['driver', 'location'], ['create', 'update', 'delete']);
 	}
 
 	public static function tearDownAfterClass() {
 		parent::tearDownAfterClass();
-		self::$build->deleteDatabase();
-		self::$build->removeDirectory(self::$build->DB);
+		$build = self::$box->builder();
+		$build->deleteDatabase();
+		$build->removeDirectory($build->DB);
 	}
 
 	protected function setUp() {
