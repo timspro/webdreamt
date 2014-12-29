@@ -12,7 +12,7 @@ class FillerTest extends DatabaseTest {
 	/**
 	 * @group Filler
 	 */
-	public function testAddData() {
+	function testAddData() {
 		for ($i = 0; $i < 10; $i++) {
 			$this->createTable();
 		}
@@ -41,8 +41,8 @@ class FillerTest extends DatabaseTest {
 	/**
 	 * @group Filler
 	 */
-	public function testBigData() {
-		self::setupSchema();
+	function testBigData() {
+		self::setUpSchema();
 		$generator = Factory::create();
 		self::$box->filler()->setNumber([
 			"job" => 10,
@@ -78,7 +78,7 @@ class FillerTest extends DatabaseTest {
 	 * @group Filler
 	 * @expectedException Exception
 	 */
-	public function testBadTableName() {
+	function testBadTableName() {
 		$this->createTable("bigger");
 
 		self::$build->updatePropel();
@@ -90,7 +90,7 @@ class FillerTest extends DatabaseTest {
 	 * @group Filler
 	 * @expectedException Exception
 	 */
-	public function testBadColumnName() {
+	function testBadColumnName() {
 		$this->createTable("bigger");
 
 		self::$build->updatePropel();

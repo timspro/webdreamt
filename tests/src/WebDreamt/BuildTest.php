@@ -13,7 +13,7 @@ class BuildTest extends DatabaseTest {
 	/**
 	 * @group Build
 	 */
-	public function testBuild() {
+	function testBuild() {
 		self::$box->db()->exec("DROP DATABASE " . self::$box->DatabaseName);
 		self::$build->build();
 		$this->assertGreaterThan(0, $this->countTables());
@@ -22,7 +22,7 @@ class BuildTest extends DatabaseTest {
 	/**
 	 * @group Build
 	 */
-	public function testUpdatePropel() {
+	function testUpdatePropel() {
 		$this->createTable();
 		$this->createTable();
 		$this->createTable();
@@ -43,7 +43,7 @@ class BuildTest extends DatabaseTest {
 	/**
 	 * @group Build
 	 */
-	public function testUpdateDatabase() {
+	function testUpdateDatabase() {
 		$build = self::$build;
 		$build->build();
 
@@ -71,7 +71,7 @@ class BuildTest extends DatabaseTest {
 	/**
 	 * @group Build
 	 */
-	public function testDeleteData() {
+	function testDeleteData() {
 		$build = self::$build;
 		parent::createTable("addtest");
 		$db = self::$box->db();
@@ -86,7 +86,7 @@ class BuildTest extends DatabaseTest {
 	/**
 	 * @group Build
 	 */
-	public function testManyToMany() {
+	function testManyToMany() {
 		self::$db->exec("CREATE TABLE red (id INT PRIMARY KEY AUTO_INCREMENT);"
 				. "CREATE TABLE blue (id INT PRIMARY KEY AUTO_INCREMENT);"
 				. "CREATE TABLE red_blue (red_id INT, blue_id INT,
@@ -102,7 +102,7 @@ class BuildTest extends DatabaseTest {
 	 * Check to see that Build::guarantee works when the generated schema is missing.
 	 * @group Build
 	 */
-	public function testGuaranteeWithSchema() {
+	function testGuaranteeWithSchema() {
 
 	}
 
@@ -110,7 +110,7 @@ class BuildTest extends DatabaseTest {
 	 * Check to see that Build::guarantee works when the generated schema is old.
 	 * @group Build
 	 */
-	public function testGuaranteeWithoutSchema() {
+	function testGuaranteeWithoutSchema() {
 
 	}
 

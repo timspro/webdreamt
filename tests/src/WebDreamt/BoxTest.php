@@ -10,14 +10,14 @@ class BoxTest extends Test {
 	/**
 	 * @group Box
 	 */
-	public function testSentry() {
+	function testSentry() {
 		$this->assertInstanceOf('\Cartalyst\Sentry\Sentry', self::$box->sentry());
 	}
 
 	/**
 	 * @group Box
 	 */
-	public function testPdo() {
+	function testPdo() {
 		$pdo = self::$box->db();
 		$dbName = self::$box->DatabaseName;
 		$this->assertInstanceOf('\PDO', $pdo);

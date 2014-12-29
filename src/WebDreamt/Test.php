@@ -281,8 +281,8 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	/**
 	 * Setup the database by putting in example schemas and data.
 	 */
-	static function setupDatabase() {
-		static::setupSchema();
+	static function setUpDatabase() {
+		static::setUpSchema();
 		self::$box->filler()->setNumber([
 			"job" => 20,
 			"service" => 10,
@@ -301,13 +301,22 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	/**
 	 * Setup the database schema. Does not add data.
 	 */
-	static function setupSchema() {
+	static function setUpSchema() {
 		$sql = file_get_contents(__DIR__ . '/Test/test.sql');
 		self::$box->db()->exec($sql);
 		$build = self::$box->builder();
 		$build->updatePropel();
 		require_once __DIR__ . "/../../db/propel/generated-conf/config.php";
 		$build->loadAllClasses();
+	}
+
+	/**
+	 * Tear down the database and the database folder.
+	 */
+	static function tearDownDatabase() {
+		$build = self::$box->builder();
+		$build->deleteDatabase();
+		$build->removeDirectory($build->DB);
 	}
 
 }

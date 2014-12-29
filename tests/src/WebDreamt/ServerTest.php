@@ -15,9 +15,9 @@ class ServerTest extends Test {
 	/** @var Sentry */
 	protected static $sentry;
 
-	public static function setUpBeforeClass() {
+	static function setUpBeforeClass() {
 		parent::setUpBeforeClass();
-		self::setupSchema();
+		self::setUpSchema();
 		self::$sentry = self::$box->sentry();
 		$sentry = self::$sentry;
 		$sentry->getThrottleProvider()->disable();
@@ -43,15 +43,9 @@ class ServerTest extends Test {
 		self::$server->allow('Administrator', ['driver', 'location'], ['create', 'update', 'delete']);
 	}
 
-	public static function tearDownAfterClass() {
+	static function tearDownAfterClass() {
 		parent::tearDownAfterClass();
-		$build = self::$box->builder();
-		$build->deleteDatabase();
-		$build->removeDirectory($build->DB);
-	}
-
-	protected function setUp() {
-		parent::setUp();
+		self::tearDownDatabase();
 	}
 
 	protected function tearDown() {
@@ -61,7 +55,7 @@ class ServerTest extends Test {
 	/**
 	 * @group Server
 	 */
-	public function testOkay() {
+	function testOkay() {
 		self::$sentry->authenticate([
 			'email' => 'admin@email.com',
 			'password' => 'test'
@@ -84,7 +78,7 @@ class ServerTest extends Test {
 	/**
 	 * @group Server
 	 */
-	public function testInvalidCreate() {
+	function testInvalidCreate() {
 		self::$sentry->authenticate([
 			'email' => 'user@email.com',
 			'password' => 'test'
@@ -100,7 +94,7 @@ class ServerTest extends Test {
 	/**
 	 * @group Server
 	 */
-	public function testInvalidUpdate() {
+	function testInvalidUpdate() {
 		self::$sentry->authenticate([
 			'email' => 'user@email.com',
 			'password' => 'test'
@@ -115,7 +109,7 @@ class ServerTest extends Test {
 	/**
 	 * @group Server
 	 */
-	public function testInvalidDelete() {
+	function testInvalidDelete() {
 		self::$sentry->authenticate([
 			'email' => 'user@email.com',
 			'password' => 'test'
@@ -129,7 +123,7 @@ class ServerTest extends Test {
 	/**
 	 * @group Server
 	 */
-	public function testBatch() {
+	function testBatch() {
 		self::$sentry->authenticate([
 			'email' => 'admin@email.com',
 			'password' => 'test'
