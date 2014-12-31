@@ -20,7 +20,8 @@ class Group extends Wrapper {
 	 * @param string $html
 	 * @param mixed $input
 	 */
-	function __construct(Component $display, $htmlTag = 'div', $class = null, $html = null, $input = null) {
+	function __construct(Component $display = null, $htmlTag = 'div', $class = null, $html = null,
+			$input = null) {
 		parent::__construct($display, $htmlTag, $class, $html, $input);
 		$this->title = Box::now()->pluralize($display->getTitle());
 	}

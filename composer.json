@@ -11,7 +11,8 @@
 		"propel/propel": "dev-master",
 		"cartalyst/sentry": "dev-master",
 		"illuminate/database": ">=4.1,<4.2",
-		"fzaninotto/faker": "dev-master"
+		"fzaninotto/faker": "dev-master",
+		"symfony/console": ">=2.3,<2.6"
 	},
 	"autoload": {
 		"psr-0": {

@@ -64,7 +64,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * @return array
 	 */
 	function all($query) {
-		return static::$db->query($query)->fetchAll();
+		return static::$db->query($query)->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 	/**
@@ -176,7 +176,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 		}
 		foreach ($selectors as $selector => $count) {
 			$convert = CssSelector::toXPath($selector);
-			$this->assertEquals($count, $xpath->query($convert)->length);
+			$this->assertEquals($count, $xpath->query($convert)->length, $selector);
 		}
 	}
 

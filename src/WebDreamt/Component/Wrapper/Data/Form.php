@@ -4,8 +4,11 @@ namespace WebDreamt\Component\Wrapper\Data;
 
 use Propel\Generator\Model\PropelTypes;
 use Propel\Runtime\Map\ColumnMap;
+use WebDreamt\Component;
+use WebDreamt\Component\Wrapper;
 use WebDreamt\Component\Wrapper\Data;
 use WebDreamt\Component\Wrapper\Group\Select;
+use WebDreamt\Component\Wrapper\Modal;
 
 /**
  * A class to easily render a form for a table in the database.
@@ -160,7 +163,7 @@ class Form extends Data {
 	 * @return this
 	 */
 	function setHtmlClass($columns) {
-		$this->merge($columns, self::OPT_HTML_CLASS);
+		$this->mergeOptions($columns, self::OPT_HTML_CLASS);
 		return $this;
 	}
 
@@ -170,7 +173,7 @@ class Form extends Data {
 	 * @return this
 	 */
 	function setHtmlType($columns) {
-		$this->merge($columns, self::OPT_HTML_TYPE);
+		$this->mergeOptions($columns, self::OPT_HTML_TYPE);
 		return $this;
 	}
 
@@ -180,7 +183,7 @@ class Form extends Data {
 	 * @return this
 	 */
 	function setHtmlExtra($columns) {
-		$this->merge($columns, self::OPT_HTML_EXTRA);
+		$this->mergeOptions($columns, self::OPT_HTML_EXTRA);
 		return $this;
 	}
 
@@ -190,7 +193,7 @@ class Form extends Data {
 	 * @return self
 	 */
 	function required(array $columns = null) {
-		$this->apply(is_array($columns) ? $columns : func_get_args(), self::OPT_REQUIRE, true);
+		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_REQUIRE, true);
 		return $this;
 	}
 
@@ -200,7 +203,7 @@ class Form extends Data {
 	 * @return self
 	 */
 	function optional(array $columns = null) {
-		$this->apply(is_array($columns) ? $columns : func_get_args(), self::OPT_REQUIRE, false);
+		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_REQUIRE, false);
 		return $this;
 	}
 
@@ -210,7 +213,7 @@ class Form extends Data {
 	 * @return self
 	 */
 	function disable(array $columns = null) {
-		$this->apply(is_array($columns) ? $columns : func_get_args(), self::OPT_DISABLE, false);
+		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_DISABLE, false);
 		return $this;
 	}
 
@@ -220,16 +223,8 @@ class Form extends Data {
 	 * @return self
 	 */
 	function enable(array $columns = null) {
-		$this->apply(is_array($columns) ? $columns : func_get_args(), self::OPT_DISABLE, true);
+		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_DISABLE, true);
 		return $this;
-	}
-
-	/**
-	 * Sets HTML attributes for the form. You will likely want to use "role='form'" in $html.
-	 * @param string $html Example: "class='test' method='get' role='form'"
-	 */
-	function setHtml($html = "role='form'") {
-		$this->html = $html;
 	}
 
 	/**
@@ -240,6 +235,14 @@ class Form extends Data {
 	function setMultiple($multiple = false) {
 		$this->multiple = $multiple;
 		return $this;
+	}
+
+	/**
+	 * Get if the form can submit multiple items.
+	 * @return boolean
+	 */
+	function getMultiple() {
+		return $this->multiple;
 	}
 
 	/**
@@ -255,7 +258,20 @@ class Form extends Data {
 		return $this;
 	}
 
-	function render($input = null, $included = null) {
+	/**
+	 * Get the input hook.
+	 * @return callable
+	 */
+	function getInputHook() {
+		return $this->inputHook;
+	}
+
+	/**
+	 * Render the form.
+	 * @param array $input
+	 * @param Component $included
+	 */
+	function render($input = null, Component $included = null) {
 		if ($included instanceof Modal) {
 			$this->setHtmlTag('div');
 			$included->useButtons(['btn-primary wd-btn-submit' => 'Submit']);
@@ -322,11 +338,11 @@ class Form extends Data {
 			switch ($type) {
 				case self::HTML_NUMBER:
 					$component = new Component('input', $classes, "type='number' value='$value' $attributes");
-					$this->display->setDisplayComponent($component->setInput('', $this));
+					$this->display->setDisplayComponent($component->setInput(''));
 					break;
 				case self::HTML_TEXT:
 					$component = new Component('input', $classes, "value='$value' $attributes");
-					$this->display->setDisplayComponent($component->setInput('', $this));
+					$this->display->setDisplayComponent($component->setInput(''));
 					break;
 				case self::HTML_TEXTAREA:
 					$this->display->setDisplayComponent(new Component('textarea', $classes, $attributes));

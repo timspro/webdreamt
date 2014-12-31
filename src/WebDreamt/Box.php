@@ -21,6 +21,10 @@ class Box {
 	public $DatabaseName = "";
 	public $DatabaseUsername = "root";
 	public $DatabasePassword = "";
+	/**
+	 * The vendor directory in the project.
+	 * @var string
+	 */
 	public $VendorDirectory;
 
 	/**

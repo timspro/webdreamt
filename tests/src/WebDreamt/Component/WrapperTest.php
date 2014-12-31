@@ -39,6 +39,9 @@ class WrapperTest extends Test {
 			'[data-pan=""]' => 1
 		]);
 		$this->checkHtml($output, '.taste', 'lizard');
+
+		//Blank constructor
+		$this->assertEquals('<div><div></div></div>', (new Wrapper())->render());
 	}
 
 	/**

@@ -18,14 +18,19 @@ class Wrapper extends Component {
 	/**
 	 * Construct a wrapper. Note that title is automatically set to the title of the displayed
 	 * component.
-	 * @param Component $display Specify a component which the wrapper goes around.
+	 * @param Component $display Specify a component which the wrapper goes around. Can be null, which
+	 * indicates that the wrapper should just use the default component given by new Component().
 	 * @param string $htmlTag
 	 * @param string $class
 	 * @param string $html
 	 * @param mixed $input
 	 * @param string
 	 */
-	function __construct(Component $display, $htmlTag = 'div', $class = null, $html = null, $input = null) {
+	function __construct(Component $display = null, $htmlTag = 'div', $class = null, $html = null,
+			$input = null) {
+		if ($display === null) {
+			$display = new Component();
+		}
 		parent::__construct($htmlTag, $class, $html, $input);
 		$this->display = $display;
 		$this->title = $display->getTitle();
