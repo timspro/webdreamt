@@ -284,17 +284,15 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	static function setUpDatabase() {
 		static::setUpSchema();
 		self::$box->filler()->setNumber([
-			"job" => 20,
+			"contract" => 20,
 			"service" => 10,
-			"service_job" => 5,
+			"service_contract" => 5,
 			"customer" => 10,
 			"location" => 10,
-			"customer_location" => 5,
-			"driver" => 10,
+			"agent" => 10,
 			"groups" => 0,
 			"users" => 0,
 			"users_groups" => 0,
-			"vehicles" => 10
 				], true)->addData();
 	}
 

@@ -11,102 +11,72 @@ CREATE TABLE `customer` (
   `first_name` varchar(100) DEFAULT NULL,
   `last_name` varchar(100) DEFAULT NULL,
   `company_name` varchar(100) DEFAULT NULL,
-  `billing_street_address` varchar(255) DEFAULT NULL,
-  `billing_city` varchar(100) DEFAULT NULL,
-  `billing_state` enum('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY') NOT NULL,
-  `billing_zip` int(5) unsigned DEFAULT NULL,
-  `customer_add_date` datetime DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
   `active` tinyint(1) unsigned DEFAULT NULL,
-  `credit_customer` tinyint(1) unsigned DEFAULT NULL,
-  `phone` int(10) unsigned DEFAULT NULL,
+  `type` enum('Person', 'Business', 'Nonprofit') NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
-DROP TABLE IF EXISTS `customer_location`;
-CREATE TABLE `customer_location` (
-  `customer_id` int(10) unsigned NOT NULL,
-  `location_id` int(10) unsigned NOT NULL,
-  `current_active` tinyint(1) NOT NULL,
-  PRIMARY KEY (`customer_id`,`location_id`),
-  KEY `customer_id` (`customer_id`),
-  KEY `location_id` (`location_id`),
-  CONSTRAINT `customer_location_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
-  CONSTRAINT `customer_location_ibfk_2` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-DROP TABLE IF EXISTS `driver`;
-CREATE TABLE `driver` (
+DROP TABLE IF EXISTS `agent`;
+CREATE TABLE `agent` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
-  `salary` decimal(10,2) unsigned NOT NULL,
+  `salary` decimal(10,2) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `groups`;
-CREATE TABLE `groups` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `permissions` text,
-  `created_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `groups_name_unique` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-DROP TABLE IF EXISTS `job`;
-CREATE TABLE `job` (
+DROP TABLE IF EXISTS `contract`;
+CREATE TABLE `contract` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `customer_id` int(10) unsigned NOT NULL,
   `location_id` int(10) unsigned NOT NULL,
-  `driver_id` int(10) unsigned DEFAULT NULL,
-  `commission` decimal(10,2) unsigned DEFAULT NULL,
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `completed_at` datetime DEFAULT NULL,
+  `agent_id` int(10) unsigned DEFAULT NULL,
+  `completed_time` time DEFAULT NULL,
+  `completed_data` date DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
   KEY `customer_id` (`customer_id`),
   KEY `location_id` (`location_id`),
-  KEY `driver_id` (`driver_id`),
-  CONSTRAINT `job_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
-  CONSTRAINT `job_ibfk_2` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`),
-  CONSTRAINT `job_ibfk_3` FOREIGN KEY (`driver_id`) REFERENCES `driver` (`id`)
+  KEY `agent_id` (`agent_id`),
+  CONSTRAINT `contract_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
+  CONSTRAINT `contract_ibfk_2` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`),
+  CONSTRAINT `contract_ibfk_3` FOREIGN KEY (`agent_id`) REFERENCES `agent` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 DROP TABLE IF EXISTS `location`;
 CREATE TABLE `location` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `street_address` varchar(255) NOT NULL,
   `city` varchar(100) NOT NULL,
   `state` varchar(50) NOT NULL,
-  `zip` int(10) unsigned NOT NULL,
-  `street_address` varchar(255) NOT NULL,
+  `zip` varchar(20) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 DROP TABLE IF EXISTS `service`;
 CREATE TABLE `service` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
-  `price` decimal(10,0) NOT NULL,
-  `active` tinyint(1) NOT NULL DEFAULT '1',
+  `price` decimal(10,2) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-DROP TABLE IF EXISTS `service_job`;
-CREATE TABLE `service_job` (
-  `service_id` int(11) NOT NULL,
-  `job_id` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`service_id`,`job_id`),
-  KEY `job_id` (`job_id`),
-  CONSTRAINT `service_job_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`),
-  CONSTRAINT `service_job_ibfk_2` FOREIGN KEY (`job_id`) REFERENCES `job` (`id`)
+DROP TABLE IF EXISTS `service_contract`;
+CREATE TABLE `service_contract` (
+  `service_id` int(10) unsigned NOT NULL,
+  `contract_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`service_id`,`contract_id`),
+  KEY `contract_id` (`contract_id`),
+  CONSTRAINT `service_contract_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`),
+  CONSTRAINT `service_contract_ibfk_2` FOREIGN KEY (`contract_id`) REFERENCES `contract` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -132,7 +102,6 @@ CREATE TABLE `users` (
   KEY `users_reset_password_code_index` (`reset_password_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
 DROP TABLE IF EXISTS `users_groups`;
 CREATE TABLE `users_groups` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -145,17 +114,14 @@ CREATE TABLE `users_groups` (
   CONSTRAINT `users_groups_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
-DROP TABLE IF EXISTS `vehicles`;
-CREATE TABLE `vehicles` (
+DROP TABLE IF EXISTS `groups`;
+CREATE TABLE `groups` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `year` int(4) DEFAULT NULL,
-  `make` varchar(100) NOT NULL,
-  `model` varchar(100) NOT NULL,
-  `current_mileage` int(10) unsigned DEFAULT NULL,
-  `license_plate` varchar(8) NOT NULL,
-  `mileage_oil_last` int(10) unsigned DEFAULT NULL,
-  `mileage_fuelfilter_last` int(10) unsigned DEFAULT NULL,
-  `needs_service` tinyint(1) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `name` varchar(255) NOT NULL,
+  `permissions` text,
+  `created_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `groups_name_unique` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+

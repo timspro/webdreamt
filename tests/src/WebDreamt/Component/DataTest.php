@@ -21,7 +21,7 @@ class DataTest extends Test {
 	/**
 	 * @group ComData
 	 */
-	function testData() {
+	function testBasic() {
 		$customers = $this->all('SELECT * FROM customer LIMIT 10');
 		$data = new Data('customer', new Component('td'), 'tr', 'test', 'data-test=""');
 		$group = new Group($data, 'table');
@@ -30,6 +30,13 @@ class DataTest extends Test {
 			'tr' => 10,
 			'td' => 10 * count($customers[0])
 		]);
+	}
+
+	/**
+	 * @group ComData
+	 */
+	function test() {
+
 	}
 
 }

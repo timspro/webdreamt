@@ -31,7 +31,7 @@ Fork bower-installer.
 Validation
 
 # Very Hard:
-Rethink Filler supporting libraries.
+Rethink Filler supporting libraries. (Allow circular database references.)
 Rethink Authorization supporting libraries.
 Cache forms, but how to do it for rows?
 

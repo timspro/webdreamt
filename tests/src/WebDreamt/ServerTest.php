@@ -40,7 +40,7 @@ class ServerTest extends Test {
 		]);
 		$user->addGroup($sentry->findGroupByName('User'));
 		self::$server = self::$box->server();
-		self::$server->allow('Administrator', ['driver', 'location'], ['create', 'update', 'delete']);
+		self::$server->allow('Administrator', ['agent', 'location'], ['create', 'update', 'delete']);
 	}
 
 	static function tearDownAfterClass() {
@@ -49,7 +49,7 @@ class ServerTest extends Test {
 	}
 
 	protected function tearDown() {
-		$this->truncateTables(["driver", "location"]);
+		$this->truncateTables(["agent", "location"]);
 	}
 
 	/**
@@ -60,19 +60,19 @@ class ServerTest extends Test {
 			'email' => 'admin@email.com',
 			'password' => 'test'
 		]);
-		$object = self::$server->run('driver', 'create', [
+		$object = self::$server->run('agent', 'create', [
 			'first_name' => "John",
 			'last_name' => 'Smith',
 			'salary' => '1000'
 		]);
-		$this->assertEquals(1, $this->countRows('driver'));
-		self::$server->run('driver', 'update', [
+		$this->assertEquals(1, $this->countRows('agent'));
+		self::$server->run('agent', 'update', [
 			'id' => $object->getId(),
 			'first_name' => "Peter"
 		]);
-		$this->inColumn("SELECT first_name FROM driver", "Peter");
-		self::$server->run('driver', 'delete', ['id' => $object->getId()]);
-		$this->assertEquals(0, $this->countRows('driver'));
+		$this->inColumn("SELECT first_name FROM agent", "Peter");
+		self::$server->run('agent', 'delete', ['id' => $object->getId()]);
+		$this->assertEquals(0, $this->countRows('agent'));
 	}
 
 	/**
@@ -84,7 +84,7 @@ class ServerTest extends Test {
 			'password' => 'test'
 		]);
 		$this->setExpectedException('Exception');
-		self::$server->run('driver', 'create', [
+		self::$server->run('agent', 'create', [
 			'first_name' => "John",
 			'last_name' => 'Smith',
 			'salary' => '1000'
@@ -100,7 +100,7 @@ class ServerTest extends Test {
 			'password' => 'test'
 		]);
 		$this->setExpectedException('Exception');
-		self::$server->run('driver', 'update', [
+		self::$server->run('agent', 'update', [
 			'id' => '1',
 			'first_name' => "Peter",
 		]);
@@ -115,7 +115,7 @@ class ServerTest extends Test {
 			'password' => 'test'
 		]);
 		$this->setExpectedException('Exception');
-		self::$server->run('driver', 'delete', [
+		self::$server->run('agent', 'delete', [
 			'id' => '1'
 		]);
 	}
@@ -130,11 +130,11 @@ class ServerTest extends Test {
 		]);
 
 		self::$server->batch([
-			"1" => 'driver',
+			"1" => 'agent',
 			"1-first_name" => "Johnny",
 			"1-last_name" => "Smith",
 			"1-salary" => '10000.50',
-			"2" => 'driver',
+			"2" => 'agent',
 			"2-first_name" => "Alex",
 			"2-last_name" => "Smith",
 			"2-salary" => '20000.50',
@@ -145,7 +145,7 @@ class ServerTest extends Test {
 			'3-street_address' => 'A Road'
 		]);
 
-		$data = $this->all('SELECT id, salary FROM driver ORDER BY salary');
+		$data = $this->all('SELECT id, salary FROM agent ORDER BY salary');
 		$id = $data[0]['id'];
 		$this->assertEquals('10000.50', $data[0]['salary']);
 		$this->assertEquals('20000.50', $data[1]['salary']);
@@ -156,14 +156,14 @@ class ServerTest extends Test {
 			"4-state" => 'California',
 			'4-zip' => "20000",
 			'4-street_address' => 'Monkey Lane',
-			'5' => 'driver',
+			'5' => 'agent',
 			'5-id' => $id,
 			'5-first_name' => 'James',
 			'5-last_name' => "Monroe",
 			'5-salary' => '30000.50'
 		]);
 
-		$this->is('SELECT salary FROM driver WHERE id = ' . $id, '30000.50');
+		$this->is('SELECT salary FROM agent WHERE id = ' . $id, '30000.50');
 		$this->assertEquals(2, $this->countRows('location'));
 	}
 
