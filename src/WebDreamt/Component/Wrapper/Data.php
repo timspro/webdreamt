@@ -349,6 +349,30 @@ class Data extends Wrapper {
 	}
 
 	/**
+	 * Get the components not associated with a column. Note that null represents this component.
+	 * @return array
+	 */
+	function getComponents() {
+		$components = [];
+		foreach ($this->components as $component) {
+			$components[] = $component[self::EXTRA_COMPONENT];
+		}
+		return $components;
+	}
+
+	/**
+	 * Get the extra components that were added with a column.
+	 * @return array
+	 */
+	function getColumnComponents() {
+		$components = [];
+		foreach ($this->columnComponents as $column => $component) {
+			$components[$column] = $component[self::EXTRA_COMPONENT];
+		}
+		return $components;
+	}
+
+	/**
 	 * Make columns visible. Defaults to all columns.
 	 * @param array|... $columns Column names should be the values of the array.
 	 * @return self

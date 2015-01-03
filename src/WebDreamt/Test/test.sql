@@ -24,6 +24,7 @@ CREATE TABLE `agent` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
+  `agency` varchar(100) DEFAULT NULL,
   `salary` decimal(10,2) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -31,22 +32,27 @@ CREATE TABLE `agent` (
 DROP TABLE IF EXISTS `contract`;
 CREATE TABLE `contract` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `customer_id` int(10) unsigned NOT NULL,
   `location_id` int(10) unsigned NOT NULL,
-  `agent_id` int(10) unsigned DEFAULT NULL,
+  `buyer_customer_id` int(10) unsigned NOT NULL,
+  `seller_customer_id` int(10) unsigned NOT NULL,
+  `buyer_agent_id` int(10) unsigned DEFAULT NULL,
+  `seller_agent_id` int(10) unsigned DEFAULT NULL,
   `completed_time` time DEFAULT NULL,
-  `completed_data` date DEFAULT NULL,
+  `completed_date` date DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
-  KEY `customer_id` (`customer_id`),
   KEY `location_id` (`location_id`),
-  KEY `agent_id` (`agent_id`),
-  CONSTRAINT `contract_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
-  CONSTRAINT `contract_ibfk_2` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`),
-  CONSTRAINT `contract_ibfk_3` FOREIGN KEY (`agent_id`) REFERENCES `agent` (`id`)
+  KEY `buyer_customer_id` (`buyer_customer_id`),
+  KEY `seller_customer_id` (`seller_customer_id`),
+  KEY `buyer_agent_id` (`buyer_agent_id`),
+  KEY `seller_agent_id` (`seller_agent_id`),
+  CONSTRAINT `contract_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`),
+  CONSTRAINT `contract_ibfk_2` FOREIGN KEY (`buyer_customer_id`) REFERENCES `customer` (`id`),
+  CONSTRAINT `contract_ibfk_3` FOREIGN KEY (`seller_customer_id`) REFERENCES `customer` (`id`),
+  CONSTRAINT `contract_ibfk_4` FOREIGN KEY (`buyer_agent_id`) REFERENCES `agent` (`id`),
+  CONSTRAINT `contract_ibfk_5` FOREIGN KEY (`seller_agent_id`) REFERENCES `agent` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 DROP TABLE IF EXISTS `location`;
 CREATE TABLE `location` (
@@ -58,7 +64,6 @@ CREATE TABLE `location` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
 DROP TABLE IF EXISTS `service`;
 CREATE TABLE `service` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -67,7 +72,6 @@ CREATE TABLE `service` (
   `price` decimal(10,2) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 DROP TABLE IF EXISTS `service_contract`;
 CREATE TABLE `service_contract` (
@@ -79,6 +83,17 @@ CREATE TABLE `service_contract` (
   CONSTRAINT `service_contract_ibfk_2` FOREIGN KEY (`contract_id`) REFERENCES `contract` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `move`;
+CREATE TABLE `move` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `buyer_contract_id` int(10) unsigned NOT NULL,
+  `seller_contract_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `buyer_contract_id` (`buyer_contract_id`),
+  KEY `seller_contract_id` (`seller_contract_id`),
+  CONSTRAINT `move_ibfk_1` FOREIGN KEY (`buyer_contract_id`) REFERENCES `contract` (`id`),
+  CONSTRAINT `move_ibfk_2` FOREIGN KEY (`seller_contract_id`) REFERENCES `contract` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (

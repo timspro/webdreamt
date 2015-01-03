@@ -28,14 +28,52 @@ class DataTest extends Test {
 		$output = $group->render($customers);
 		$this->checkCount($output, [
 			'tr' => 10,
+			'.test' => 10,
+			'[data-test=""]' => 10,
 			'td' => 10 * count($customers[0])
 		]);
+		$this->assertEquals('Customers', $group->getTitle());
+		$this->assertEquals($data->getTableName(), 'customer');
+		$this->assertEquals(array_keys($customers[0]), $data->getColumnNames());
 	}
 
 	/**
 	 * @group ComData
 	 */
-	function test() {
+	function testExtraComponent() {
+		$data = new Data('customer', null, 'div', 'second');
+		$data->addExtraComponent(new Component('div', 'first', 'data-test=""'));
+		$data->addExtraComponent(new Component('div', 'third', 'data-test=""'));
+		$data->setChildComponentIndex(1);
+		$data->getComponents();
+		$data->getColumnComponents();
+	}
+
+	function testOptions() {
+
+	}
+
+	function testAlias() {
+
+	}
+
+	function testReorder() {
+
+	}
+
+	function testDataClass() {
+
+	}
+
+	function testDateFormat() {
+
+	}
+
+	function testLabel() {
+		$data = new Data();
+	}
+
+	function testLink() {
 
 	}
 
