@@ -18,6 +18,10 @@ class DataTest extends Test {
 		self::tearDownDatabase();
 	}
 
+	function setUp() {
+		$this->set(Data::class);
+	}
+
 	/**
 	 * @group ComData
 	 */
@@ -41,11 +45,15 @@ class DataTest extends Test {
 	 * @group ComData
 	 */
 	function testExtraComponent() {
+		$first = new Component('div', 'first', 'data-test=""');
 		$data = new Data('customer', null, 'div', 'second');
-		$data->addExtraComponent(new Component('div', 'first', 'data-test=""'));
-		$data->addExtraComponent(new Component('div', 'third', 'data-test=""'));
+		$third = new Component('div', 'third', 'data-test=""');
+		$this->ret($data->addExtraComponent($first)->addExtraComponent($third));
+		$this->ret($data->addExtraComponent(new Component('span', 'x', null, 'x'), 'phone'));
+		$data->addExtraComponent(new Component('span', 'y', null, 'y'), 'phone');
+		$data->addExtraComponent(new Component('span', 'hint', null, 'Select '), '');
 		$data->setChildComponentIndex(1);
-		$data->getComponents();
+		$data->getComponents([$first, $data, $third]);
 		$data->getColumnComponents();
 	}
 

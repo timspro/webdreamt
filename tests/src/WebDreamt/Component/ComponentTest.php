@@ -204,6 +204,22 @@ class ComponentTest extends Test {
 	/**
 	 * @group Component
 	 */
+	function testExtraComponentBefore() {
+		$this->ret($this->component->addExtraComponent(new Component('div', 'a', null, ''), false));
+		$this->ret($this->component->addExtraComponent(new Component('div', 'b', null, ''), false));
+		$this->ret($this->component->addExtraComponent(new Component('div', 'c', null, ''), false));
+		$this->component->setInput('<div class="me"></div>');
+		$this->checkIndex($this->component->render(), [
+			'.c' => 0,
+			'.b' => 1,
+			'.a' => 2,
+			'.me' => 3
+		]);
+	}
+
+	/**
+	 * @group Component
+	 */
 	function testBeautify() {
 		$this->assertEquals($this->getMethod($this->component, 'beautify', 'some_other_id'), 'Some Other ID');
 	}

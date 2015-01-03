@@ -47,7 +47,7 @@ class Data extends Wrapper {
 	 */
 	const OPT_LABEL = 'label';
 	/**
-	 * The method to call on the propel object to access a different object. only applies if input is
+	 * The method to call on the propel object to access a different object. This only applies if input is
 	 * given as a Propel object.
 	 */
 	const OPT_PROPEL_OBJECT = 'object';
@@ -82,11 +82,6 @@ class Data extends Wrapper {
 	 */
 	protected $tableName;
 	/**
-	 * The Propel table map.
-	 * @var TableMap
-	 */
-	protected $tableMap;
-	/**
 	 * A component to show labels in.
 	 * @var Component
 	 */
@@ -95,7 +90,7 @@ class Data extends Wrapper {
 	 * Indicates if the labels should output alongside the data.
 	 * @var boolean
 	 */
-	protected $labelInDisplay;
+	protected $showLabel;
 	/**
 	 * The css prefix used to identify column data.
 	 * @var string
@@ -130,9 +125,6 @@ class Data extends Wrapper {
 			$html = null, $input = null) {
 		parent::__construct($display, $htmlTag, $class, $html, $input);
 		$table = Propel::getDatabaseMap()->getTable($tableName);
-		//Keep a reference to the table map so when something is linked, we can look up the linked
-		//table's information.
-		$this->tableMap = $table;
 		$this->tableName = $tableName;
 		$this->title = static::beautify($tableName);
 		foreach ($table->getColumns() as $column) {
@@ -267,17 +259,17 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Set a component to show labels in. Defaults to null. Also, can specify whether the output should
-	 * automatically render the label in the display component. If true, then will put the label inside
-	 * the component. If false, then will put the label alongside the component. If null, will
-	 * not output the label.
+	 * Set a component to show labels in. Defaults to null. Also, can specify whether the labels should
+	 * be shown when rendered. Defaults to true. A value of false can be useful when one wants to instead
+	 * use renderLabels() to output the labels or wants to add the label component as an extra component
+	 * to something else.
 	 * @param Component $label
-	 * @param boolean $labelInDisplay Can be true, false, or null.
+	 * @param boolean $show
 	 * @return self;
 	 */
-	function setLabelComponent(Component $label, $labelInDisplay = true) {
+	function setLabelComponent(Component $label, $show = true) {
 		$this->label = $label;
-		$this->labelInDisplay = $labelInDisplay;
+		$this->showLabel = $show;
 		return $this;
 	}
 
@@ -290,86 +282,55 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Link a column value with another Data component.
+	 * Link a column value with a component. This will prevent the default display component from
+	 * being rendered. If this is undesirable, then you can do:
+	 * <code>
+	 * $a->link('col', $b);
+	 * $b->addExtraComponent($a->getDisplay());
+	 * </code>
 	 * @param string $column
-	 * @param Data $component
+	 * @param Component $component
+	 * @param boolean $propelInput If this is true, then link() configures the render function to
+	 * retrieve related data from a Propel object to give as input to $component based on the class
+	 * of $component.
+	 * @param string $manyColumn When you want to use an ID column in another table that points to this
+	 * table and there are multiple such columns, you must specify what column to actually use.
 	 * @return self
 	 */
-	function link($column, Data $component) {
+	function link($column, Component $component, $propelInput = true, $manyColumn = null) {
 		if (!isset($this->linked[$column])) {
 			$this->linked[$column] = [];
 		}
 		$this->linked[$column][] = $component;
-		//Set the Propel method that needs to be called to get input for the linked component.
-		$columnMap = $this->tableMap->getColumn($column);
-		$propel = 'get' . $columnMap->getRelatedTable()->getPhpName();
-		if (!method_exists($this->tableMap->getPhpName(), $propel)) {
-			$propel .= 'By' . $columnMap->getPhpName();
-		}
-		$this->columns[$column][self::OPT_PROPEL_OBJECT] = $propel;
-		return $this;
-	}
 
-	/**
-	 * Add an extra component that will be rendered within the context of the current component.
-	 * This also will check the table name of the given component and compute the method to call
-	 * to get the input for the extra component.
-	 * @param Component $component
-	 * @param string $column The column that goes before the extra component. If null, then will put the
-	 * component before/after the data component.
-	 * @param string $inputIdColumn If you want to use a Propel object as input and there are
-	 * multiple methods to call on the input (i.e. multiple "RelatedBy" methods),
-	 * then specify the ID column to use.
-	 * @return self
-	 */
-	function addExtraComponent($component, $column = null, $inputIdColumn = null) {
-		$array = &$this->components;
-		//Figure out the array the component should be added to: column component or regular.
-		if ($column !== null) {
-			if (!isset($this->columnComponents[$column])) {
-				$this->columnComponents[$column] = [];
+		if ($propelInput) {
+			//Set the Propel method that needs to be called to get input for the linked component.
+			$propel = null;
+			while ($component instanceof Wrapper) {
+				if ($component instanceof Data) {
+					$table = Propel::getDatabaseMap()->getTable($component->getTableName());
+					$columnMap = $table->getColumn($column);
+					$propel = 'get' . $columnMap->getRelatedTable()->getPhpName();
+					if (!method_exists($table->getPhpName(), $propel)) {
+						$propel .= 'RelatedBy' . $columnMap->getPhpName();
+					}
+					break;
+				} else if ($component instanceof Group) {
+					$display = $component->getDisplayComponent();
+					if ($display instanceof Data) {
+						$table = Propel::getDatabaseMap()->getTable($display->getTableName());
+						$propel = 'get' . Box::now()->pluralize($table->getPhpName());
+						if ($manyColumn) {
+							$propel .= 'RelatedBy' . $table->getColumn($manyColumn)->getPhpName();
+						}
+					}
+					break;
+				}
+				$component = $component->getDisplayComponent();
 			}
-			$array = &$this->columnComponents[$column];
+			$this->columns[$column][self::OPT_PROPEL_OBJECT] = $propel;
 		}
-		//Figure out the Propel method if applicable.
-		$propel = null;
-		if ($component instanceof Data) {
-			$table = Propel::getDatabaseMap()->getTable($component->getTableName());
-			$propel = 'get' . Box::now()->pluralize($table->getPhpName());
-			if ($inputIdColumn) {
-				$propel .= 'RelatedBy' . $table->getColumn($inputIdColumn)->getPhpName();
-			}
-		}
-		//Add to the end of the array.
-		$array[] = [
-			self::EXTRA_METHOD => $propel,
-			self::EXTRA_COMPONENT => $component
-		];
 		return $this;
-	}
-
-	/**
-	 * Get the components not associated with a column. Note that null represents this component.
-	 * @return array
-	 */
-	function getComponents() {
-		$components = [];
-		foreach ($this->components as $component) {
-			$components[] = $component[self::EXTRA_COMPONENT];
-		}
-		return $components;
-	}
-
-	/**
-	 * Get the extra components that were added with a column.
-	 * @return array
-	 */
-	function getColumnComponents() {
-		$components = [];
-		foreach ($this->columnComponents as $column => $component) {
-			$components[$column] = $component[self::EXTRA_COMPONENT];
-		}
-		return $components;
 	}
 
 	/**
@@ -587,25 +548,19 @@ class Data extends Wrapper {
 				if ($this->dataClass) {
 					$this->display->useCssClass($this->dataClass . "-$column");
 				}
-				if ($this->label && $this->labelInDisplay !== null) {
+				if ($this->label && $this->showLabel) {
 					if ($options[self::OPT_VISIBLE]) {
 						$this->label->useHtml('style="display:none"');
 					}
-					if ($this->labelInDisplay) {
-						$label = $this->label->render($options[self::OPT_LABEL], $this);
-						$this->display->useAfterOpeningTag($label);
-					} else {
-						$output .= $this->label->render($options[self::OPT_LABEL], $this);
-					}
+					$output .= $this->label->render($options[self::OPT_LABEL], $this);
 				}
 				$value = $this->getValueFromInput($column, $input);
 				$linked = $this->renderLinkedComponents($column, $value);
-				if (!$linked) {
+				if ($linked === null) {
 					$output .= $this->renderColumn($column, $value, $included);
 				} else {
 					$output .= $linked;
 				}
-				$output .= $this->renderColumnComponents($column, $input);
 			}
 		}
 		return $output;
@@ -640,47 +595,6 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Render any extra components for the given column. Return null if there is no component
-	 * for the given column.
-	 * @param string $column
-	 * @param array|ActiveRecordInterface $input The input to be given to the component.
-	 * @return string Null if nothing was rendered; otherwise the output.
-	 */
-	protected function renderColumnComponents($column, $input = null) {
-		$result = null;
-		if (isset($this->columnComponents[$column])) {
-			foreach ($this->columnComponents[$column] as $component) {
-				$result .= $component->render($input, $this);
-			}
-		}
-		return $result;
-	}
-
-	/**
-	 * Render the componenents.
-	 * @param array|ActiveRecordInterface $input
-	 * @param string $included
-	 * @return string
-	 */
-	protected function renderComponents($input = null, $included = null) {
-		$result = null;
-		foreach ($this->components as $object) {
-			if (!$object) {
-				$result .= $this->renderSpecial($input, $included);
-			} else {
-				$method = $object[self::EXTRA_METHOD];
-				$component = $object[self::EXTRA_COMPONENT];
-				if ($input instanceof ActiveRecordInterface && $method) {
-					$result .= $component->render($input->$method(), $this);
-				} else {
-					$result .= $component->render($input, $this);
-				}
-			}
-		}
-		return $result;
-	}
-
-	/**
 	 * Output the HTML of the labels.
 	 * @return string
 	 */
@@ -698,7 +612,7 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Get a value from input. Note that if the $value is a DateTime object, convert it to a string
+	 * Get a value from input. Note that if the $value is a DateTime object, this converts it into a string
 	 * in the format specifed by either the setDateTimeFormat(), setTimeFormat(), or setDateFormat()
 	 * methods depending on the type of the column in the database.
 	 * @param string $key The key to use to try to get the value from the input.

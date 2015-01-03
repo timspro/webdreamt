@@ -248,8 +248,8 @@ class Form extends Data {
 	/**
 	 * Sets a function that provides fine-grain control over the name, value, and possible values
 	 * (for applicable inputs) of the HTML form input. The values passed to function are: (1) column name,
-	 * (2) the options for the column, (3) the form input name, (4) the form value,
-	 * (5) an array of possible values, the last three are passed by reference and so are modifiable.
+	 * (2) the options for the column, (3) the form input name, (4) the form value, and
+	 * (5) an array of possible values; the last three are passed by reference and so are modifiable.
 	 * @param callable $function
 	 * @return self
 	 */
@@ -290,16 +290,26 @@ class Form extends Data {
 	}
 
 	/**
-	 * Link a column value with another Data component.
+	 * Link a column value with a component. This will prevent the default display component from
+	 * being rendered. If this is undesirable, then you can do:
+	 * <code>
+	 * $a->link('col', $b);
+	 * $b->addExtraComponent($a->getDisplay());
+	 * </code>
 	 * @param string $column
-	 * @param Data $component
+	 * @param Component $component
+	 * @param boolean $propelInput If this is true, then link() configures the render function to
+	 * retrieve related data from a Propel object to give as input to $component based on the class
+	 * of $component.
+	 * @param string $manyColumn When you want to use an ID column in another table that points to this
+	 * table and there are multiple such columns, you must specify what column to actually use.
 	 * @return self
 	 */
-	function link($column, Data $component) {
+	function link($column, Component $component, $propelInput = true, $manyColumn = null) {
 		if ($component instanceof Select) {
 			$this->selectComponent[$column] = $component;
 		} else {
-			parent::link($column, $component);
+			parent::link($column, $component, $propelInput, $manyColumn);
 		}
 		return $this;
 	}

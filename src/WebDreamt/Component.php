@@ -347,28 +347,41 @@ class Component {
 	/**
 	 * Set the child component index and thus the order that the child component appears along with
 	 * extra components.
-	 * @param int $newIndex
+	 * @param int $newIndex If invalid (negative or larger than the array can handle), then the
+	 * child component will appear last.
 	 * @return self
 	 */
 	function setChildComponentIndex($newIndex) {
 		$array = [];
-		$before = false;
+		//Assume that we are moving the component forward in the array or keeping at the same spot.
+		$backward = false;
+		$processed = false;
 		foreach ($this->components as $index => $component) {
 			if ($index === $newIndex) {
-				if ($before) {
+				//We need to take into account if the component is being moved forward or backward in the
+				//array. If backward, then put the current component before this component.
+				if ($backward) {
 					$array[] = $component;
 					$array[] = null;
 				} else {
 					$array[] = null;
 					$array[] = $component;
 				}
+				$processed = true;
 				continue;
 			}
 			if ($component) {
 				$array[] = $component;
 			} else {
-				$before = true;
+				//The $component is null so we know that the component is be moving farther back into the
+				//array if we haven't added it already.
+				$backward = true;
 			}
+		}
+		//If the new index was invalid, resulting in this component not being added, then just append it
+		//to the end.
+		if (!$processed) {
+			$array[] = null;
 		}
 		$this->components = $array;
 		return $this;
@@ -384,15 +397,22 @@ class Component {
 				return $index;
 			}
 		}
+		return null;
 	}
 
 	/**
-	 * Add an extra component.
+	 * Append/prepend an extra component to the list of components to be rendered.
 	 * @param Component $component
+	 * @param boolean $after Indicates whether the extra component should go after or before this
+	 * component.
 	 * @return self
 	 */
-	function addExtraComponent(Component $component) {
-		$this->components[] = $component;
+	function addExtraComponent(Component $component, $after = true) {
+		if ($after) {
+			$this->components[] = $component;
+		} else {
+			array_unshift($this->components, $component);
+		}
 		return $this;
 	}
 

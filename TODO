@@ -8,6 +8,7 @@ Label in Display Test
 Class Label Test
 Examine why presidents won.
 getValueFromInput
+Is default handled correctly in getValueFromInput
 
 # Medium: 
 Make a Search Component.
