@@ -339,7 +339,7 @@ class Builder {
 		$markers = $schemaDom->getElementsByTagName('table');
 		foreach ($markers as $marker) {
 			$tableName = $marker->attributes->getNamedItem("name")->nodeValue;
-			if (isset($data[$tableName])) {
+			if (array_key_exists($tableName, $data)) {
 				foreach ($data[$tableName] as $node) {
 					$marker->appendChild($node);
 				}

@@ -37,7 +37,7 @@ class Table extends Group {
 		$cell = new Component('td');
 		if ($tableName) {
 			$row = new Data($cell, $tableName, 'tr');
-			$row->hide('id')->setLabelComponent($header, null);
+			$row->hide('id')->setLabelComponent($header)->setLabelClass('wd-header');
 		} else {
 			$row = new Group($cell, 'tr');
 		}
@@ -114,7 +114,7 @@ class Table extends Group {
 	/**
 	 * Set the number header. Default is '#'.
 	 * @param string $numberHeader Set the row number header.
-	 * @return self
+	 * @return static
 	 */
 	function setNumberHeader($numberHeader = '#') {
 		$this->numberHeader = $numberHeader;

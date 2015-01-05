@@ -29,7 +29,7 @@ class Filler {
 	 * @param array $number Specifies the number to add for a given Propel class,
 	 * where the Propel class's name is the key and the number to add is the value.
 	 * @param boolean $only
-	 * @return self
+	 * @return static
 	 */
 	public function setNumber($number = [], $only = false) {
 		$this->number = $number;
@@ -45,7 +45,7 @@ class Filler {
 	 * function () use ($generator) { return $generator->text; }
 	 * </code>
 	 * where $generator is a \Faker\Factory.
-	 * @return self
+	 * @return static
 	 */
 	public function setRules($rules = []) {
 		$this->rules = $rules;
@@ -54,7 +54,7 @@ class Filler {
 
 	/**
 	 * Adds test data to the database.
-	 * @return self
+	 * @return static
 	 */
 	public function addData() {
 		require_once $this->vendor . "../db/propel/generated-conf/config.php";

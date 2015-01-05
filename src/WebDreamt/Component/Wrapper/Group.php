@@ -30,7 +30,7 @@ class Group extends Wrapper {
 	 * Set the display component. Note that the title is set to the plural fom of the display component's
 	 * title.
 	 * @param Component $display
-	 * @return self
+	 * @return static
 	 */
 	function setDisplayComponent(Component $display) {
 		$this->display = $display;

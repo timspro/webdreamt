@@ -51,14 +51,6 @@ class Data extends Wrapper {
 	 * given as a Propel object.
 	 */
 	const OPT_PROPEL_OBJECT = 'object';
-	/**
-	 * The method to use to get input for the extra component.
-	 */
-	const EXTRA_METHOD = 'method';
-	/**
-	 * The extra component.
-	 */
-	const EXTRA_COMPONENT = 'component';
 
 	/**
 	 * An array where the keys are column names and the values are the options for each column.
@@ -90,7 +82,12 @@ class Data extends Wrapper {
 	 * Indicates if the labels should output alongside the data.
 	 * @var boolean
 	 */
-	protected $showLabel;
+	protected $showLabel = false;
+	/**
+	 * The css prefix used to identify the column label.
+	 * @var string
+	 */
+	protected $labelClass;
 	/**
 	 * The css prefix used to identify column data.
 	 * @var string
@@ -100,17 +97,32 @@ class Data extends Wrapper {
 	 * The time format.
 	 * @var string
 	 */
-	protected $timeFormat = "g:i a";
+	public $timeFormat;
 	/**
 	 * The date time format.
 	 * @var string
 	 */
-	protected $dateTimeFormat = "g:i a, m/d/y";
+	public $dateTimeFormat;
 	/**
 	 * The date format.
 	 * @var string
 	 */
-	protected $dateFormat = 'm/d/y';
+	public $dateFormat;
+	/**
+	 * The default time format for the class.
+	 * @var string
+	 */
+	static public $defaultTimeFormat = "g:i a";
+	/**
+	 * The default date time format for the class.
+	 * @var string
+	 */
+	static public $defaultDateTimeFormat = "g:i a, m/d/y";
+	/**
+	 * The default dateformat for the class.
+	 * @var string
+	 */
+	static public $defaultDateFormat = 'm/d/y';
 
 	/**
 	 * Construct a component that represents a row from a table in the database.
@@ -127,6 +139,7 @@ class Data extends Wrapper {
 		$table = Propel::getDatabaseMap()->getTable($tableName);
 		$this->tableName = $tableName;
 		$this->title = static::beautify($tableName);
+		$this->label = new Component();
 		foreach ($table->getColumns() as $column) {
 			$name = $column->getName();
 			$this->columns[$name] = $this->getDefaultOptions();
@@ -186,10 +199,21 @@ class Data extends Wrapper {
 	}
 
 	/**
+	 * Get an array where each key is a column name and each value is an array. In the subarray, each
+	 * key is an option name (specified by the OPT constants) and each value is the value set for
+	 * the option.
+	 * @return array
+	 */
+	function getColumnOptions() {
+		return $this->columns;
+	}
+
+	/**
 	 * Set a CSS class prefix that will be used to identify column data. If null, then no CSS class
-	 * will be used.
+	 * will be used. For example, if 'wd' is used, then for an 'customer_id' column, the display component
+	 * will have class 'wd-customer_id'.
 	 * @param string $dataClass
-	 * @return self
+	 * @return static
 	 */
 	function setDataClass($dataClass) {
 		$this->dataClass = $dataClass;
@@ -197,7 +221,7 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Get the CSS prefix.
+	 * Get the CSS class prefix for the data.
 	 * @return string
 	 */
 	function getDataClass() {
@@ -205,71 +229,50 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Set the time format used by the component. Default is 'g:i a'.
-	 * @param string $format
-	 * @return self
+	 * Set a CSS class prefix that will be used to identify the label. If null, then no CSS class
+	 * will be used. For example, if 'wd' is used, then for an 'customer_id' column, the label component
+	 * will have class 'wd-customer_id'.
+	 * @param string $labelClass
+	 * @return static
 	 */
-	function setTimeFormat($format) {
-		$this->timeFormat = $format;
+	function setLabelClass($labelClass) {
+		$this->labelClass = $labelClass;
 		return $this;
 	}
 
 	/**
-	 * Get the time format.
+	 * Get the CSS class prefix for the label.
 	 * @return string
 	 */
-	function getTimeFormat() {
-		return $this->timeFormat;
+	function getLabelClass() {
+		return $this->labelClass;
 	}
 
 	/**
-	 * Set the date time format used by the component. Default is 'g:i a, m-d-y'.
-	 * @param string $format
-	 * @return self
-	 */
-	function setDateTimeFormat($format) {
-		$this->dateTimeFormat = $format;
-		return $this;
-	}
-
-	/**
-	 * Get the date time format.
-	 * @return string
-	 */
-	function getDateTimeFormat() {
-		return $this->dateTimeFormat;
-	}
-
-	/**
-	 * Set the date format used by the component. Default is 'm-d-y'.
-	 * @param string $format
-	 * @return self
-	 */
-	function setDateFormat($format) {
-		$this->dateFormat = $format;
-		return $this;
-	}
-
-	/**
-	 * Get the date format.
-	 * @return string
-	 */
-	function getDateFormat() {
-		return $this->dateFormat;
-	}
-
-	/**
-	 * Set a component to show labels in. Defaults to null. Also, can specify whether the labels should
-	 * be shown when rendered. Defaults to true. A value of false can be useful when one wants to instead
-	 * use renderLabels() to output the labels or wants to add the label component as an extra component
-	 * to something else.
-	 * @param Component $label
+	 * Set if labels should be shown. Defaults to false.
 	 * @param boolean $show
-	 * @return self;
+	 * @return static
 	 */
-	function setLabelComponent(Component $label, $show = true) {
-		$this->label = $label;
+	function setLabelable($show) {
 		$this->showLabel = $show;
+		return $this;
+	}
+
+	/**
+	 * Get if labels should be shown.
+	 * @return boolean
+	 */
+	function getLabelable() {
+		return $this->showLabel;
+	}
+
+	/**
+	 * Set a component to show labels in.
+	 * @param Component $label
+	 * @return static
+	 */
+	function setLabelComponent(Component $label) {
+		$this->label = $label;
 		return $this;
 	}
 
@@ -288,6 +291,8 @@ class Data extends Wrapper {
 	 * $a->link('col', $b);
 	 * $b->addExtraComponent($a->getDisplay());
 	 * </code>
+	 * Multiple components can be linked to one column. The only option that affects linked components
+	 * is OPT_ACCESS.
 	 * @param string $column
 	 * @param Component $component
 	 * @param boolean $propelInput If this is true, then link() configures the render function to
@@ -295,7 +300,7 @@ class Data extends Wrapper {
 	 * of $component.
 	 * @param string $manyColumn When you want to use an ID column in another table that points to this
 	 * table and there are multiple such columns, you must specify what column to actually use.
-	 * @return self
+	 * @return static
 	 */
 	function link($column, Component $component, $propelInput = true, $manyColumn = null) {
 		if (!isset($this->linked[$column])) {
@@ -336,7 +341,7 @@ class Data extends Wrapper {
 	/**
 	 * Make columns visible. Defaults to all columns.
 	 * @param array|... $columns Column names should be the values of the array.
-	 * @return self
+	 * @return static
 	 */
 	function show($columns = null) {
 		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_VISIBLE, true);
@@ -346,7 +351,7 @@ class Data extends Wrapper {
 	/**
 	 * Hides columns. Defaults to all columns.
 	 * @param array|... $columns Column names should be the values of the array.
-	 * @return self
+	 * @return static
 	 */
 	function hide($columns = null) {
 		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_VISIBLE, false);
@@ -356,7 +361,7 @@ class Data extends Wrapper {
 	/**
 	 * Enable the columns to be sent to the client. Defaults to all columns.
 	 * @param array|... $columns Column names should be the values of the array.
-	 * @return self
+	 * @return static
 	 */
 	function allow($columns = null) {
 		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_ACCESS, true);
@@ -366,7 +371,7 @@ class Data extends Wrapper {
 	/**
 	 * Disable the columns from being sent to the client. Defaults to all columns.
 	 * @param array|... $columns Column names should be the values of the array.
-	 * @return self
+	 * @return static
 	 */
 	function deny($columns = null) {
 		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_ACCESS, false);
@@ -376,7 +381,7 @@ class Data extends Wrapper {
 	/**
 	 * Set the default values. Can use a Propel object to set the default values.
 	 * @param array|ActiveRecordInterface $columns
-	 * @return self
+	 * @return static
 	 */
 	function setDefaultValues($columns) {
 		if ($columns instanceof ActiveRecordInterface) {
@@ -393,7 +398,7 @@ class Data extends Wrapper {
 	/**
 	 * Set the labels.
 	 * @param array $columns
-	 * @return self
+	 * @return static
 	 */
 	function setLabels(array $columns) {
 		$this->mergeOptions($columns, self::OPT_LABEL);
@@ -409,9 +414,9 @@ class Data extends Wrapper {
 	 * as the parameter, we would have ['e', 'b', 'a', 'c', 'd'].
 	 * @param array $columns The key is the index of the column in the new list of columns. The value
 	 * is the column name.
-	 * @return self
+	 * @return static
 	 */
-	function order(array $columns) {
+	function reorder(array $columns) {
 		$newColumns = [];
 		$count = count($this->columns);
 		for ($i = 0; $i < $count; $i++) {
@@ -436,7 +441,7 @@ class Data extends Wrapper {
 	 * @param array $oldToNewColumns The key should be the old column name and the value should be the
 	 * new column name.
 	 * @param boolean $changeLabel
-	 * @return self
+	 * @return static
 	 */
 	function alias(array $oldToNewColumns, $changeLabel = true) {
 		$newColumns = [];
@@ -455,21 +460,38 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Get the option values for the columns. If $columns is a string, then will return the value of the
-	 * option for the given column. If $columns is an array, then will return an array of option
-	 * values indexed by column names. If $columns is null or an empty array, then will return an
+	 * Get the value for an option and column.
+	 * @param string $column
+	 * @param string $option See OPT constants.
+	 * @return mixed
+	 */
+	function getOption($column, $option) {
+		return $this->columns[$column][$option];
+	}
+
+	/**
+	 * Set the value for an option and column.
+	 * @param string $column
+	 * @param string $option See OPT constants.
+	 * @param mixed $value
+	 * @return static
+	 */
+	function setOption($column, $option, $value) {
+		$this->columns[$column][$option] = $value;
+		return $this;
+	}
+
+	/**
+	 * Get the option values for the columns. If $columns is null or an empty array, then will return an
 	 * array of option values for all columns.
-	 * @param array|string $columns
+	 * @param array $columns
 	 * @param string $option An option as given by the OPT constants in the Data or child class.
 	 * @return array|string
 	 */
 	function getOptions($columns, $option) {
 		$ret = [];
-		if (is_string($columns)) {
-			return $this->columns[$columns][$option];
-		}
 		foreach ($this->columns as $column => $options) {
-			if (count($columns) === 0 || isset($columns[$column])) {
+			if (count($columns) === 0 || in_array($column, $columns)) {
 				$ret[$column] = $options[$option];
 			}
 		}
@@ -479,21 +501,17 @@ class Data extends Wrapper {
 	/**
 	 * Applies the $options for each $columns. Also, see mergeOptions() if you want to put the column
 	 * names and option values in the same array.
-	 * @param array|string $columns If an array, then column names are obtained from the array's values.
-	 * If a string, then the column name is the string. If null or an empty array, then assumes option
-	 * applies to all columns.
+	 * @param array $columns
 	 * @param array|string $options If an array, then keys are assumed to be option names and values are
 	 * option values. If a string, then assumes $options is an option name.
 	 * @param string $value If $options is a string instead of an array, then $value is
-	 * used as the value for the option specified by $options.
-	 * @return self
+	 * used as the value for the option specified by the string $options.
+	 * @return static
 	 */
 	function setOptions($columns, $options, $value = null) {
 		//Coerce $columns into an array.
 		if (count($columns) === 0) {
 			$columns = array_keys($this->columns);
-		} else if (!is_array($columns)) {
-			$columns = [$columns];
 		}
 		if (!is_array($options)) {
 			foreach ($columns as $name) {
@@ -510,22 +528,14 @@ class Data extends Wrapper {
 	/**
 	 * Merges in the values contained in the $columns array. If you don't want to put the values
 	 * in $columns, see setOptions().
-	 * 1) If $options is not null, then $columns is assumed to be an array where each key is a
-	 * column name and each value is option value for the option specified by $option. This is
-	 * the more common use case.
-	 * 2) If $options is null, then $columns is assumed to be an array where each key is a column
-	 * name and each value is an array with keys of option names and values of option values.
-	 * @param array $columns
-	 * @param string $option
-	 * @return self
+	 * @param array $columns An array where each key is a column name and each value is option
+	 * value for the option specified by $option.
+	 * @param string $option See OPT constants.
+	 * @return static
 	 */
-	function mergeOptions(array $columns, $option = null) {
-		if ($option !== null) {
-			foreach ($columns as $name => $value) {
-				$this->columns[$name][$option] = $value;
-			}
-		} else {
-			$this->columns = array_merge_recursive($this->columns, $columns);
+	function mergeOptions(array $columns, $option) {
+		foreach ($columns as $name => $value) {
+			$this->columns[$name][$option] = $value;
 		}
 		return $this;
 	}
@@ -542,21 +552,27 @@ class Data extends Wrapper {
 		$output = null;
 		foreach ($this->columns as $column => $options) {
 			if ($options[self::OPT_ACCESS]) {
-				if ($options[self::OPT_VISIBLE]) {
-					$this->display->useHtml('style="display:none"');
-				}
-				if ($this->dataClass) {
-					$this->display->useCssClass($this->dataClass . "-$column");
-				}
-				if ($this->label && $this->showLabel) {
-					if ($options[self::OPT_VISIBLE]) {
+				//Set the input of the label regardless as it might be used somewhere in the display
+				//component (such as via addExtraComponent()).
+				$this->label->setInput($options[self::OPT_LABEL]);
+				if ($this->showLabel) {
+					if (!$options[self::OPT_VISIBLE]) {
 						$this->label->useHtml('style="display:none"');
 					}
-					$output .= $this->label->render($options[self::OPT_LABEL], $this);
+					if ($this->labelClass !== null) {
+						$this->label->useClass($this->labelClass . "-$column");
+					}
+					$output .= $this->label->render(null, $this);
 				}
 				$value = $this->getValueFromInput($column, $input);
 				$linked = $this->renderLinkedComponents($column, $value);
 				if ($linked === null) {
+					if (!$options[self::OPT_VISIBLE]) {
+						$this->display->useHtml('style="display:none"');
+					}
+					if ($this->dataClass) {
+						$this->display->useCssClass($this->dataClass . "-$column");
+					}
 					$output .= $this->renderColumn($column, $value, $included);
 				} else {
 					$output .= $linked;
@@ -595,15 +611,19 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Output the HTML of the labels.
+	 * Output the HTML of the labels. This takes into account OPT_ACCESS and OPT_VISIBLE, but not
+	 * if labels are set to be shown.
 	 * @return string
 	 */
 	function renderLabels() {
 		$output = null;
-		foreach ($this->columns as $options) {
+		foreach ($this->columns as $column => $options) {
 			if ($options[self::OPT_ACCESS]) {
-				if ($options[self::OPT_VISIBLE]) {
-					$this->display->useHtml('style="display:none"');
+				if (!$options[self::OPT_VISIBLE]) {
+					$this->label->useHtml('style="display:none"');
+				}
+				if ($this->labelClass !== null) {
+					$this->label->useCssClass($this->labelClass . "-$column");
 				}
 				$output .= $this->label->render($options[self::OPT_LABEL], $this);
 			}
@@ -623,7 +643,7 @@ class Data extends Wrapper {
 		if ($key === null) {
 			return $input;
 		}
-		if (is_array($input) && isset($input[$key])) {
+		if (is_array($input) && array_key_exists($key, $input)) {
 			return $input[$key];
 		} else if ($input instanceof ActiveRecordInterface) {
 			$object = $this->columns[$key][self::OPT_PROPEL_OBJECT];

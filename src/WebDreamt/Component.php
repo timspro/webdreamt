@@ -99,7 +99,7 @@ class Component {
 	/**
 	 * Set the title of the component. The effect of this depends on the child component.
 	 * @param string $title
-	 * @return self
+	 * @return static
 	 */
 	function setTitle($title) {
 		$this->title = $title;
@@ -117,7 +117,7 @@ class Component {
 	/**
 	 * Set a string to go after the opening tag.
 	 * @param string $after
-	 * @return self
+	 * @return static
 	 */
 	function setAfterOpeningTag($after) {
 		$this->afterOpening = $after;
@@ -135,7 +135,7 @@ class Component {
 	/**
 	 * Append a string to go after the opening tag.
 	 * @param string $after
-	 * @return self
+	 * @return static
 	 */
 	function appendAfterOpeningTag($after) {
 		$this->afterOpening .= $after;
@@ -145,7 +145,7 @@ class Component {
 	/**
 	 * Set a string to go after the opening tag and will be reset by render().
 	 * @param string $after
-	 * @return self
+	 * @return static
 	 */
 	protected function useAfterOpeningTag($after) {
 		$this->withAfterOpening .= $after;
@@ -155,7 +155,7 @@ class Component {
 	/**
 	 * Set a string to go before the closing tag.
 	 * @param string $before
-	 * @return self
+	 * @return static
 	 */
 	function setBeforeClosingTag($before) {
 		$this->beforeClosing = $before;
@@ -173,7 +173,7 @@ class Component {
 	/**
 	 * Prepend a string to go before the closing tag.
 	 * @param string $before
-	 * @return self
+	 * @return static
 	 */
 	function prependBeforeClosingTag($before) {
 		$this->beforeClosing = $before . $this->beforeClosing;
@@ -183,7 +183,7 @@ class Component {
 	/**
 	 * Set a string to go before the closing tag and will be reset by render().
 	 * @param string $before
-	 * @return self
+	 * @return static
 	 */
 	protected function useBeforeClosingTag($before) {
 		$this->withBeforeClosing = $before . $this->withBeforeClosing;
@@ -194,7 +194,7 @@ class Component {
 	 * Set the CSS class(es) of the top-level element. This will overwrite any CSS classes the child
 	 * component sets and so appendCssClass() should be preferred.
 	 * @param string $className
-	 * @return self
+	 * @return static
 	 */
 	function setCssClass($className) {
 		$this->class = $className;
@@ -203,7 +203,7 @@ class Component {
 
 	/**
 	 * Get the CSS class of the top-level element.
-	 * @return self
+	 * @return static
 	 */
 	function getCssClass() {
 		return $this->class;
@@ -213,7 +213,7 @@ class Component {
 	 * Append the CSS class(es) to the top-level element. If you append multiple classes, just separate
 	 * them with a space. Note that a space is automatically prefixed to $className.
 	 * @param string
-	 * @return self
+	 * @return static
 	 */
 	function appendCssClass($className) {
 		$this->class .= " $className";
@@ -233,7 +233,7 @@ class Component {
 	 * Set a callback that can generate input-dependent classes.
 	 * @param callable $callable This is called with the input and object that are passed to the
 	 * render function.
-	 * @return self
+	 * @return static
 	 */
 	function setCssClassCallback($callable) {
 		$this->cssCallback = $callable;
@@ -251,7 +251,7 @@ class Component {
 	/**
 	 * Set the HTML tag for the topmost element. Can be null, in which case no tag is displayed.
 	 * @param string $htmlTag
-	 * @return self
+	 * @return static
 	 */
 	function setHtmlTag($htmlTag) {
 		$this->htmlTag = $htmlTag;
@@ -270,7 +270,7 @@ class Component {
 	 * Set the HTML of the top-level element. Note use setCssClass or appendCssClass to add classes.
 	 * This will overwrite any HTML the child component sets and so appendHtml() should be preferred.
 	 * @param string $html
-	 * @return self
+	 * @return static
 	 */
 	function setHtml($html) {
 		$this->html = $html;
@@ -289,7 +289,7 @@ class Component {
 	 * Append on to the HTML of the top-level element. Use setCssClass or appendCssClass to
 	 * add classes. Note that a space is automatically prefixed to $html.
 	 * @param string $html
-	 * @return self
+	 * @return static
 	 */
 	function appendHtml($html) {
 		$this->html .= " $html";
@@ -299,7 +299,7 @@ class Component {
 	/**
 	 * Set HTML to use with the top-level element. This will be reset by render().
 	 * @param string $html
-	 * @return self
+	 * @return static
 	 */
 	protected function useHtml($html) {
 		$this->withHtml .= " $html";
@@ -309,8 +309,8 @@ class Component {
 	/**
 	 * Add a callback function to generate HTML attributes based on input.
 	 * @param callable $callable This takes as a parameter the current input and class object that
-	 * called the render() method and should return the HTML attributes.
-	 * @return self
+	 * called the render() method and should return the HTML attributes as a string.
+	 * @return static
 	 */
 	function setHtmlCallback($callable) {
 		$this->htmlCallback = $callable;
@@ -329,7 +329,7 @@ class Component {
 	 * Set the input of the component. Note that input set this way will override input passed to the
 	 * render method.
 	 * @param array|ActiveRecordInterface $input
-	 * @return self
+	 * @return static
 	 */
 	function setInput($input) {
 		$this->input = $input;
@@ -349,7 +349,7 @@ class Component {
 	 * extra components.
 	 * @param int $newIndex If invalid (negative or larger than the array can handle), then the
 	 * child component will appear last.
-	 * @return self
+	 * @return static
 	 */
 	function setChildComponentIndex($newIndex) {
 		$array = [];
@@ -405,7 +405,7 @@ class Component {
 	 * @param Component $component
 	 * @param boolean $after Indicates whether the extra component should go after or before this
 	 * component.
-	 * @return self
+	 * @return static
 	 */
 	function addExtraComponent(Component $component, $after = true) {
 		if ($after) {
@@ -437,7 +437,7 @@ class Component {
 	 * input to setHtmlCallback() and setCssCallback(). Instead, the input is passed to these functions
 	 * as if a key was never set.
 	 * @param string $key
-	 * @return self
+	 * @return static
 	 */
 	function setKey($key) {
 		$this->key = $key;
@@ -543,14 +543,21 @@ class Component {
 
 	/**
 	 * Change underscores into spaces in a column or table name and capitalize the result.
-	 * Also, this will change ' Id' to ' ID' if the string is the last part of the resulting name.
+	 * Also, this will change ' Id' to ' ID' if the string is the last part of the resulting name or
+	 * 'Id' to 'ID' if that is the entire string.
 	 * @param string $name
 	 * @return string
 	 */
 	static protected function beautify($name) {
 		$return = ucwords(str_replace('_', ' ', $name));
-		if (substr($return, -3) === ' Id') {
-			$return = substr($return, 0, strlen($return) - 2) . 'ID';
+		if (strlen($return) === 2) {
+			if ($return === 'Id') {
+				$return = 'ID';
+			}
+		} else {
+			if (substr($return, -3) === ' Id') {
+				$return = substr($return, 0, strlen($return) - 2) . 'ID';
+			}
 		}
 		return $return;
 	}

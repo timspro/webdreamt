@@ -13,7 +13,7 @@ CREATE TABLE `customer` (
   `company_name` varchar(100) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `active` tinyint(1) unsigned DEFAULT NULL,
-  `type` enum('Person', 'Business', 'Nonprofit') NOT NULL,
+  `type` enum('Person', 'Business', 'Nonprofit') DEFAULT 'person' NOT NULL,
   `created_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)

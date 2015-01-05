@@ -8,7 +8,8 @@ Label in Display Test
 Class Label Test
 Examine why presidents won.
 getValueFromInput
-Is default handled correctly in getValueFromInput
+Is default handled correctly in getValueFromInput?
+Should we allow multiple callbacks to be set?
 
 # Medium: 
 Make a Search Component.

@@ -37,7 +37,7 @@ class Modal extends Wrapper {
 	 * Add buttons that will be rendered with the modal.
 	 * @param array $buttons The keys should be strings of class names and the value should be the
 	 * text for the button.
-	 * @return self
+	 * @return static
 	 */
 	function addButtons(array $buttons) {
 		$this->buttons = array_merge($this->buttons, $buttons);
@@ -47,7 +47,7 @@ class Modal extends Wrapper {
 	/**
 	 * Set buttons that will be reset by render().
 	 * @param array $buttons
-	 * @return self
+	 * @return static
 	 */
 	function useButtons(array $buttons) {
 		$this->withButtons = array_merge($this->withButtons, $buttons);

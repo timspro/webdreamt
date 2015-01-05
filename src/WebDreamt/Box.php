@@ -171,7 +171,7 @@ class Box {
 	 * @return mixed
 	 */
 	protected function factory($name, callable $initializer) {
-		if (!isset($this->$name)) {
+		if (!property_exists($this, $name)) {
 			$this->$name = $initializer();
 		}
 		return $this->$name;

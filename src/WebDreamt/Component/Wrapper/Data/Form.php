@@ -190,7 +190,7 @@ class Form extends Data {
 	/**
 	 * Makes all columns required. Defaults to all columns.
 	 * @param array $columns
-	 * @return self
+	 * @return static
 	 */
 	function required(array $columns = null) {
 		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_REQUIRE, true);
@@ -200,7 +200,7 @@ class Form extends Data {
 	/**
 	 * Makes columns not required. Defaults to all columns.
 	 * @param array $columns
-	 * @return self
+	 * @return static
 	 */
 	function optional(array $columns = null) {
 		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_REQUIRE, false);
@@ -210,7 +210,7 @@ class Form extends Data {
 	/**
 	 * Makes columns disable. Defaults to all columns.
 	 * @param array $columns Column names should be the keys of the array.
-	 * @return self
+	 * @return static
 	 */
 	function disable(array $columns = null) {
 		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_DISABLE, false);
@@ -220,7 +220,7 @@ class Form extends Data {
 	/**
 	 * Makes columns disable. Defaults to all columns.
 	 * @param array $columns Column names should be the keys of the array.
-	 * @return self
+	 * @return static
 	 */
 	function enable(array $columns = null) {
 		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_DISABLE, true);
@@ -230,7 +230,7 @@ class Form extends Data {
 	/**
 	 * Sets if the form should submit multiple items.
 	 * @param boolean $multiple
-	 * @return self
+	 * @return static
 	 */
 	function setMultiple($multiple = false) {
 		$this->multiple = $multiple;
@@ -251,7 +251,7 @@ class Form extends Data {
 	 * (2) the options for the column, (3) the form input name, (4) the form value, and
 	 * (5) an array of possible values; the last three are passed by reference and so are modifiable.
 	 * @param callable $function
-	 * @return self
+	 * @return static
 	 */
 	function setInputHook($function = null) {
 		$this->inputHook = $function;
@@ -303,7 +303,7 @@ class Form extends Data {
 	 * of $component.
 	 * @param string $manyColumn When you want to use an ID column in another table that points to this
 	 * table and there are multiple such columns, you must specify what column to actually use.
-	 * @return self
+	 * @return static
 	 */
 	function link($column, Component $component, $propelInput = true, $manyColumn = null) {
 		if ($component instanceof Select) {
@@ -342,7 +342,7 @@ class Form extends Data {
 		$classes = "form-control $class";
 		$cssPrefix = $this->dataClass ? "class='" . $this->dataClass . "-$column'" : '';
 		$this->display->useHtml("$hidden $cssPrefix")->setAfterOpeningTag($labelHtml);
-		if (isset($selectComponent)) {
+		if ($selectComponent !== null) {
 			$this->display->setDisplayComponent($selectComponent->useHtml($attributes));
 		} else {
 			switch ($type) {

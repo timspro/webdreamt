@@ -11,7 +11,7 @@ class Select extends Group {
 	 * Indicates the value to be selected for in the select.
 	 * @var string
 	 */
-	protected $value;
+	protected $selected;
 	/**
 	 * The option component
 	 * @var Component
@@ -32,19 +32,19 @@ class Select extends Group {
 		$option = new Component('option');
 		$option->setKey($key);
 		parent::__construct($option, 'select', "form-control $class", $html, $input);
-		$option->setHtmlCallback(function($value, Component $included = null) {
+		$option->setHtmlCallback(function($input, Component $included = null) {
 			$component = $included ? : $this;
-			$id = $component->getValueFromInput('id', $value);
+			$id = $component->getValueFromInput('id', $input);
 			if ($this->key !== null) {
-				$value = $component->getValueFromInput($this->key, $value);
+				$input = $component->getValueFromInput($this->key, $input);
 			}
 			if ($id !== null) {
-				if ($value !== null && $id === $this->value) {
+				if ($input !== null && $id === $this->selected) {
 					return "selected='' value='$id'";
 				} else {
 					return "value='$id'";
 				}
-			} else if ($value !== null && $value === $this->value) {
+			} else if ($input !== null && $input === $this->selected) {
 				return 'selected=""';
 			}
 			return '';
@@ -53,11 +53,11 @@ class Select extends Group {
 
 	/**
 	 * Set the selected element in the select box.
-	 * @param string $value
-	 * @return self
+	 * @param string $selected
+	 * @return static
 	 */
-	function setSelected($value) {
-		$this->value = $value;
+	function setSelected($selected) {
+		$this->selected = $selected;
 		return $this;
 	}
 
@@ -66,7 +66,7 @@ class Select extends Group {
 	 * @return string
 	 */
 	function getSelected() {
-		return $this->value;
+		return $this->selected;
 	}
 
 }

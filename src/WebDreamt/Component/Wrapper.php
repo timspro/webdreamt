@@ -47,7 +47,7 @@ class Wrapper extends Component {
 	/**
 	 * Set the display component. This also changes the title to the title of the new display component.
 	 * @param Component $display
-	 * @return self
+	 * @return static
 	 */
 	function setDisplayComponent(Component $display) {
 		$this->display = $display;
