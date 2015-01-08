@@ -44,34 +44,32 @@ class FillerTest extends DatabaseTest {
 	function testBigData() {
 		self::setUpSchema();
 		$generator = Factory::create();
+
 		self::$box->filler()->setNumber([
-			"job" => 10,
+			"contract" => 20,
 			"service" => 10,
-			"service_job" => 5,
+			"service_contract" => 5,
 			"customer" => 10,
 			"location" => 10,
-			"customer_location" => 5,
-			"driver" => 10,
+			"agent" => 10,
 			"groups" => 0,
 			"users" => 0,
 			"users_groups" => 0,
-			"job" => 20,
-			"vehicles" => 10
 				], true)->setRules([
-			"vehicles" => [
-				'mileage_oil_last' => function () use ($generator ) {
+			"agent" => [
+				'salary' => function () use ($generator ) {
 					return $generator->numberBetween(0, 20000);
 				}
 			]
 		])->addData();
 
-		$mileages = $this->column('SELECT mileage_oil_last FROM vehicles');
-		foreach ($mileages as $mileage) {
-			$this->assertLessThan(20000, $mileage);
+		$salaries = $this->column('SELECT salary FROM agent');
+		foreach ($salaries as $salary) {
+			$this->assertLessThan(20000, $salary);
 		}
 
-		$states = $this->column('SELECT billing_state FROM customer');
-		$this->assertNotContains('', $states);
+		$types = $this->column('SELECT type FROM customer');
+		$this->assertNotContains('', $types);
 	}
 
 	/**

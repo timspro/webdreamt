@@ -77,4 +77,26 @@ class GroupTest extends Test {
 		]);
 	}
 
+	/**
+	 * @group ComGroup
+	 */
+	function testIndexClass() {
+		$array = [];
+		for ($i = 0; $i < 10; $i++) {
+			$array[] = $i;
+		}
+		$group = new Group();
+		$this->set(Group::class);
+		$this->assertEquals(null, $group->getIndexClass());
+		$this->ret($group->setIndexClass('test'));
+		$this->assertEquals('test', $group->getIndexClass());
+		$output = $group->render($array);
+		$this->checkHtml($output, [
+			'.test-0' => '0',
+			'.test-3' => '3',
+			'.test-6' => '6',
+			'.test-9' => '9'
+		]);
+	}
+
 }

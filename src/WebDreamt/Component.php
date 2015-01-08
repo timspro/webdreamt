@@ -80,6 +80,11 @@ class Component {
 	 * @var string
 	 */
 	protected $key;
+	/**
+	 * A string to output when the input is null.
+	 * @var string
+	 */
+	protected $nullInput;
 
 	/**
 	 * Get a new component.
@@ -453,6 +458,25 @@ class Component {
 	}
 
 	/**
+	 * Set the value that should be displayed on null input. If the input is null and this has been
+	 * called with a non-null value, then that value will be displayed instead.
+	 * @param string $nullInput
+	 * @return static
+	 */
+	function setOnNullInput($nullInput) {
+		$this->nullInput = $nullInput;
+		return $this;
+	}
+
+	/**
+	 * Get the value that is displayed on null input.
+	 * @return string
+	 */
+	function getOnNullInput() {
+		return $this->nullInput;
+	}
+
+	/**
 	 * Renders the component.
 	 * @param mixed $input Any input for the component. The effect of the input depends on the child
 	 * class of the component. By default, it is simply echoed.
@@ -484,7 +508,12 @@ class Component {
 			$output .= "<$htmlTag" . $html . "$classes>";
 		}
 		$output .= $this->afterOpening . $this->withAfterOpening;
-		$output .= $this->renderComponents($this->getValueFromInput($this->key, $input), $included);
+		$value = $this->getValueFromInput($this->key, $input);
+		if ($value === null && $this->nullInput !== null) {
+			$output .= $this->nullInput;
+		} else {
+			$output .= $this->renderComponents($value, $included);
+		}
 		$output .= $this->withBeforeClosing . $this->beforeClosing;
 		if ($htmlTag !== null) {
 			$output .= "</$htmlTag>";

@@ -8,6 +8,7 @@ use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Map\ColumnMap;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
+use Exception;
 use WebDreamt\Box;
 use WebDreamt\Component;
 use WebDreamt\Component\Wrapper;
@@ -51,6 +52,10 @@ class Data extends Wrapper {
 	 * given as a Propel object.
 	 */
 	const OPT_PROPEL_OBJECT = 'object';
+	/**
+	 * A string to output when a value is retrieved from the input and it in null.
+	 */
+	const OPT_NULL_VALUE = 'null';
 
 	/**
 	 * An array where the keys are column names and the values are the options for each column.
@@ -97,32 +102,32 @@ class Data extends Wrapper {
 	 * The time format.
 	 * @var string
 	 */
-	public $timeFormat;
+	protected $timeFormat;
 	/**
 	 * The date time format.
 	 * @var string
 	 */
-	public $dateTimeFormat;
+	protected $dateTimeFormat;
 	/**
 	 * The date format.
 	 * @var string
 	 */
-	public $dateFormat;
+	protected $dateFormat;
 	/**
-	 * The default time format for the class.
+	 * The default time format for the class: g:i a
 	 * @var string
 	 */
-	static public $defaultTimeFormat = "g:i a";
+	static public $DefaultTimeFormat = "g:i a";
 	/**
-	 * The default date time format for the class.
+	 * The default date time format for the class: g:i a, m/d/y
 	 * @var string
 	 */
-	static public $defaultDateTimeFormat = "g:i a, m/d/y";
+	static public $DefaultDateTimeFormat = "g:i a, m/d/y";
 	/**
-	 * The default dateformat for the class.
+	 * The default date format for the class: m/d/y
 	 * @var string
 	 */
-	static public $defaultDateFormat = 'm/d/y';
+	static public $DefaultDateFormat = 'm/d/y';
 
 	/**
 	 * Construct a component that represents a row from a table in the database.
@@ -178,8 +183,22 @@ class Data extends Wrapper {
 			self::OPT_TYPE => null,
 			self::OPT_EXTRA => null,
 			self::OPT_PROPEL_OBJECT => null,
-			self::OPT_LABEL => null
+			self::OPT_LABEL => null,
+			self::OPT_NULL_VALUE => null
 		];
+	}
+
+	/**
+	 * Add an extra column that will be rendered by default last.
+	 * Only the label option is automatically set since information cannot be retrieved about
+	 * the column from the database.
+	 * @param string $column
+	 * @return static
+	 */
+	function addExtraColumn($column) {
+		$this->columns[$column] = $this->getDefaultOptions();
+		$this->columns[$column][self::OPT_LABEL] = static::beautify($column->getName());
+		return $this;
 	}
 
 	/**
@@ -249,6 +268,60 @@ class Data extends Wrapper {
 	}
 
 	/**
+	 * Set the time format used by the component. Default is 'g:i a'.
+	 * @param string $format
+	 * @return static
+	 */
+	function setTimeFormat($format) {
+		$this->timeFormat = $format;
+		return $this;
+	}
+
+	/**
+	 * Get the time format.
+	 * @return string
+	 */
+	function getTimeFormat() {
+		return $this->timeFormat;
+	}
+
+	/**
+	 * Set the date time format used by the component. Default is 'g:i a, m/d/y'.
+	 * @param string $format
+	 * @return static
+	 */
+	function setDateTimeFormat($format) {
+		$this->dateTimeFormat = $format;
+		return $this;
+	}
+
+	/**
+	 * Get the date time format.
+	 * @return string
+	 */
+	function getDateTimeFormat() {
+		return $this->dateTimeFormat;
+	}
+
+	/**
+	 * Set the date format used by the component. Default is 'm/d/y'.
+	 * @param string $format
+	 * @return static
+	 */
+	function setDateFormat($format) {
+		$this->dateFormat = $format;
+		return $this;
+	}
+
+	/**
+	 * Get the date format.
+	 * @return string
+	 */
+	function getDateFormat() {
+		return $this->dateFormat;
+	}
+
+	/**
 	 * Set if labels should be shown. Defaults to false.
 	 * @param boolean $show
 	 * @return static
@@ -286,13 +359,11 @@ class Data extends Wrapper {
 
 	/**
 	 * Link a column value with a component. This will prevent the default display component from
-	 * being rendered. If this is undesirable, then you can do:
+	 * being rendered. If this is undesirable, then you can do before/after:
 	 * <code>
-	 * $a->link('col', $b);
-	 * $b->addExtraComponent($a->getDisplay());
+	 * $a->link('column_name', $a->getDisplayComponent());
 	 * </code>
-	 * Multiple components can be linked to one column. The only option that affects linked components
-	 * is OPT_ACCESS.
+	 * Multiple components can be linked to one column.
 	 * @param string $column
 	 * @param Component $component
 	 * @param boolean $propelInput If this is true, then link() configures the render function to
@@ -303,6 +374,9 @@ class Data extends Wrapper {
 	 * @return static
 	 */
 	function link($column, Component $component, $propelInput = true, $manyColumn = null) {
+		if (!isset($this->columns[$column])) {
+			throw new Exception("Cannot link column $column since it doesn't exist.");
+		}
 		if (!isset($this->linked[$column])) {
 			$this->linked[$column] = [];
 		}
@@ -336,6 +410,26 @@ class Data extends Wrapper {
 			$this->columns[$column][self::OPT_PROPEL_OBJECT] = $propel;
 		}
 		return $this;
+	}
+
+	/**
+	 * Unlink all linked components for a given column.
+	 * @param string $column
+	 * @return static
+	 */
+	function unlink($column) {
+		if (isset($this->linked[$column])) {
+			unset($this->linked[$column]);
+		}
+		return $this;
+	}
+
+	/**
+	 * Get the linked components as an array with keys of column names and values of components.
+	 * @return array
+	 */
+	function getLinkedComponents() {
+		return $this->linked;
 	}
 
 	/**
@@ -379,7 +473,8 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Set the default values. Can use a Propel object to set the default values.
+	 * Set the default values, which are used when a key cannot be found in the input.
+	 * Can use a Propel object to set the default values.
 	 * @param array|ActiveRecordInterface $columns
 	 * @return static
 	 */
@@ -406,6 +501,16 @@ class Data extends Wrapper {
 	}
 
 	/**
+	 * Set a value to be returned if the value retrieved from the input is null.
+	 * @param array $columns
+	 * @return static
+	 */
+	function setNullValues(array $columns) {
+		$this->mergeOptions($columns, self::OPT_NULL_VALUE);
+		return $this;
+	}
+
+	/**
 	 * Reorder the columns of the component. The numerical indexes of the passed array will be used as
 	 * the positions of the columns in the new ordering. Any gaps in the new ordering will be
 	 * filled in with columns in the old ordering that don't have a newly specified position. These
@@ -417,16 +522,27 @@ class Data extends Wrapper {
 	 * @return static
 	 */
 	function reorder(array $columns) {
-		$newColumns = [];
 		$count = count($this->columns);
+
+		$holder = [];
+		foreach ($columns as $column) {
+			if (!isset($this->columns[$column])) {
+				throw new Exception("Unknown column $column");
+			}
+			$holder[$column] = $this->columns[$column];
+			unset($this->columns[$column]);
+		}
+
+		$newColumns = [];
 		for ($i = 0; $i < $count; $i++) {
-			if (isset($columns[$i]) && isset($this->columns[$columns[$i]])) {
-				$newColumns[] = $this->columns[$columns[$i]];
-				unset($this->columns[$columns[$i]]);
+			if (isset($columns[$i]) && isset($holder[$columns[$i]])) {
+				$newColumns[$columns[$i]] = $holder[$columns[$i]];
 			} else if ($this->columns) {
-				$newColumns[] = array_shift($this->columns);
+				reset($this->columns);
+				$newColumns[key($this->columns)] = array_shift($this->columns);
 			}
 		}
+		//Make sure everything is kept (such as in the case of an invalid index.
 		if ($this->columns) {
 			$newColumns = array_merge($newColumns, $this->columns);
 		}
@@ -447,14 +563,26 @@ class Data extends Wrapper {
 		$newColumns = [];
 		foreach ($this->columns as $oldColumn => $option) {
 			if (isset($oldToNewColumns[$oldColumn])) {
-				$newColumns[$oldToNewColumns[$oldColumn]] = $option;
+				$newColumn = $oldToNewColumns[$oldColumn];
+				$newColumns[$newColumn] = $option;
 				if ($changeLabel) {
-					$option[self::OPT_LABEL] = static::beautify($oldToNewColumns[$oldColumn]);
+					$option[self::OPT_LABEL] = static::beautify($newColumn);
 				}
 			} else {
-				$newColumns[] = $option;
+				$newColumns[$oldColumn] = $option;
 			}
 		}
+
+		$newLinked = [];
+		foreach ($this->linked as $oldColumn => $linked) {
+			if (isset($oldToNewColumns[$oldColumn])) {
+				$newLinked[$oldToNewColumns[$oldColumn]] = $linked;
+			} else {
+				$newLinked[$oldColumn] = $linked;
+			}
+		}
+
+		$this->linked = $newLinked;
 		$this->columns = $newColumns;
 		return $this;
 	}
@@ -501,7 +629,7 @@ class Data extends Wrapper {
 	/**
 	 * Applies the $options for each $columns. Also, see mergeOptions() if you want to put the column
 	 * names and option values in the same array.
-	 * @param array $columns
+	 * @param array $columns An array where the column names are values.
 	 * @param array|string $options If an array, then keys are assumed to be option names and values are
 	 * option values. If a string, then assumes $options is an option name.
 	 * @param string $value If $options is a string instead of an array, then $value is
@@ -512,14 +640,21 @@ class Data extends Wrapper {
 		//Coerce $columns into an array.
 		if (count($columns) === 0) {
 			$columns = array_keys($this->columns);
+		} else {
+			foreach ($columns as $column) {
+				if (!isset($this->columns[$column])) {
+					throw new Exception('Specified an invalid column when setting options.');
+				}
+			}
 		}
+
 		if (!is_array($options)) {
-			foreach ($columns as $name) {
-				$this->columns[$name][$options] = $value;
+			foreach ($columns as $column) {
+				$this->columns[$column][$options] = $value;
 			}
 		} else {
-			foreach ($columns as $name) {
-				$this->columns[$name] = array_merge($this->columns[$name], $options);
+			foreach ($columns as $column) {
+				$this->columns[$column] = array_merge($this->columns[$column], $options);
 			}
 		}
 		return $this;
@@ -534,6 +669,9 @@ class Data extends Wrapper {
 	 * @return static
 	 */
 	function mergeOptions(array $columns, $option) {
+		if (count(array_intersect_key($columns, $this->columns)) !== count($columns)) {
+			throw new Exception('Specified an invalid column when setting options.');
+		}
 		foreach ($columns as $name => $value) {
 			$this->columns[$name][$option] = $value;
 		}
@@ -604,6 +742,12 @@ class Data extends Wrapper {
 		$result = null;
 		if (isset($this->linked[$column])) {
 			foreach ($this->linked[$column] as $component) {
+				if (!$this->columns[$column][self::OPT_VISIBLE]) {
+					$component->useHtml('style="display:none"');
+				}
+				if ($this->dataClass) {
+					$component->useCssClass($this->dataClass . "-$column");
+				}
 				$result .= $component->render($input, $this);
 			}
 		}
@@ -644,7 +788,11 @@ class Data extends Wrapper {
 			return $input;
 		}
 		if (is_array($input) && array_key_exists($key, $input)) {
-			return $input[$key];
+			$value = $input[$key];
+			if ($value === null) {
+				return $this->columns[$key][self::OPT_NULL_VALUE];
+			}
+			return $value;
 		} else if ($input instanceof ActiveRecordInterface) {
 			$object = $this->columns[$key][self::OPT_PROPEL_OBJECT];
 			if ($object) {
@@ -654,12 +802,16 @@ class Data extends Wrapper {
 				if ($value instanceof DateTime) {
 					$type = $this->columns[$key][self::OPT_TYPE];
 					if ($type === PropelTypes::DATE) {
-						return $value->format($this->dateFormat);
+						$format = $this->dateFormat ? : Data::$DefaultDateFormat;
 					} else if ($type === PropelTypes::TIME) {
-						return $value->format($this->timeFormat);
+						$format = $this->timeFormat ? : Data::$DefaultTimeFormat;
 					} else {
-						return $value->format($this->dateTimeFormat);
+						$format = $this->dateTimeFormat ? : Data::$DefaultDateTimeFormat;
 					}
+					return $value->format($format);
+				}
+				if ($value === null) {
+					return $this->columns[$key][self::OPT_NULL_VALUE];
 				}
 				return $value;
 			}

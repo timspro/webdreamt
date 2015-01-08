@@ -21,32 +21,81 @@ use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
  */
 class Builder {
 
-	public $PropelPHP;
-	public $PropelProject;
-	public $UserSchema;
-	public $BuildSchema;
-	public $ValidSchema;
-	public $GeneratedSchema;
-	public $GeneratedClasses;
-	public $GeneratedMigrations;
+	/**
+	 * The vendor folder
+	 * @var string
+	 */
 	public $Vendor;
+	/**
+	 * The database folder
+	 * @var string
+	 */
 	public $DB;
+	/**
+	 * The propel folder
+	 * @var string
+	 */
+	public $PropelProject;
+	/**
+	 * The propel config file
+	 * @var string
+	 */
+	public $PropelPHP;
+	/**
+	 * The schema folder
+	 * @var string
+	 */
+	public $Schemas;
+	/**
+	 * The schema that the user can edit
+	 * @var string
+	 */
+	public $UserSchema;
+	/**
+	 * The validation schema
+	 * @var string
+	 */
+	public $ValidSchema;
+	/**
+	 * The schema that Propel uses
+	 * @var string
+	 */
+	public $BuildSchema;
+	/**
+	 * The file where Propel puts a generated schema
+	 * @var string
+	 */
+	public $GeneratedSchema;
+	/**
+	 * The Propel classes folder
+	 * @var string
+	 */
+	public $GeneratedClasses;
+	/**
+	 * The Propel migrations folder
+	 * @var string
+	 */
+	public $GeneratedMigrations;
 	/**
 	 * A list of schemas to add to the database
 	 * @var array
 	 */
-	private $registeredSchemas;
+	protected $registeredSchemas;
 	/**
 	 * A reference to the box
 	 * @var Box
 	 */
-	private $a;
+	protected $a;
 	/**
 	 * The propel command runner
 	 * @var Application
 	 */
-	private $propel;
-	private $propelOutput;
+	protected $propel;
+	/**
+	 * Output from propel commands
+	 * @var ConsoleOutput
+	 */
+	protected $propelOutput;
 
 	/**
 	 * Construct a Builder object. Note that this will ensure/create a basic Propel setup, but

@@ -176,7 +176,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 		}
 		foreach ($selectors as $selector => $count) {
 			$convert = CssSelector::toXPath($selector);
-			$this->assertEquals($count, $xpath->query($convert)->length, $selector);
+			$this->assertEquals($count, $xpath->query($convert)->length, $selector . ' does not match count.');
 		}
 	}
 
@@ -196,7 +196,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 		foreach ($selectors as $selector => $givenIndex) {
 			$convert = CssSelector::toXPath($selector);
 			$elements = $xpath->query($convert);
-			$this->assertNotEquals(0, $elements->length, $selector);
+			$this->assertNotEquals(0, $elements->length, $selector . ' not found.');
 			foreach ($elements as $element) {
 				$index = 0;
 				while ($element = $element->previousSibling) {
@@ -204,7 +204,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 						$index++;
 					}
 				}
-				$this->assertEquals($givenIndex, $index, $selector);
+				$this->assertEquals($givenIndex, $index, $selector . ' does not match index.');
 			}
 		}
 	}
@@ -225,9 +225,9 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 		foreach ($selectors as $selector => $html) {
 			$convert = CssSelector::toXPath($selector);
 			$elements = $xpath->query($convert);
-			$this->assertNotEquals(0, $elements->length, $selector);
+			$this->assertNotEquals(0, $elements->length, $selector . ' not found. ');
 			foreach ($elements as $element) {
-				$this->assertEquals($html, $this->getInnerHtml($element), $selector);
+				$this->assertEquals($html, $this->getInnerHtml($element), $selector . ' does not match HTML.');
 			}
 		}
 	}

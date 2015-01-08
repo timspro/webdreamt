@@ -252,4 +252,20 @@ class ComponentTest extends Test {
 		$this->assertEquals('<div></div>', $output);
 	}
 
+	/**
+	 * @group Component
+	 */
+	function testNullInput() {
+		$this->assertEquals(null, $this->component->getOnNullInput());
+		$this->component->setOnNullInput('None');
+		$output = $this->component->render();
+		$this->checkHtml($output, [
+			'div' => 'None'
+		]);
+		$this->component->setOnNullInput(null);
+		$this->checkHtml($this->component->render(), [
+			'div' => ''
+		]);
+	}
+
 }

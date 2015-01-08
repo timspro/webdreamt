@@ -14,12 +14,29 @@ use Propel\Common\Pluralizer\StandardEnglishPluralizer;
 class Box {
 
 	/**
+	 * An instance of the Box that can be accessed statically
 	 * @var Box
 	 */
 	static protected $box;
+	/**
+	 * The database server's host name
+	 * @var string
+	 */
 	public $DatabaseHost = "localhost";
+	/**
+	 * The database's name
+	 * @var string
+	 */
 	public $DatabaseName = "";
+	/**
+	 * The username used to log into the database
+	 * @var string
+	 */
 	public $DatabaseUsername = "root";
+	/**
+	 * The password used to log into the database
+	 * @var string
+	 */
 	public $DatabasePassword = "";
 	/**
 	 * The vendor directory in the project.
