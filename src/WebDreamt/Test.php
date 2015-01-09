@@ -151,6 +151,10 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	 * @param string $output The XML to output
 	 */
 	function output($filename, $output) {
+		$directory = dirname($filename);
+		if (!file_exists($directory)) {
+			mkdir($directory, 0777, true);
+		}
 		file_put_contents($filename, $output);
 		$doc = new DOMDocument();
 		$doc->formatOutput = true;
@@ -206,6 +210,22 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 				}
 				$this->assertEquals($givenIndex, $index, $selector . ' does not match index.');
 			}
+		}
+	}
+
+	/**
+	 * Check if the selectors return at least one element in the HTML.
+	 * @param string $output
+	 * @param array $selectors
+	 */
+	function checkExists($output, $selectors) {
+		$doc = new DOMDocument();
+		$doc->loadHTML($output);
+		$xpath = new DOMXPath($doc);
+		foreach ($selectors as $selector) {
+			$convert = CssSelector::toXPath($selector);
+			$elements = $xpath->query($convert);
+			$this->assertNotEquals(0, $elements->length, $selector . ' not found.');
 		}
 	}
 
@@ -290,6 +310,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 			"customer" => 10,
 			"location" => 10,
 			"agent" => 10,
+			'move' => 20,
 			"groups" => 0,
 			"users" => 0,
 			"users_groups" => 0,

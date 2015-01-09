@@ -10,6 +10,7 @@ Examine why presidents won.
 getValueFromInput
 Is default handled correctly in getValueFromInput?
 Should we allow multiple callbacks to be set?
+Make groups numerable
 
 # Medium: 
 Make a Search Component.

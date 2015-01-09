@@ -12,31 +12,26 @@ use WebDreamt\Component\Wrapper\Group;
 class Table extends Group {
 
 	/**
-	 * The number column
-	 * @var boolean
-	 */
-	protected $numberable = false;
-	/**
-	 * The number row header
-	 * @var string
-	 */
-	protected $numberHeader = '#';
-	/**
 	 * The header component
 	 * @var Component
 	 */
 	protected $header;
+	/**
+	 * Indicates whether to use headers or not.
+	 * @var boolean
+	 */
+	protected $headerable = false;
 
 	/**
 	 * Create a table.
-	 * @param string $tableName
+	 * @param string $tableName A name of a table in the database. Can be null.
 	 */
 	function __construct($tableName = null, $class = null, $html = null, $input = null) {
 		$header = new Component('th', $class, $html);
 		$this->header = $header;
 		$cell = new Component('td');
 		if ($tableName) {
-			$row = new Data($cell, $tableName, 'tr');
+			$row = new Data($tableName, $cell, 'tr');
 			$row->hide('id')->setLabelComponent($header)->setLabelClass('wd-header');
 		} else {
 			$row = new Group($cell, 'tr');
@@ -51,15 +46,17 @@ class Table extends Group {
 	 * @return Component
 	 */
 	function getCellComponent() {
-		return $this->display->getDisplay();
+		return $this->display->getDisplayComponent();
 	}
 
 	/**
 	 * Set the cell component.
 	 * @param Component $cell
+	 * @return static
 	 */
 	function setCellComponent(Component $cell) {
 		$this->display->setDisplayComponent($cell);
+		return $this;
 	}
 
 	/**
@@ -72,10 +69,12 @@ class Table extends Group {
 
 	/**
 	 * Set the row component. This has the same effect as setDisplay().
-	 * @param Component $row
+	 * @param Group $row
+	 * @return static
 	 */
-	function setRowComponent(Component $row) {
+	function setRowComponent(Group $row) {
 		$this->display = $row;
+		return $this;
 	}
 
 	/**
@@ -87,66 +86,57 @@ class Table extends Group {
 	}
 
 	/**
-	 * Set the header component. This can be null, in which case no column headers are used.
+	 * Set the header component.
 	 * @param Component $header
-	 */
-	function setHeaderComponent(Component $header = null) {
-		$this->header = $header;
-	}
-
-	/**
-	 * If the parameters is true, then the table will have row numbers.
-	 * @param boolean $numberable
-	 */
-	function setNumberable($numberable = false) {
-		$this->numberable = $numberable;
-		return $this;
-	}
-
-	/**
-	 * Get if the table is numberable.
-	 * @return boolean
-	 */
-	function getNumberable() {
-		return $this->numberable;
-	}
-
-	/**
-	 * Set the number header. Default is '#'.
-	 * @param string $numberHeader Set the row number header.
 	 * @return static
 	 */
-	function setNumberHeader($numberHeader = '#') {
-		$this->numberHeader = $numberHeader;
+	function setHeaderComponent(Component $header) {
+		$this->header = $header;
 		return $this;
 	}
 
 	/**
-	 * Get the number header.
-	 * @return string
+	 * Set whether to use headers or not.
+	 * @param boolean $headerable
+	 * @return static
 	 */
-	function getNumberHeader() {
-		return $this->numberHeader;
+	function setHeaderable($headerable) {
+		$this->headerable = $headerable;
+		return $this;
 	}
 
-	protected function render($input = null, $included = null) {
-		$opening = '';
-		if ($this->header) {
-			$opening .= '<thead>';
-			ob_start();
+	/**
+	 * Get whether to use headers or not.
+	 * @return boolean
+	 */
+	function getHeaderable() {
+		return $this->headerable;
+	}
+
+	/**
+	 * Render the table.
+	 * @param array $input
+	 * @param Component $included
+	 * @return string
+	 */
+	function render($input = null, $included = null) {
+		if ($this->headerable) {
+			$opening = '<thead>';
 			if ($this->display instanceof Data) {
-				$this->display->printLabels();
+				$opening .= $this->display->renderLabels();
 			} else {
 				foreach ($input as $key => $value) {
-					$this->header->render(static::beautify($key), $this);
+					$opening .= $this->header->render(static::beautify($key), $this);
 				}
 			}
-			$opening .= ob_get_clean() . '</thead><tbody>';
+			$opening .= '</thead><tbody>';
+		} else {
+			$opening = '<tbody>';
 		}
 
-		$closing = '</tbody></table>';
+		$closing = '</tbody>';
 		$this->useAfterOpeningTag($opening)->useBeforeClosingTag($closing);
-		parent::render($input, $included);
+		return parent::render($input, $included);
 	}
 
 }

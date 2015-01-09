@@ -197,7 +197,7 @@ class Data extends Wrapper {
 	 */
 	function addExtraColumn($column) {
 		$this->columns[$column] = $this->getDefaultOptions();
-		$this->columns[$column][self::OPT_LABEL] = static::beautify($column->getName());
+		$this->columns[$column][self::OPT_LABEL] = static::beautify($column);
 		return $this;
 	}
 
@@ -366,14 +366,11 @@ class Data extends Wrapper {
 	 * Multiple components can be linked to one column.
 	 * @param string $column
 	 * @param Component $component
-	 * @param boolean $propelInput If this is true, then link() configures the render function to
-	 * retrieve related data from a Propel object to give as input to $component based on the class
-	 * of $component.
 	 * @param string $manyColumn When you want to use an ID column in another table that points to this
 	 * table and there are multiple such columns, you must specify what column to actually use.
 	 * @return static
 	 */
-	function link($column, Component $component, $propelInput = true, $manyColumn = null) {
+	function link($column, Component $component, $manyColumn = null) {
 		if (!isset($this->columns[$column])) {
 			throw new Exception("Cannot link column $column since it doesn't exist.");
 		}
@@ -382,33 +379,31 @@ class Data extends Wrapper {
 		}
 		$this->linked[$column][] = $component;
 
-		if ($propelInput) {
-			//Set the Propel method that needs to be called to get input for the linked component.
-			$propel = null;
-			while ($component instanceof Wrapper) {
-				if ($component instanceof Data) {
-					$table = Propel::getDatabaseMap()->getTable($component->getTableName());
-					$columnMap = $table->getColumn($column);
-					$propel = 'get' . $columnMap->getRelatedTable()->getPhpName();
-					if (!method_exists($table->getPhpName(), $propel)) {
-						$propel .= 'RelatedBy' . $columnMap->getPhpName();
-					}
-					break;
-				} else if ($component instanceof Group) {
-					$display = $component->getDisplayComponent();
-					if ($display instanceof Data) {
-						$table = Propel::getDatabaseMap()->getTable($display->getTableName());
-						$propel = 'get' . Box::now()->pluralize($table->getPhpName());
-						if ($manyColumn) {
-							$propel .= 'RelatedBy' . $table->getColumn($manyColumn)->getPhpName();
-						}
-					}
-					break;
+		//Set the Propel method that needs to be called to get input for the linked component.
+		$propel = null;
+		while ($component instanceof Wrapper) {
+			if ($component instanceof Data) {
+				$table = Propel::getDatabaseMap()->getTable($this->getTableName());
+				$columnMap = $table->getColumn($column);
+				$propel = 'get' . $columnMap->getRelatedTable()->getPhpName();
+				if (!method_exists($table->getPhpName(), $propel)) {
+					$propel .= 'RelatedBy' . $columnMap->getPhpName();
 				}
-				$component = $component->getDisplayComponent();
+				break;
+			} else if ($component instanceof Group) {
+				$display = $component->getDisplayComponent();
+				if ($display instanceof Data) {
+					$table = Propel::getDatabaseMap()->getTable($display->getTableName());
+					$propel = 'get' . Box::now()->pluralize($table->getPhpName());
+					if ($manyColumn) {
+						$propel .= 'RelatedBy' . $table->getColumn($manyColumn)->getPhpName();
+					}
+				}
+				break;
 			}
-			$this->columns[$column][self::OPT_PROPEL_OBJECT] = $propel;
+			$component = $component->getDisplayComponent();
 		}
+		$this->columns[$column][self::OPT_PROPEL_OBJECT] = $propel;
 		return $this;
 	}
 
@@ -491,7 +486,7 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Set the labels.
+	 * Set the labels. Can set a label to null, in which case it won't be shown.
 	 * @param array $columns
 	 * @return static
 	 */
@@ -693,7 +688,7 @@ class Data extends Wrapper {
 				//Set the input of the label regardless as it might be used somewhere in the display
 				//component (such as via addExtraComponent()).
 				$this->label->setInput($options[self::OPT_LABEL]);
-				if ($this->showLabel) {
+				if ($this->showLabel && $options[self::OPT_LABEL] !== null) {
 					if (!$options[self::OPT_VISIBLE]) {
 						$this->label->useHtml('style="display:none"');
 					}
@@ -717,6 +712,8 @@ class Data extends Wrapper {
 				}
 			}
 		}
+		//Reset the label input to null to remove side-effects.
+		$this->label->setInput(null);
 		return $output;
 	}
 

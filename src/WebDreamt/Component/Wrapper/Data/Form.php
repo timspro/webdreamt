@@ -293,8 +293,7 @@ class Form extends Data {
 	 * Link a column value with a component. This will prevent the default display component from
 	 * being rendered. If this is undesirable, then you can do:
 	 * <code>
-	 * $a->link('col', $b);
-	 * $b->addExtraComponent($a->getDisplay());
+	 * $a->link('column', $a->getDisplayComponent());
 	 * </code>
 	 * @param string $column
 	 * @param Component $component

@@ -208,27 +208,88 @@ class DataTest extends Test {
 	}
 
 	/**
-	 * @group ComDataLink
+	 * @group ComData
 	 */
 	function testLinkPropel() {
 		//So, let's test the limit of the database interactivity...
 		//For some customers, display all contracts where they were a buyer and show if possible, the
 		//contract(s) associated in the "move" table where they were a seller.
-//		$contracts = $this->all('SELECT * FROM contract LIMIT 10');
-//		$contract = new Data('contract');
-//		$contract->setDataClass('wd')->setLabelable(true);
-//		$contract->link('location_id', new Data('location'));
-//		$contract->addExtraColumn('buyer_contract')->addExtraColumn('seller_contract');
-//		$move = new Group(new Data('move'));
-//		$contract->link('buyer_contract', $move, true, 'buyer_contract_id');
-//		$contract->link('seller_contract', $move, true, 'buyer_contract_id');
+		//First, setup common components.
+		$agent = new Data('agent');
+		$agent->setDataClass('agent')->setLabelable(true);
+		$location = new Data('location');
+		$location->setDataClass('location')->setLabelable(true);
+		$sellerCustomer = new Data('customer');
+		$sellerCustomer->setDataClass('customer')->setLabelable(true);
+		$buyerCustomer = $sellerCustomer;
+		$move = new Data('move');
+		$move->hide('id', 'buyer_contract_id');
+
+		//Let's create the topmost customer component.
+		$topCustomer = new Data('customer');
+		$topCustomer->setDataClass('top-customer')->setLabelable(true);
+		//Link in the buyer contracts. Note that we will finish setting this up when make the contract
+		//component.
+		$topCustomer->addExtraColumn('bought_contracts');
+
+		//Now, create the bought contract component.
+		$boughtContract = new Data('contract');
+		$boughtContract->setDataClass('bought-contract')->setLabelable(true);
+		$boughtContract->link('location_id', $location)
+				->link('seller_customer_id', $sellerCustomer)
+				->link('buyer_agent_id', $agent)
+				->link('seller_agent_id', $agent)
+				->hide('buyer_customer_id');
+		$boughtContract->addExtraColumn('sold_contracts');
+		//Link in move component.
+		$boughtContract->link('sold_contracts', new Group($move), 'seller_contract_id');
+		$topCustomer->link('bought_contracts', new Group($boughtContract), 'buyer_customer_id');
+
+		//Create the sold contract component.
+		$soldContract = new Data('contract');
+		$soldContract->setDataClass('sold-contract')->setLabelable(true);
+		$soldContract->link('location_id', $location)
+				->link('buyer_customer_id', $buyerCustomer)
+				->link('buyer_agent_id', $agent)
+				->link('seller_agent_id', $agent)
+				->hide('seller_customer_id');
+		//Link in sold contracts.
+		$move->link('seller_contract_id', $soldContract);
+
+		//Get the data.
+		$data = \CustomerQuery::create()->find();
+		//Render
+		$customers = new Group($topCustomer);
+		$output = $customers->render($data);
+		//Check the output.
+		$this->output(__DIR__ . '/output/complex.html', $output);
+		$this->checkExists($output, [
+			'.sold-contract-id',
+			'.top-customer-id',
+			'.customer-id',
+			'.location-id',
+			'.bought-contract-id'
+		]);
 	}
 
 	/**
 	 * @group ComData
 	 */
 	function testAlias() {
-
+		$data = new Data('service');
+		$data->link('price', new Component());
+		$data->alias(['description' => 'extra', 'price' => 'test']);
+		$this->assertContains('extra', $data->getColumnNames());
+		$this->assertContains('test', $data->getColumnNames());
+		$this->assertEquals(true, isset($data->getLinkedComponents()['test']));
+		$data->hide('id', 'test');
+		$data->alias(['id' => 'name', 'name' => 'id', 'test' => 'test2']);
+		$this->assertEquals(true, isset($data->getLinkedComponents()['test2']));
+		$this->assertEquals(false, $data->getOption('name', Data::OPT_VISIBLE));
+		$this->assertEquals(false, $data->getOption('test2', Data::OPT_VISIBLE));
+		$this->assertEquals(true, $data->getOption('id', Data::OPT_VISIBLE));
+		$values = [false, true, true, false];
+		$this->assertEquals($values, array_values($data->getOptions(null, Data::OPT_VISIBLE)));
 	}
 
 	/**
@@ -311,7 +372,16 @@ class DataTest extends Test {
 	 * @group ComData
 	 */
 	function testPropelDefaultValues() {
-		//Include default values.
+		$service = \ServiceQuery::create()->findPK(1);
+		$data = new Data('service');
+		$data->setDefaultValues($service)->setDataClass('wd');
+		$output = $data->render();
+		$this->checkHtml($output, [
+			'.wd-id' => $service->getId(),
+			'.wd-name' => $service->getName(),
+			'.wd-description' => $service->getDescription(),
+			'.wd-price' => $service->getPrice()
+		]);
 	}
 
 	/**

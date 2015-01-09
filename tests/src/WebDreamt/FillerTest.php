@@ -52,6 +52,7 @@ class FillerTest extends DatabaseTest {
 			"customer" => 10,
 			"location" => 10,
 			"agent" => 10,
+			'move' => 20,
 			"groups" => 0,
 			"users" => 0,
 			"users_groups" => 0,
