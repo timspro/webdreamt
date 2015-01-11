@@ -268,4 +268,15 @@ class ComponentTest extends Test {
 		]);
 	}
 
+	/**
+	 * @group Component
+	 */
+	function testSelfClosing() {
+		$this->assertEquals(false, $this->component->getSelfClosing());
+		$this->ret($this->component->setSelfClosing(true));
+		$this->assertEquals(true, $this->component->getSelfClosing());
+		$output = $this->component->render();
+		$this->assertEquals('<div />', $output);
+	}
+
 }

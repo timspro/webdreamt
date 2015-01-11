@@ -60,7 +60,7 @@ class Form extends Data {
 	 * A count of the number of forms rendered.
 	 * @var int
 	 */
-	protected static $count = 0;
+	protected static $countForm = 0;
 	/**
 	 * Indicates if the form can handle multiple items.
 	 * @var boolean
@@ -75,7 +75,7 @@ class Form extends Data {
 	 * A function to give control to change form inputs.
 	 * @var callable
 	 */
-	protected $inputHook = null;
+	protected $inputHook;
 	/**
 	 * Linked select components.
 	 * @var array
@@ -88,7 +88,7 @@ class Form extends Data {
 	 */
 	function __construct($tableName, $class = null, $html = null) {
 		$display = new Wrapper($this->input, 'div', "form-group $class", $html);
-		parent::__construct($display, $tableName, 'form', null, 'role="form"');
+		parent::__construct($tableName, $display, 'form', null, 'role="form"');
 		$this->setLabelComponent(new Component('label'), null);
 	}
 
@@ -96,9 +96,9 @@ class Form extends Data {
 		$options = parent::getDefaultOptions();
 		$options[self::OPT_DISABLE] = false;
 		$options[self::OPT_REQUIRE] = false;
-		$options[self::OPT_HTML_TYPE] = '';
-		$options[self::OPT_HTML_CLASS] = '';
-		$options[self::OPT_HTML_EXTRA] = '';
+		$options[self::OPT_HTML_TYPE] = null;
+		$options[self::OPT_HTML_CLASS] = null;
+		$options[self::OPT_HTML_EXTRA] = null;
 		return $options;
 	}
 
@@ -192,7 +192,7 @@ class Form extends Data {
 	 * @param array $columns
 	 * @return static
 	 */
-	function required(array $columns = null) {
+	function required($columns) {
 		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_REQUIRE, true);
 		return $this;
 	}
@@ -202,7 +202,7 @@ class Form extends Data {
 	 * @param array $columns
 	 * @return static
 	 */
-	function optional(array $columns = null) {
+	function optional($columns) {
 		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_REQUIRE, false);
 		return $this;
 	}
@@ -212,7 +212,7 @@ class Form extends Data {
 	 * @param array $columns Column names should be the keys of the array.
 	 * @return static
 	 */
-	function disable(array $columns = null) {
+	function disable($columns) {
 		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_DISABLE, false);
 		return $this;
 	}
@@ -222,7 +222,7 @@ class Form extends Data {
 	 * @param array $columns Column names should be the keys of the array.
 	 * @return static
 	 */
-	function enable(array $columns = null) {
+	function enable($columns) {
 		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_DISABLE, true);
 		return $this;
 	}
@@ -232,7 +232,7 @@ class Form extends Data {
 	 * @param boolean $multiple
 	 * @return static
 	 */
-	function setMultiple($multiple = false) {
+	function setMultiple($multiple) {
 		$this->multiple = $multiple;
 		return $this;
 	}
@@ -249,11 +249,10 @@ class Form extends Data {
 	 * Sets a function that provides fine-grain control over the name, value, and possible values
 	 * (for applicable inputs) of the HTML form input. The values passed to function are: (1) column name,
 	 * (2) the options for the column, (3) the form input name, (4) the form value, and
-	 * (5) an array of possible values; the last three are passed by reference and so are modifiable.
-	 * @param callable $function
+	 * (5) an array of possible values; use references to modify the values.
 	 * @return static
 	 */
-	function setInputHook($function = null) {
+	function setInputHook($function) {
 		$this->inputHook = $function;
 		return $this;
 	}
@@ -270,23 +269,26 @@ class Form extends Data {
 	 * Render the form.
 	 * @param array $input
 	 * @param Component $included
+	 * @return string
 	 */
 	function render($input = null, Component $included = null) {
 		if ($included instanceof Modal) {
-			$this->setHtmlTag('div');
 			$included->useButtons(['btn-primary wd-btn-submit' => 'Submit']);
+		}
+		if ($included instanceof Form) {
+			$this->setHtmlTag('div');
 		} else {
 			$this->setHtmlTag('form');
 		}
 		//Get an ID for the form.
-		static::$count++;
-		$count = static::$count;
+		static::$countForm++;
+		$count = static::$countForm;
 		$this->count = $count;
 		$this->useAfterOpeningTag("<input type='hidden' name='$count' value='" . $this->tableName . "'/>");
 		if ($this->multiple) {
-			$this->useBeforeClosingTag("<button type='button' class='btn btn-default'>Add Another</button>");
+			$this->useBeforeClosingTag("<button type='button' class='btn btn-default wd-multiple'>Add Another</button>");
 		}
-		parent::render($input, $included);
+		return parent::render($input, $included);
 	}
 
 	/**
@@ -297,18 +299,15 @@ class Form extends Data {
 	 * </code>
 	 * @param string $column
 	 * @param Component $component
-	 * @param boolean $propelInput If this is true, then link() configures the render function to
-	 * retrieve related data from a Propel object to give as input to $component based on the class
-	 * of $component.
 	 * @param string $manyColumn When you want to use an ID column in another table that points to this
 	 * table and there are multiple such columns, you must specify what column to actually use.
 	 * @return static
 	 */
-	function link($column, Component $component, $propelInput = true, $manyColumn = null) {
+	function link($column, Component $component, $manyColumn = null) {
 		if ($component instanceof Select) {
 			$this->selectComponent[$column] = $component;
 		} else {
-			parent::link($column, $component, $propelInput, $manyColumn);
+			parent::link($column, $component, $manyColumn);
 		}
 		return $this;
 	}
@@ -317,41 +316,41 @@ class Form extends Data {
 	 * Renders the column.
 	 * @param string $column
 	 * @param mixed $value
+	 * @return string
 	 */
 	function renderColumn($column, $value) {
 		$options = $this->columns[$column];
 		$selectComponent = isset($this->selectComponent[$column]) ? $this->selectComponent[$column] : null;
 		$name = $this->count . "-" . $column;
-		$label = $selectComponent ? $selectComponent->getHeader() : $options[self::OPT_LABEL];
-		ob_start();
-		$this->label->useHtml("for='$name'")->render($label, $this);
-		$labelHtml = ob_get_clean();
-		$hidden = $options[self::OPT_VISIBLE] ? '' : 'style="display:none"';
+		$label = $selectComponent ? $selectComponent->getTitle() : $options[self::OPT_LABEL];
+		$labelHtml = $this->label->useHtml("for='$name'")->render($label, $this);
 		$disabled = $options[self::OPT_DISABLE] ? 'disabled=""' : '';
-		$required .= $options[self::OPT_REQUIRE] && $options[self::OPT_VISIBLE] ? 'required=""' : '';
+		$required = $options[self::OPT_REQUIRE] && $options[self::OPT_VISIBLE] ? 'required=""' : '';
 		$type = $options[self::OPT_HTML_TYPE];
 		$class = $options[self::OPT_HTML_CLASS];
 		$extra = $options[self::OPT_HTML_EXTRA];
-		$possibleValues = '';
+		$possibleValues = null;
+		if (is_array($options[self::OPT_EXTRA])) {
+			$possibleValues = $options[self::OPT_EXTRA];
+		}
 		if ($this->inputHook) {
 			$function = $this->inputHook;
-			$function($column, $options, &$name, &$value, &$possibleValues);
+			$function($column, $options, $name, $value, $possibleValues);
 		}
 		$attributes = "name='$name' $disabled $required $extra";
 		$classes = "form-control $class";
-		$cssPrefix = $this->dataClass ? "class='" . $this->dataClass . "-$column'" : '';
-		$this->display->useHtml("$hidden $cssPrefix")->setAfterOpeningTag($labelHtml);
+		$this->display->setAfterOpeningTag($labelHtml);
 		if ($selectComponent !== null) {
-			$this->display->setDisplayComponent($selectComponent->useHtml($attributes));
+			$this->display->setDisplayComponent($selectComponent->useHtml($attributes)->useCssClass($classes));
 		} else {
 			switch ($type) {
 				case self::HTML_NUMBER:
 					$component = new Component('input', $classes, "type='number' value='$value' $attributes");
-					$this->display->setDisplayComponent($component->setInput(''));
+					$this->display->setDisplayComponent($component->setInput('')->setSelfClosing(true));
 					break;
 				case self::HTML_TEXT:
-					$component = new Component('input', $classes, "value='$value' $attributes");
-					$this->display->setDisplayComponent($component->setInput(''));
+					$component = new Component('input', $classes, "type='text' value='$value' $attributes");
+					$this->display->setDisplayComponent($component->setInput('')->setSelfClosing(true));
 					break;
 				case self::HTML_TEXTAREA:
 					$this->display->setDisplayComponent(new Component('textarea', $classes, $attributes));
@@ -360,15 +359,12 @@ class Form extends Data {
 					$value = $value ? 'Yes' : 'No';
 					$possibleValues = ['No', 'Yes'];
 				case self::HTML_SELECT:
-					$component = new Select('form-control', $attributes);
-					if (!$possibleValues) {
-						$possibleValues = $options[self::OPT_EXTRA];
-					}
+					$component = new Select(null, $classes, $attributes);
 					$component->setSelected($value)->setInput($possibleValues);
 					$this->display->setDisplayComponent($component);
 			}
 		}
-		$this->display->render($value, $this);
+		return $this->display->render($value, $this);
 	}
 
 }

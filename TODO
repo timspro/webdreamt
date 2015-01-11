@@ -11,6 +11,7 @@ getValueFromInput
 Is default handled correctly in getValueFromInput?
 Should we allow multiple callbacks to be set?
 Make groups numerable
+Placeholder
 
 # Medium: 
 Make a Search Component.

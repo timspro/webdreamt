@@ -85,6 +85,11 @@ class Component {
 	 * @var string
 	 */
 	protected $nullInput;
+	/**
+	 * Indicates if the tag is self-closing.
+	 * @var boolean
+	 */
+	protected $selfClosing = false;
 
 	/**
 	 * Get a new component.
@@ -458,6 +463,24 @@ class Component {
 	}
 
 	/**
+	 * Set if the tag is self-closing.
+	 * @param boolean $selfClosing
+	 * @return static
+	 */
+	function setSelfClosing($selfClosing) {
+		$this->selfClosing = $selfClosing;
+		return $this;
+	}
+
+	/**
+	 * Get if the tag is self-closing.
+	 * @return boolean
+	 */
+	function getSelfClosing() {
+		return $this->selfClosing;
+	}
+
+	/**
 	 * Set the value that should be displayed on null input. If the input is null and this has been
 	 * called with a non-null value, then that value will be displayed instead.
 	 * @param string $nullInput
@@ -505,18 +528,25 @@ class Component {
 			if ($html) {
 				$html = " $html";
 			}
-			$output .= "<$htmlTag" . $html . "$classes>";
+			$output .= "<$htmlTag" . $html . "$classes";
+			if ($this->selfClosing) {
+				$output .= ' />';
+			} else {
+				$output .= '>';
+			}
 		}
-		$output .= $this->afterOpening . $this->withAfterOpening;
-		$value = $this->getValueFromInput($this->key, $input);
-		if ($value === null && $this->nullInput !== null) {
-			$output .= $this->nullInput;
-		} else {
-			$output .= $this->renderComponents($value, $included);
-		}
-		$output .= $this->withBeforeClosing . $this->beforeClosing;
-		if ($htmlTag !== null) {
-			$output .= "</$htmlTag>";
+		if (!$this->selfClosing) {
+			$output .= $this->afterOpening . $this->withAfterOpening;
+			$value = $this->getValueFromInput($this->key, $input);
+			if ($value === null && $this->nullInput !== null) {
+				$output .= $this->nullInput;
+			} else {
+				$output .= $this->renderComponents($value, $included);
+			}
+			$output .= $this->withBeforeClosing . $this->beforeClosing;
+			if ($htmlTag !== null) {
+				$output .= "</$htmlTag>";
+			}
 		}
 		$this->withHtml = null;
 		$this->withCssClass = null;

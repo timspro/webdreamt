@@ -69,4 +69,15 @@ class Select extends Group {
 		return $this->selected;
 	}
 
+	/**
+	 * Warning! This does not set the key used to retrieve the option values from the array.
+	 * Instead, it has the same behavior as setKey() does for any other component, and so
+	 * sets a key used to retrieve the array of option values.
+	 * @param string $key
+	 * @return static
+	 */
+	function setKey($key) {
+		return parent::setKey($key);
+	}
+
 }
