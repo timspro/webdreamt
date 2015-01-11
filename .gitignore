@@ -12,3 +12,4 @@
 /node_modules/
 dist/*
 /tests/src/WebDreamt/output/
+/tests/src/WebDreamt/Component/output/

@@ -167,7 +167,7 @@ class FormTest extends Test {
 	}
 
 	/**
-	 * @group ComFormTest
+	 * @group ComForm
 	 */
 	function testLinkPropel() {
 		$contract = \ContractQuery::create()->find()[0];
