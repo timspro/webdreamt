@@ -117,6 +117,8 @@ class Builder {
 		$this->PropelProject = $this->Vendor . "../db/propel/";
 		$this->PropelPHP = $this->PropelProject . "propel.php";
 		$this->Schemas = $this->Vendor . "../db/schemas/";
+		$this->Classes = $this->Vendor . '../db/classes/';
+		$this->Old = $this->Vendor . '../db/old/';
 		$this->UserSchema = $this->Schemas . "schema.xml";
 		$this->ValidSchema = $this->Schemas . "validation.xml";
 		$this->BuildSchema = $this->PropelProject . "schema.xml";
@@ -163,6 +165,8 @@ class Builder {
 		$this->makeDir($this->Vendor . "../db/");
 		$this->makeDir($this->PropelProject);
 		$this->makeDir($this->Schemas);
+		$this->makeDir($this->Classes);
+		$this->makeDir($this->Old);
 		if (!file_exists($this->ValidSchema)) {
 			$xml = "<?xml version='1.0' encoding='UTF-8'?>\n<database>\n</database>\n";
 			file_put_contents($this->ValidSchema, $xml);
@@ -359,6 +363,28 @@ class Builder {
 		$this->propel->find("build")->run(new ArrayInput([
 			"command" => "build"
 				]), $this->propelOutput);
+
+		//Get rid of Propel classes that are no longer in the database.
+		foreach (scandir($this->Classes) as $file) {
+			$path = $this->Classes . $file;
+			$check = !file_exists($this->GeneratedClasses . $file);
+			if ($file !== '.' && $file !== ".." && is_file($path) && $check) {
+				rename($path, $this->Old . $file);
+			}
+		}
+
+		//Add new Propel classes to the classes folder.
+		foreach (scandir($this->GeneratedClasses) as $file) {
+			$path = $this->GeneratedClasses . $file;
+			$check = substr($file, strlen($file) - 9) !== 'Query.php';
+			if ($file !== '.' && $file !== ".." && is_file($path) && $check) {
+				if (!file_exists($this->Classes . $file)) {
+					rename($path, $this->Classes . $file);
+				} else {
+					unlink($path);
+				}
+			}
+		}
 	}
 
 	/**
@@ -508,6 +534,7 @@ class Builder {
 		$this->loadAll($filename);
 		$this->loadAll($this->GeneratedClasses);
 		$this->loadAll($this->GeneratedClasses . "Map/");
+		$this->loadAll($this->Classes);
 	}
 
 	/**

@@ -34,7 +34,7 @@ class BuildTest extends DatabaseTest {
 				$count++;
 			}
 		}
-		$this->assertEquals(6, $count);
+		$this->assertEquals(3, $count);
 		$file = file_get_contents(self::$build->BuildSchema);
 		preg_match('/size="\[([^\"]*)\]"/', $file, $check);
 		$this->assertEquals("'male','female'", $check[1]);
