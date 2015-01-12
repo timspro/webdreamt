@@ -212,7 +212,7 @@ class Server {
 	 * @param array $columns
 	 * @return boolean
 	 */
-	protected function permissionsContain($permissions, $tableName, $action, $columns = null) {
+	function permissionsContain($permissions, $tableName, $action, $columns = null) {
 		$key = "api/$tableName/$action";
 		//Check if there are general permissions.
 		if (isset($permissions[$key]) && $permissions[$key] === 1) {

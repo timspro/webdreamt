@@ -17,8 +17,14 @@ if (!$box) {
 	echo "Could not find a Box! <br>";
 	return;
 }
+
 $sentry = $box->sentry();
 $server = $box->server();
+
+if (isset($_POST['1-name'])) {
+	$sentry->createGroup(['name' => $_POST['1-name']]);
+}
+
 $groups = $sentry->findAllGroups();
 $tables = $box->db()->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
 
@@ -38,7 +44,11 @@ $tableWrapper = new Wrapper($table);
 $select = new Select($options);
 $panel = new Panel($tableWrapper, null, 'style="margin: 40px auto 0 auto;"');
 $panel->setTitle('Group Permissions');
-$table->setHeaders(array_merge(['Tables'], $groups));
+$groupNames = [];
+foreach ($groups as $group) {
+	$groupNames[] = $group['name'];
+}
+$table->setHeaders(array_merge(['Tables'], $groupNames));
 $table->setCellComponent(new Wrapper($select, 'td'));
 $table->getRowComponent()->setUseFirst(true)->setFirstComponent(new Component('td'));
 $tableWrapper->setOnNullInput('There are no groups.');
@@ -48,9 +58,9 @@ if (!empty($groups)) {
 	foreach ($tables as $table) {
 		$data[] = [$table];
 		foreach ($groups as $group) {
-			$create = $server->groupPermitted($group, $table, Server::ACT_CREATE);
-			$update = $server->groupPermitted($group, $table, Server::ACT_UPDATE);
-			$delete = $server->groupPermitted($group, $table, Server::ACT_DELETE);
+			$create = $server->permissionsContain($group['permissions'], $table, Server::ACT_CREATE);
+			$update = $server->permissionsContain($group['permissions'], $table, Server::ACT_UPDATE);
+			$delete = $server->permissionsContain($group['permissions'], $table, Server::ACT_DELETE);
 
 			$value = 0;
 			$value += $create ? 4 : 0;
@@ -66,7 +76,7 @@ if (!empty($groups)) {
 }
 
 $form = new Form('groups');
-$form->deny('permissions')->setHtmlType(['name' => Form::HTML_TEXT]);
+$form->setHtml("method='POST'")->deny('permissions')->setHtmlType(['name' => Form::HTML_TEXT]);
 $formPanel = new Panel($form);
 $formPanel->setTitle('Add Group');
 

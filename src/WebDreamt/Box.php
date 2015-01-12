@@ -44,10 +44,15 @@ class Box {
 	 */
 	public $VendorDirectory;
 	/**
-	 * If true, then will make a builder that can't issue commands and won't create files.
+	 * If false, then builder won't setup the Propel directories and config files.
 	 * @var boolean
 	 */
-	public $DummyBuilder = false;
+	public $BuilderFiles = true;
+	/**
+	 * If false, then builder won't be able to issue Propel commands.
+	 * @var boolean
+	 */
+	public $BuilderConsole = true;
 
 	/**
 	 * Constructs a Box.
@@ -94,7 +99,7 @@ class Box {
 		return $this->factory(__FUNCTION__, function () {
 					$schema = $this->VendorDirectory . "cartalyst/sentry/schema/mysql.sql";
 					$fk = __DIR__ . '/Builder/sentry.sql';
-					$build = new Builder($this, [$schema, $fk], $this->DummyBuilder);
+					$build = new Builder($this, [$schema, $fk], $this->BuilderFiles, $this->BuilderConsole);
 					return $build;
 				});
 	}

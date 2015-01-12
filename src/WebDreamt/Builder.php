@@ -102,8 +102,12 @@ class Builder {
 	 * will not modify the database or create any Propel classes.
 	 * @param Box $box The settings object.
 	 * @param array|string $schemas Any additional schemas to use for database creation.
+	 * @param boolean $files If true, then will automatically make sure the needed folder and config
+	 * files are in place.
+	 * @param boolean $console If true, then will allow builder to issue commands to the Propel
+	 * command line program.
 	 */
-	public function __construct(Box $box, $schemas = [], $dummy = false) {
+	public function __construct(Box $box, $schemas = [], $files = true, $console = true) {
 		umask(0);
 
 		//Change how this is organized.
@@ -127,7 +131,7 @@ class Builder {
 		$this->registeredSchemas = $schemas;
 		$this->a = $box;
 
-		if (!$dummy) {
+		if ($console) {
 			$finder = new Finder();
 			$finder->files()->name('*.php')
 					->in($this->Vendor . '/propel/propel/src/Propel/Generator/Command')->depth(0);
@@ -145,6 +149,9 @@ class Builder {
 			if (!($app instanceof Application)) {
 				throw new Exception("Could not get the propel application.");
 			}
+		}
+
+		if ($files) {
 			$this->setupFiles();
 		}
 	}

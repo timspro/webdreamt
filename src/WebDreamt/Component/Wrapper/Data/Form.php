@@ -275,7 +275,7 @@ class Form extends Data {
 		if ($included instanceof Modal) {
 			$included->useButtons(['btn-primary wd-btn-submit' => 'Submit']);
 		} else {
-			$this->useBeforeClosingTag('<button type="button" class="btn btn-default">Submit</button>');
+			$this->useBeforeClosingTag('<button type="submit" class="btn btn-default">Submit</button>');
 		}
 		if ($included instanceof Form) {
 			$this->setHtmlTag('div');

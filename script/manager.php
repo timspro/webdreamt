@@ -23,7 +23,7 @@ $data = [
 	"destroy-database" => "Delete Tables from Database"
 ];
 
-$select = new Select($data, false, null, 'id="option" name="script"');
+$select = new Select($data, null, 'id="option" name="script"');
 if (isset($_GET['script']) || isset($argv[1])) {
 	if (isset($argv[1]) && ($argv[1] === '--help' || $argv[1] === '-h')) {
 		echo 'Options are: update-database, update-propel, add-schemas (for authorization), fill-database, ' .
