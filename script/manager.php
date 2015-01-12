@@ -1,6 +1,6 @@
 <?php
 use WebDreamt\Box;
-use WebDreamt\Extra\Select;
+use WebDreamt\Component\Wrapper\Select;
 //This may be included from somewhere else.
 if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
 	require_once __DIR__ . '/../vendor/autoload.php';
@@ -10,14 +10,26 @@ $box = Box::get();
 if (!$box) {
 	$box = new Box(false);
 	echo "Could not find a Box! <br>";
+	return;
 }
+
+$data = [
+	"update-database" => "Update DB from Propel",
+	"update-propel" => "Update Propel from DB",
+	"build-all" => "Basic Configuration",
+	"add-schemas" => "Add in Sentry",
+	"fill-database" => "Fill Database with Data",
+	"delete-database" => "Delete Data from Database",
+	"destroy-database" => "Delete Tables from Database"
+];
+
+$select = new Select($data, false, null, 'id="option" name="script"');
 if (isset($_GET['script']) || isset($argv[1])) {
 	if (isset($argv[1]) && ($argv[1] === '--help' || $argv[1] === '-h')) {
-		echo 'Options are: update-database, update-propel, add-schemas (authorizatio), fill-database, ' .
+		echo 'Options are: update-database, update-propel, add-schemas (for authorization), fill-database, ' .
 		'delete-database (data), and destroy-database (schemas)';
 	}
 	$value = $_GET['script'] ? : $argv[1];
-	$select = new Select($value);
 	try {
 		echo "Trying to: " . $value . "<br>";
 		if ($value === "build-all") {
@@ -46,8 +58,6 @@ if (isset($_GET['script']) || isset($argv[1])) {
 		echo $error;
 		return;
 	}
-} else {
-	$select = new Select();
 }
 echo $box->header();
 ?>
@@ -56,15 +66,7 @@ echo $box->header();
 	<form method="get" role="form">
 		<div class="form-group">
 			<label for="option">Option: </label>
-			<select id="option" name="script" class="form-control">
-				<option <?= $select->select("update-database") ?>>Update DB from Propel</option>
-				<option <?= $select->select("update-propel") ?>>Update Propel from DB</option>
-				<option <?= $select->select("build-all") ?>>Basic Configuration</option>
-				<option <?= $select->select("add-schemas") ?>>Add in Sentry</option>
-				<option <?= $select->select("fill-database") ?>>Fill Database with Data</option>
-				<option <?= $select->select("delete-database") ?>>Delete Data from Database</option>
-				<option <?= $select->select("destroy-database") ?>>Delete Tables from Database</option>
-			</select>
+			<?= $select->render(isset($_GET['script']) ? $_GET['script'] : null) ?>
 		</div>
 		<button class="btn btn-default" type="submit">Submit</button>
 	</form>

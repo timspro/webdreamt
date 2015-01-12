@@ -2,9 +2,10 @@
 
 namespace WebDreamt;
 
+use Propel\Runtime\ActiveQuery\Criteria;
 use WebDreamt\Component\Wrapper\Data\Form;
-use WebDreamt\Component\Wrapper\Group\Select;
 use WebDreamt\Component\Wrapper\Modal;
+use WebDreamt\Component\Wrapper\Select;
 require_once __DIR__ . '/../../../bootstrap.php';
 
 class FormTest extends Test {
@@ -170,14 +171,16 @@ class FormTest extends Test {
 	 * @group ComForm
 	 */
 	function testLinkPropel() {
-		$contract = \ContractQuery::create()->find()[0];
+		$contract = \ContractQuery::create()->filterByBuyerAgentId(null, Criteria::ISNOTNULL)->find()[0];
 		$agents = \AgentQuery::create()->find();
 		$data = [];
+		$buyerAgentId = $contract->getBuyerAgentId();
 		foreach ($agents as $agent) {
-			$array = [];
-			$array['id'] = $agent->getId();
-			$array['name'] = $agent->getLastName() . ', ' . $agent->getFirstName();
-			$data[] = $array;
+			$id = $agent->getId();
+			$data[$id] = $agent->getLastName() . ', ' . $agent->getFirstName();
+			if ($id === $buyerAgentId) {
+				$buyerAgentName = $data[$id];
+			}
 		}
 
 		$contractForm = new Form('contract');
@@ -185,8 +188,7 @@ class FormTest extends Test {
 		$locationForm = new Form('location');
 		$locationForm->setDataClass('wd');
 		$contractForm->link('location_id', $locationForm);
-		$select = new Select('name');
-		$select->setInput($data);
+		$select = new Select($data);
 		$contractForm->link('buyer_agent_id', $select);
 		$output = $contractForm->render($contract);
 		$this->output(__DIR__ . '/output/form.html', $output);
@@ -198,6 +200,7 @@ class FormTest extends Test {
 		$location = $contract->getLocation();
 		$this->checkHtml($output, [
 			'option:first-child' => $agents[0]->getLastName() . ', ' . $agents[0]->getFirstName(),
+			'[selected]' => $buyerAgentName
 		]);
 		$this->checkExists($output, [
 			'.wd-form-id > input[value="' . $contract->getId() . '"]',

@@ -71,7 +71,7 @@ class TableTest extends Test {
 	}
 
 	/**
-	 * @group ComTableTest
+	 * @group ComTable
 	 */
 	function testPropel() {
 		$customers = \CustomerQuery::create()->find();
@@ -106,6 +106,23 @@ class TableTest extends Test {
 			'th:first-child' => 'ID',
 			'.wd-header-id' => 'ID',
 			'.wd-header-company_name' => 'Company Name'
+		]);
+	}
+
+	/**
+	 * @group ComTable
+	 */
+	function testSetHeaders() {
+		$data = $this->all('SELECT * FROM customer');
+		$table = new Table();
+		$this->assertEquals(null, $table->getHeaders());
+		$headers = array_keys(array_keys($data[0]));
+		$this->ret($table->setHeaders($headers));
+		$this->assertEquals($headers, $table->getHeaders());
+		$output = $table->render($data);
+		$this->checkHtml($output, [
+			'th:first-child' => 0,
+			'th:last-child' => 8
 		]);
 	}
 

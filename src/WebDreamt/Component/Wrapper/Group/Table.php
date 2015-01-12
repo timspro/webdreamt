@@ -21,9 +21,17 @@ class Table extends Group {
 	 * @var boolean
 	 */
 	protected $headerable = false;
+	/**
+	 * Headers to use for the table
+	 * @var array
+	 */
+	protected $headers;
 
 	/**
-	 * Create a table.
+	 * Create a table. If a table name is provided, then the rows will be based on a data component
+	 * that automatically has the label class 'wd-header'.
+	 * If no table name is provided, then the row component is a group component.
+	 * In both cases, labels/headers won't be displayed if headerable is false, which is default.
 	 * @param string $tableName A name of a table in the database. Can be null.
 	 */
 	function __construct($tableName = null, $class = null, $html = null, $input = null) {
@@ -114,6 +122,26 @@ class Table extends Group {
 	}
 
 	/**
+	 * Set headers for the table. Note that this won't work if the row component is a data component.
+	 * This also automatically sets headerable to true.
+	 * @param array $headers
+	 * @return static
+	 */
+	function setHeaders($headers) {
+		$this->headerable = true;
+		$this->headers = $headers;
+		return $this;
+	}
+
+	/**
+	 * Get the set headers.
+	 * @return array
+	 */
+	function getHeaders() {
+		return $this->headers;
+	}
+
+	/**
 	 * Render the table.
 	 * @param array $input
 	 * @param Component $included
@@ -124,6 +152,10 @@ class Table extends Group {
 			$opening = '<thead>';
 			if ($this->display instanceof Data) {
 				$opening .= $this->display->renderLabels();
+			} else if ($this->headers !== null) {
+				foreach ($this->headers as $value) {
+					$opening .= $this->header->render($value, $this);
+				}
 			} else {
 				foreach ($input as $key => $value) {
 					$opening .= $this->header->render(static::beautify($key), $this);

@@ -3,17 +3,20 @@
 namespace WebDreamt;
 
 use WebDreamt\Component\Wrapper\Group;
-use WebDreamt\Component\Wrapper\Group\Select;
 use WebDreamt\Test;
 require_once __DIR__ . '/../../../bootstrap.php';
 
 class GroupTest extends Test {
 
+	function setUp() {
+		parent::setUp();
+		$this->set(Group::class);
+	}
+
 	/**
 	 * @group ComGroup
 	 */
 	function testGroup() {
-		$this->set(Group::class);
 		$group = new Group(new Component(), 'span', 'test', 'data-test=""', ['a', 'b', 'c']);
 		$this->assertEquals('', $group->getTitle());
 		$component = new Component();
@@ -37,47 +40,6 @@ class GroupTest extends Test {
 	}
 
 	/**
-	 * @group ComSelect
-	 */
-	function testSelect() {
-		$this->set(Select::class);
-		$select = new Select(null, 'test', 'data-test=""', ['a', 'b', 'c']);
-		$output = $select->render(['q']);
-		$this->checkCount($output, [
-			'.test' => 1,
-			'[data-test=""]' => 1,
-			'option' => 3,
-			'selected' => 0
-		]);
-		$select->setSelected('c');
-		$this->checkHtml($select->render(), [
-			'[selected=""]' => 'c'
-		]);
-		$select->setInput(null)->getDisplayComponent()->setKey('value');
-		$data = [
-			['id' => '0', 'value' => 'cat'],
-			['id' => '1', 'value' => 'dog'],
-			['id' => '2', 'value' => 'lizard']
-		];
-		$output = $select->render($data);
-		$this->checkIndex($output, [
-			'[value=0]' => 0,
-			'[value=1]' => 1,
-			'[value=2]' => 2
-		]);
-		$this->checkHtml($output, [
-			'[value=0]' => 'cat',
-			'[value=1]' => 'dog',
-			'[value=2]' => 'lizard'
-		]);
-		$this->ret($select->setSelected('2'));
-		$output = $select->render($data);
-		$this->checkHtml($output, [
-			"[selected='']" => 'lizard'
-		]);
-	}
-
-	/**
 	 * @group ComGroup
 	 */
 	function testIndexClass() {
@@ -86,7 +48,6 @@ class GroupTest extends Test {
 			$array[] = $i;
 		}
 		$group = new Group();
-		$this->set(Group::class);
 		$this->assertEquals(null, $group->getIndexClass());
 		$this->ret($group->setIndexClass('test'));
 		$this->assertEquals('test', $group->getIndexClass());
@@ -96,6 +57,33 @@ class GroupTest extends Test {
 			'.test-3' => '3',
 			'.test-6' => '6',
 			'.test-9' => '9'
+		]);
+	}
+
+	/**
+	 * @group ComGroup
+	 */
+	function testFirst() {
+		$group = new Group();
+		$this->assertEquals(null, $group->getFirstComponent());
+		$this->assertEquals(false, $group->getUseFirst());
+		$this->ret($group->setUseFirst(true));
+		$this->assertEquals(true, $group->getUseFirst());
+		$group->getFirstComponent()->setCssClass('test');
+
+		$output = $group->render(['a', 'b', 'c']);
+		echo $output;
+		$this->checkCount($output, [
+			'div' => 4
+		]);
+		$this->checkHtml($output, [
+			'.test' => 'a'
+		]);
+
+		$this->ret($group->setFirstComponent(new Component('span')));
+		$output = $group->render(['d', 'e', 'f']);
+		$this->checkHtml($output, [
+			'span' => 'd'
 		]);
 	}
 

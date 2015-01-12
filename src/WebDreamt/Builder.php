@@ -103,7 +103,7 @@ class Builder {
 	 * @param Box $box The settings object.
 	 * @param array|string $schemas Any additional schemas to use for database creation.
 	 */
-	public function __construct(Box $box, $schemas = []) {
+	public function __construct(Box $box, $schemas = [], $dummy = false) {
 		umask(0);
 
 		//Change how this is organized.
@@ -127,25 +127,26 @@ class Builder {
 		$this->registeredSchemas = $schemas;
 		$this->a = $box;
 
-		$finder = new Finder();
-		$finder->files()->name('*.php')
-				->in($this->Vendor . '/propel/propel/src/Propel/Generator/Command')->depth(0);
-		$app = new Application('Propel', Propel::VERSION);
-		foreach ($finder as $file) {
-			$ns = '\\Propel\\Generator\\Command';
-			$r = new ReflectionClass($ns . '\\' . $file->getBasename('.php'));
-			if ($r->isSubclassOf('Symfony\\Component\\Console\\Command\\Command') && !$r->isAbstract()) {
-				$app->add($r->newInstance());
+		if (!$dummy) {
+			$finder = new Finder();
+			$finder->files()->name('*.php')
+					->in($this->Vendor . '/propel/propel/src/Propel/Generator/Command')->depth(0);
+			$app = new Application('Propel', Propel::VERSION);
+			foreach ($finder as $file) {
+				$ns = '\\Propel\\Generator\\Command';
+				$r = new ReflectionClass($ns . '\\' . $file->getBasename('.php'));
+				if ($r->isSubclassOf('Symfony\\Component\\Console\\Command\\Command') && !$r->isAbstract()) {
+					$app->add($r->newInstance());
+				}
 			}
-		}
 
-		$this->propel = $app;
-		$this->propelOutput = new ConsoleOutput();
-		if (!($app instanceof Application)) {
-			throw new Exception("Could not get the propel application.");
+			$this->propel = $app;
+			$this->propelOutput = new ConsoleOutput();
+			if (!($app instanceof Application)) {
+				throw new Exception("Could not get the propel application.");
+			}
+			$this->setupFiles();
 		}
-
-		$this->setupFiles();
 	}
 
 	/**
@@ -493,7 +494,11 @@ class Builder {
 	 * certain script.
 	 */
 	public function loadAllClasses() {
-		$this->loadAll($this->GeneratedClasses . "Base/");
+		$filename = $this->GeneratedClasses . "Base/";
+		if (!file_exists($filename)) {
+			throw new Exception('There are no classes to load. Does the database have tables?');
+		}
+		$this->loadAll($filename);
 		$this->loadAll($this->GeneratedClasses);
 		$this->loadAll($this->GeneratedClasses . "Map/");
 	}
@@ -523,7 +528,7 @@ class Builder {
 	 * If not, then returns false.
 	 * @return boolean Indicates if the synchronization was carried out.
 	 */
-	public static function guarantee(Box $box) {
+	public static function automate(Box $box) {
 		$generatedSchema = $box->VendorDirectory . "../db/schemas/schema.xml";
 		if (!file_exists($generatedSchema)) {
 			ob_start();

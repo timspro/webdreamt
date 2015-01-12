@@ -53,7 +53,7 @@ class Server {
 			}
 		}
 		//Note that permissible will flag if the $action is invalid.
-		if (!$this->permissible($tableName, $action, $columns)) {
+		if (!$this->permitted($tableName, $action, $columns)) {
 			throw new Exception("Insufficient permissions for the requested table or the "
 			. "requested table doesn't exist");
 		}
@@ -165,7 +165,7 @@ class Server {
 	 * @throws Exception Thrown if a valid action is not specified OR if no uses is logged in and no
 	 * default group set OR if the table name is not a string.
 	 */
-	function permissible($tableName, $action, $columns = null) {
+	function permitted($tableName, $action, $columns = null) {
 		//Check the input.
 		if (!is_string($tableName)) {
 			throw new Exception('Did not specify the name of the table as a string.');
@@ -180,6 +180,39 @@ class Server {
 		} else {
 			$permissions = $user->getMergedPermissions();
 		}
+		return $this->permissionsContain($permissions, $tableName, $action, $columns);
+	}
+
+	/**
+	 * Checks to see if the group is permitted to do the given action.
+	 * @param string $groupName
+	 * @param string $tableName
+	 * @param string $action
+	 * @param array $columns
+	 * @return boolean True if allowed. False if not
+	 * @throws Exception
+	 */
+	function groupPermitted($groupName, $tableName, $action, $columns = null) {
+		//Check the input.
+		if (!is_string($tableName)) {
+			throw new Exception('Did not specify the name of the table as a string.');
+		}
+		if (!in_array($action, self::$actions)) {
+			throw new Exception("Did not specify a valid action.");
+		}
+		$permissions = $this->sentry->findGroupByName($groupName)->getPermissions();
+		return $this->permissionsContain($permissions, $tableName, $action);
+	}
+
+	/**
+	 * Check to see if the permissions contain the given action for the table name.
+	 * @param mixed $permissions
+	 * @param string $tableName
+	 * @param string $action
+	 * @param array $columns
+	 * @return boolean
+	 */
+	protected function permissionsContain($permissions, $tableName, $action, $columns = null) {
 		$key = "api/$tableName/$action";
 		//Check if there are general permissions.
 		if (isset($permissions[$key]) && $permissions[$key] === 1) {

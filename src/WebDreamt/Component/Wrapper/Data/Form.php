@@ -7,7 +7,7 @@ use Propel\Runtime\Map\ColumnMap;
 use WebDreamt\Component;
 use WebDreamt\Component\Wrapper;
 use WebDreamt\Component\Wrapper\Data;
-use WebDreamt\Component\Wrapper\Group\Select;
+use WebDreamt\Component\Wrapper\Select;
 use WebDreamt\Component\Wrapper\Modal;
 
 /**
@@ -274,6 +274,8 @@ class Form extends Data {
 	function render($input = null, Component $included = null) {
 		if ($included instanceof Modal) {
 			$included->useButtons(['btn-primary wd-btn-submit' => 'Submit']);
+		} else {
+			$this->useBeforeClosingTag('<button type="button" class="btn btn-default">Submit</button>');
 		}
 		if ($included instanceof Form) {
 			$this->setHtmlTag('div');
@@ -359,8 +361,7 @@ class Form extends Data {
 					$value = $value ? 'Yes' : 'No';
 					$possibleValues = ['No', 'Yes'];
 				case self::HTML_SELECT:
-					$component = new Select(null, $classes, $attributes);
-					$component->setSelected($value)->setInput($possibleValues);
+					$component = new Select($possibleValues, $classes, $attributes);
 					$this->display->setDisplayComponent($component);
 			}
 		}

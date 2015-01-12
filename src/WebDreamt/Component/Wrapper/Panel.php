@@ -30,7 +30,9 @@ class Panel extends Wrapper {
 	 */
 	protected function renderSpecial($input = null, Component $included = null) {
 		$output = '';
-		$output .= '<div class="panel-heading"><span class="panel-title">' . $this->title . '</span></div>';
+		if ($this->title !== null) {
+			$output .= '<div class="panel-heading"><span class="panel-title">' . $this->title . '</span></div>';
+		}
 		$output .= '<div class="panel-body">' . $this->display->render($input, $this) . '</div>';
 		return $output;
 	}

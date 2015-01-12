@@ -74,12 +74,18 @@ class Modal extends Wrapper {
 		?>
 		<div class="modal-dialog">
 			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal">
-						<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-					</button>
-					<span class="modal-title"><?= $this->title ?></span>
-				</div>
+				<?php
+				if ($this->title !== null) {
+					?>
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">
+							<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+						</button>
+						<span class="modal-title"><?= $this->title ?></span>
+					</div>
+					<?php
+				}
+				?>
 				<div class="modal-body"><?= $this->display->render($input, $this) ?></div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default wd-btn-close" data-dismiss="modal">Close</button>

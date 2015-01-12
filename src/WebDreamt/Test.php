@@ -38,6 +38,14 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * Get the Box component.
+	 * @return Box
+	 */
+	static function getBox() {
+		return static::$box;
+	}
+
+	/**
 	 * Creates a table with five columns.
 	 * @param string $name
 	 */
@@ -325,7 +333,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 		self::$box->db()->exec($sql);
 		$build = self::$box->builder();
 		$build->updatePropel();
-		require_once __DIR__ . "/../../db/propel/generated-conf/config.php";
+		self::$box->propel();
 		$build->loadAllClasses();
 	}
 

@@ -16,6 +16,16 @@ class Group extends Wrapper {
 	 * @var string
 	 */
 	protected $indexClass;
+	/**
+	 * A component to display the first input in.
+	 * @type Component
+	 */
+	protected $firstComponent;
+	/**
+	 * Indicates if a different component should be used for the first column.
+	 * @var boolean
+	 */
+	protected $useFirst = false;
 
 	/**
 	 * Construct a group. This sets the title to the plural form of the display component's title.
@@ -29,7 +39,10 @@ class Group extends Wrapper {
 	function __construct(Component $display = null, $htmlTag = 'div', $class = null, $html = null,
 			$input = null) {
 		parent::__construct($display, $htmlTag, $class, $html, $input);
-		$this->title = Box::now()->pluralize($this->display->getTitle());
+		$title = $this->display->getTitle();
+		if ($title !== null) {
+			$this->title = Box::now()->pluralize($title);
+		}
 	}
 
 	/**
@@ -65,6 +78,45 @@ class Group extends Wrapper {
 	}
 
 	/**
+	 * Set the first component.
+	 * @param Component $firstComponent
+	 * @return static
+	 */
+	function setFirstComponent(Component $firstComponent) {
+		$this->firstComponent = $firstComponent;
+		return $this;
+	}
+
+	/**
+	 * Get the first component.
+	 * @return Component
+	 */
+	function getFirstComponent() {
+		return $this->firstComponent;
+	}
+
+	/**
+	 * Set if a different component should be used for the first input.
+	 * @param boolean $first
+	 * @return static
+	 */
+	function setUseFirst($first) {
+		if ($this->firstComponent === null) {
+			$this->firstComponent = new Component();
+		}
+		$this->useFirst = $first;
+		return $this;
+	}
+
+	/**
+	 * Get whether a different component should be used for the first input.
+	 * @return boolean
+	 */
+	function getUseFirst() {
+		return $this->useFirst;
+	}
+
+	/**
 	 * Render the group.
 	 * @param string|array $input
 	 * @param Component $included
@@ -75,6 +127,9 @@ class Group extends Wrapper {
 			return;
 		}
 		$output = '';
+		if ($this->useFirst) {
+			$output .= $this->firstComponent->render(array_shift($input), $this);
+		}
 		foreach ($input as $index => $value) {
 			if ($this->indexClass !== null) {
 				$this->display->useCssClass($this->indexClass . "-$index");

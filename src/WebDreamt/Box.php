@@ -43,21 +43,26 @@ class Box {
 	 * @var string
 	 */
 	public $VendorDirectory;
+	/**
+	 * If true, then will make a builder that can't issue commands and won't create files.
+	 * @var boolean
+	 */
+	public $DummyBuilder = false;
 
 	/**
 	 * Constructs a Box.
-	 * @param boolean $guarantee If true, then calls Builder::guarantee which helps to maintain
+	 * @param boolean $automate If true, then calls Builder::guarantee which helps to maintain
 	 * consistency between the Propel and the database. Defaults to true. Use false when its unnecessary
 	 * to peform this check, such as when not using the database.
 	 */
-	function __construct($guarantee = true) {
+	function __construct($automate = true) {
 		$this->VendorDirectory = (\file_exists(__DIR__ . '/../../vendor/') ?
 						__DIR__ . '/../../vendor/' : __DIR__ . '/../../../../');
-		if ($guarantee) {
-			if (!self::$box) {
-				self::$box = $this;
-			}
-			Builder::guarantee($this);
+		if (!self::$box) {
+			self::$box = $this;
+		}
+		if ($automate) {
+			Builder::automate($this);
 		}
 	}
 
@@ -89,7 +94,7 @@ class Box {
 		return $this->factory(__FUNCTION__, function () {
 					$schema = $this->VendorDirectory . "cartalyst/sentry/schema/mysql.sql";
 					$fk = __DIR__ . '/Builder/sentry.sql';
-					$build = new Builder($this, [$schema, $fk]);
+					$build = new Builder($this, [$schema, $fk], $this->DummyBuilder);
 					return $build;
 				});
 	}
@@ -178,6 +183,13 @@ class Box {
 		return $this->factory(__FUNCTION__, function() {
 					return new Script($this);
 				});
+	}
+
+	/**
+	 * Require the propel configuration file.
+	 */
+	function propel() {
+		require_once $this->VendorDirectory . "../db/propel/generated-conf/config.php";
 	}
 
 	/**
