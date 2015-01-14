@@ -209,11 +209,15 @@ class Server {
 	 * @param mixed $permissions
 	 * @param string $tableName
 	 * @param string $action
-	 * @param array $columns
+	 * @param string|array $columns
 	 * @return boolean
 	 */
 	function permissionsContain($permissions, $tableName, $action, $columns = null) {
 		$key = "api/$tableName/$action";
+		//Coerce columns.
+		if ($columns !== null && !is_array($columns)) {
+			$columns = [$columns];
+		}
 		//Check if there are general permissions.
 		if (isset($permissions[$key]) && $permissions[$key] === 1) {
 			return true;
@@ -275,18 +279,22 @@ class Server {
 		if (!is_array($actions)) {
 			$actions = [$actions];
 		}
+		if ($columns !== null && !is_array($columns)) {
+			$columns = [$columns];
+		}
 
 		foreach ($groupNames as $groupName) {
+			//Get the group.
+			$group = $this->sentry->findGroupByName($groupName);
+			if (!$group) {
+				throw Exception("Requested group is not found.");
+			}
+
+			$permissions = $group->permissions;
 			foreach ($tableNames as $tableName) {
 				foreach ($actions as $action) {
-					//Get the group.
-					$group = $this->sentry->findGroupByName($groupName);
-					if (!$group) {
-						throw Exception("Requested group is not found.");
-					}
 					//Allow the action.
 					if ($permission === 1) {
-						$permissions = [];
 						//Allow in general.
 						if (empty($columns) || $action === self::ACT_DELETE) {
 							$permissions["api/$tableName/$action"] = 1;
@@ -296,22 +304,22 @@ class Server {
 								$permissions["api/$tableName/$action/$column"] = 1;
 							}
 						}
-						$group->permissions = array_merge($group->permissions, $permissions);
 						//Deny the action.
 					} else if ($permission === -1) {
 						//Deny in general.
 						if (empty($columns) || $action === self::ACT_DELETE) {
-							unset($permissions["api/$tableName/$action"]);
+							$permissions["api/$tableName/$action"] = null;
 						} else {
 							//Deny for given columns.
 							foreach ($columns as $column) {
-								unset($permissions["api/$tableName/$action/$column"]);
+								$permissions["api/$tableName/$action/$column"] = null;
 							}
 						}
 					}
-					$group->save();
 				}
 			}
+			$group->permissions = $permissions;
+			$group->save();
 		}
 	}
 

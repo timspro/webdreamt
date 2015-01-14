@@ -86,4 +86,13 @@ class Select extends Wrapper {
 		return $this;
 	}
 
+	/**
+	 * Make the select box use Select2.js
+	 * @return static
+	 */
+	function useSelect2() {
+		$this->setCssClass('wd-select2');
+		return $this;
+	}
+
 }

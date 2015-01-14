@@ -5,7 +5,8 @@ module.exports = function (grunt) {
 		cssmin: {
 			do: {
 				files: {
-					'dist/build.min.css': ['css/**/*.css']
+					'dist/build.min.css': ['css/bootstrap.css', 'css/bootstrap-datetime.css',
+						'css/select2.css', 'css/select2-bootstrap.css', 'css/webdreamt.css']
 				}
 			}
 		},

@@ -4,11 +4,9 @@
 /nbproject/
 /src/WebDreamt/Propel/propel.php
 /db/Propel/propel.php
-/fonts/
 /db/
 /bower_components/
 /less/
-/img/
 /node_modules/
 dist/*
 /tests/src/WebDreamt/output/

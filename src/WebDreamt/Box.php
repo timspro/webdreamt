@@ -230,17 +230,26 @@ class Box {
 
 	/**
 	 * Returns an HTML header. Defaults to opening html and body tags and a complete head.
+	 * @param boolean $css Add results from css()
+	 * @param string $title The page title
+	 * @param function $custom A function to use to output custom CSS
 	 * @return string
 	 */
-	public function header() {
+	public function header($css = true, $title = 'WebDreamt', $custom = null) {
+		if ($custom) {
+			ob_start();
+			$custom();
+			$custom = ob_get_clean();
+		}
 		return '
 			<html lang="en">
 			<head>
 				<meta charset="utf-8">
 				<meta http-equiv="X-UA-Compatible" content="IE=edge">
 				<meta name="viewport" content="width=device-width, initial-scale=1">
-				<title>WebDreamt</title> ' .
-				$this->css() . '
+				<title>' . $title . '</title> ' .
+				($css ? $this->css() : '') . "\n" .
+				$custom . '
 			</head>
 			<body style="background-color: #e3e3e3; padding: 50px;">';
 	}
@@ -255,10 +264,18 @@ class Box {
 
 	/**
 	 * Returns an HTML footer. Defaults to script tags and closing html and closing body tags.
+	 * @param boolean $javascript Add results from javascript().
+	 * @param function $custom A function to use to output custom HTML.
 	 * @return string
 	 */
-	public function footer() {
-		return '
+	public function footer($javascript = true, $custom = null) {
+		if ($custom) {
+			ob_start();
+			$custom();
+			$custom = ob_get_clean();
+		}
+		return ($javascript ? $this->javascript() : '') . "\n" .
+				$custom . '
 		</body>
 		</html>';
 	}
