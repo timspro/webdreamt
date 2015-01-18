@@ -4,7 +4,7 @@ namespace WebDreamt;
 
 use Faker\Factory;
 use WebDreamt\Filler\Populator;
-use WebDreamt\Filler\Topological;
+use WebDreamt\Topological;
 use Propel\Runtime\Propel;
 
 /**
@@ -92,7 +92,7 @@ class Filler {
 				$column = $table->getColumn($columnName);
 				if (!$column) {
 					throw new Exception("Column $tableName.$columnName not known by Propel. "
-					. "Is propel in sync with the database?");
+					. "Is Propel in sync with the database?");
 				}
 				$name = $column->getPhpName();
 				$customConverted[$tablePhp][$name] = $value;

@@ -90,6 +90,12 @@ class Component {
 	 * @var boolean
 	 */
 	protected $selfClosing = false;
+	/**
+	 * The component that is currently rendering this component. Null if this component is not being
+	 * rendered.
+	 * @var Component
+	 */
+	protected $renderedBy;
 
 	/**
 	 * Get a new component.
@@ -513,6 +519,7 @@ class Component {
 		}
 		$output = null;
 		$htmlTag = $this->htmlTag;
+		$this->renderedBy = $included;
 		if ($htmlTag !== null) {
 			//Get HTML
 			$htmlCallback = $this->htmlCallback;
@@ -552,7 +559,17 @@ class Component {
 		$this->withCssClass = null;
 		$this->withAfterOpening = null;
 		$this->withBeforeClosing = null;
+		$this->renderedBy = null;
 		return $output;
+	}
+
+	/**
+	 * Get the component that is currently rendering the component. Null if the component is not
+	 * currently being rendered.
+	 * @return Component
+	 */
+	function getRenderedBy() {
+		return $this->renderedBy;
 	}
 
 	/**

@@ -45,7 +45,14 @@ class Server {
 		//If the action is null, try to infer whether to create or update with the given columns.
 		$keys = null;
 		if ($action === null) {
-			$keys = $this->findWithKeys($tableMap, $columns);
+			//If the table is a cross-reference table, then we can't tell if we are supposed to update
+			//or create the entry in the database. So, we just assume that we will create one UNLESS
+			//$columns has 'in_database' set.
+			if ($tableMap->isCrossRef()) {
+				$keys = isset($columns['in_database']) && $columns['in_database'];
+			} else {
+				$keys = $this->findWithKeys($tableMap, $columns);
+			}
 			if ($keys === false) {
 				$action = self::ACT_CREATE;
 			} else {
@@ -98,54 +105,119 @@ class Server {
 			$keyColumns[$key->getName()] = true;
 		}
 		//Get the primary key columns from the input.
-		$findWith = array_intersect($keyColumns, $columns);
+		$findWith = array_intersect_key($columns, $keyColumns);
 		//Count the columns to make sure all were filled.
 		if (count($keyColumns) !== count($findWith)) {
 			return false;
 		}
 		//For the given query class, create a query object and call findPK() on it with the $findWith array.
 		$query = $type . "Query";
-		$object = call_user_func_array([$query::create(), "findPk"], $findWith);
+		if (count($findWith) === 1) {
+			$object = call_user_func_array([$query::create(), "findPk"], $findWith);
+		} else {
+			$object = call_user_func([$query::create(), "findPk"], array_values($findWith));
+		}
 		return $object;
 	}
 
 	/**
-	 * Attempts to infer how to modify the database (create or update) based on data on passed in data
-	 * or from the $_POST variable. The format used is the same as the format used in Hyper/Form.
-	 * @param array $data If null, then uses the $_POST variable.
+	 * Attempts to infer how to modify the database (create or update) based on data on passed in data.
+	 * @param array $data See test cases for examples of format.
 	 * @throws Exception If Propel can't commit the batch.
 	 */
-	function batch($data = null) {
-		$data = $data ? : $_POST;
-
+	function batch($data) {
 		$connection = Propel::getWriteConnection(Propel::getDefaultDatasource());
 		//Maybe disable instance pooling?
 
 		$items = [];
 		$tables = [];
+		$store = [];
 		//Change POST data into a more usable format.
 		foreach ($data as $key => $value) {
 			//Get the table name if of the form '1' => 'customer'
 			if (is_numeric($key)) {
 				$tables[$key] = $value;
-				//Get the value for the specified column.
-				//This will be of the form '1-first_name' => 'John'
 			} else {
-				$parts = explode('-', $key);
-				//Make an array if it doesn't exist aleady for the item.
-				if (!isset($items[$parts[0]])) {
-					$items[$parts[0]] = [];
+				$parts = explode('.', $key);
+				//4.with.3: contract.buyer_agent_id
+				if (count($parts) === 3) {
+					//This case is a bit tricky because we need to notate the dependency and figure out
+					//how to fill it. We will deal with this once we know the tables for all IDs.
+					if (intval($parts[0]) < intval($parts[2])) {
+						$index = "$parts[0].$parts[2]";
+					} else {
+						$index = "$parts[2].$parts[0]";
+					}
+					if (!isset($store[$index])) {
+						$store[$index] = [];
+					}
+					$store[$index][] = $value;
+					//Get the value for the specified column.
+					//This will be of the form '1-first_name' => 'John'
+				} else if (count($parts) === 2) {
+					//Make an array if it doesn't exist aleady for the item.
+					if (!isset($items[$parts[0]])) {
+						$items[$parts[0]] = [];
+					}
+					$items[$parts[0]][$parts[1]] = $value;
 				}
-				$items[$parts[0]][$parts[1]] = $value;
 			}
 		}
 
-		$connection->beginTransaction();
+		//Figure out dependencies.
+		$edges = [];
+		$fulfills = [];
+		foreach ($store as $index => $columns) {
+			foreach ($columns as $column) {
+				$ids = explode('.', $index);
+				$table = explode('.', $column)[0];
+				//We need to figure out what table the column is in. If it is the first table, then
+				//we will need to add the second table before the first. Otherwise, we need to do the opposite.
+				if ($tables[$ids[0]] === $table) {
+					$first = $ids[1];
+					$second = $ids[0];
+				} else {
+					$first = $ids[0];
+					$second = $ids[1];
+				}
 
+				if (!isset($fulfills[$first])) {
+					$fulfills[$first] = [];
+				}
+				$intFirst = intval($first);
+				$intSecond = intval($second);
+				//$fulfills keeps track of what the form ID of $first is used in.
+				$fulfills[$intFirst][] = $intSecond;
+				//$edges is used for topological sort and states that $first comes before $second.
+				$edges[] = [$intFirst, $intSecond];
+			}
+		}
+
+		//Do a topological sort of the dependencies to determine what we can add first.
+		$sortedIds = Topological::sort(array_keys($tables), $edges);
+
+		//Do the transaction.
+		$connection->beginTransaction();
 		try {
 			//Create or update for the given items.
-			foreach ($items as $key => $item) {
-				$this->run($tables[$key], null, $item, $connection);
+			foreach ($sortedIds as $id) {
+				$object = $this->run($tables[$id], null, $items[$id], $connection);
+				if (method_exists($object, 'getId')) {
+					$objectId = $object->getId();
+					//Now that we have added the object, we need to update other items with the ID.
+					if (isset($fulfills[$id])) {
+						foreach ($fulfills[$id] as $incompleteId) {
+							if ($id < $incompleteId) {
+								$columns = $store["$id.$incompleteId"];
+							} else {
+								$columns = $store["$incompleteId.$id"];
+							}
+							foreach ($columns as $column) {
+								$items[$incompleteId][explode('.', $column)[1]] = $objectId;
+							}
+						}
+					}
+				}
 			}
 			$connection->commit();
 		} catch (Exception $e) {
@@ -205,7 +277,8 @@ class Server {
 	}
 
 	/**
-	 * Check to see if the permissions contain the given action for the table name.
+	 * Check to see if the permissions contain the given action for the table name. This function
+	 * does not attempt to validate input.
 	 * @param mixed $permissions
 	 * @param string $tableName
 	 * @param string $action

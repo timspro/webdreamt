@@ -2,6 +2,7 @@
 
 namespace WebDreamt;
 
+use Exception;
 use Propel\Runtime\ActiveQuery\Criteria;
 use WebDreamt\Component\Wrapper\Data\Form;
 use WebDreamt\Component\Wrapper\Modal;
@@ -38,7 +39,7 @@ class FormTest extends Test {
 			'.wd-active > select',
 			'.wd-type > select',
 			'.wd-created_at > input.wd-datetime-control',
-			'.wd-first_name > input[name="1-first_name"]'
+			'.wd-first_name > input[name="1.first_name"]'
 		]);
 		$this->checkCount($output, [
 			'option' => 5
@@ -175,6 +176,9 @@ class FormTest extends Test {
 		$agents = \AgentQuery::create()->find();
 		$data = [];
 		$buyerAgentId = $contract->getBuyerAgentId();
+		if ($buyerAgentId === null) {
+			throw Exception('Buyer agent ID is null.');
+		}
 		foreach ($agents as $agent) {
 			$id = $agent->getId();
 			$data[$id] = $agent->getLastName() . ', ' . $agent->getFirstName();
@@ -183,6 +187,8 @@ class FormTest extends Test {
 			}
 		}
 
+		$serviceForm = new Form('service_contract');
+		$serviceForm->setMultiple(true)->hide('contract_id')->link('service_id', new Form('service'));
 		$contractForm = new Form('contract');
 		$contractForm->setDataClass('wd-form');
 		$locationForm = new Form('location');
@@ -190,6 +196,7 @@ class FormTest extends Test {
 		$contractForm->link('location_id', $locationForm);
 		$select = new Select($data);
 		$contractForm->link('buyer_agent_id', $select);
+		$contractForm->addExtraColumn('services')->link('services', $serviceForm, 'contract_id');
 		$output = $contractForm->render($contract);
 		$this->output(__DIR__ . '/output/form.html', $output);
 		$this->checkCount($output, [
@@ -199,14 +206,17 @@ class FormTest extends Test {
 		]);
 		$location = $contract->getLocation();
 		$this->checkHtml($output, [
-			'option:first-child' => $agents[0]->getLastName() . ', ' . $agents[0]->getFirstName(),
-			'[selected]' => $buyerAgentName
+			'.wd-form-buyer_agent_id option:first-child' => $agents[0]->getLastName() . ', ' . $agents[0]->getFirstName(),
+			'.wd-form-buyer_agent_id [selected]' => $buyerAgentName
 		]);
 		$this->checkExists($output, [
 			'.wd-form-id > input[value="' . $contract->getId() . '"]',
 			'.wd-form-buyer_customer_id > input[value="' . $contract->getBuyerCustomerId() . '"]',
 			'.wd-city > input[value="' . $location->getCity() . '"]',
-			'.wd-state > input[value="' . $location->getState() . '"]'
+			'.wd-state > input[value="' . $location->getState() . '"]',
+			'[name][value="contract.location_id"]',
+			'[name][value="service_contract.service_id"]',
+			'[name][value="service_contract.contract_id"]'
 		]);
 	}
 

@@ -77,6 +77,7 @@ DROP TABLE IF EXISTS `service_contract`;
 CREATE TABLE `service_contract` (
   `service_id` int(10) unsigned NOT NULL,
   `contract_id` int(10) unsigned NOT NULL,
+  `in_database` tinyint(1) unsigned DEFAULT 1,
   PRIMARY KEY (`service_id`,`contract_id`),
   KEY `contract_id` (`contract_id`),
   CONSTRAINT `service_contract_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`),

@@ -13,7 +13,7 @@ Should we allow multiple callbacks to be set?
 Make groups numerable
 Placeholder
 
-# Medium: 
+# Medium:
 Make a Search Component.
 Integrate Select2.js with Components.
 CSRF protection
@@ -58,3 +58,18 @@ Hyper (Cache)
 Box/Common Functions/Other Classes
 
 Create/Update/Delete, tables and columns
+
+//Modify link to disable Propel object.
+Change name for a multiple select to $name[] / Add multiple option to Select / Make sure Server's batch() can handle arrays.
+Overwrite renderLinkedComponents to add a hidden input for the form telling what Propel method
+should be used / Modify server to understand this
+Add some JavaScript for add another button.
+Are things being added in the server in the right order?
+Get the id from the current form?
+We could just mostly kick this into JavaScript?
+
+To deal with the reference issue:
+Make it so that any extra Forms when linked will have access to the linking form ID.
+How to do select and Form?
+Linked Components
+Circular references

@@ -60,7 +60,7 @@ class Form extends Data {
 	 * A count of the number of forms rendered.
 	 * @var int
 	 */
-	protected static $countForm = 0;
+	protected static $formCount = 0;
 	/**
 	 * Indicates if the form can handle multiple items.
 	 * @var boolean
@@ -70,7 +70,7 @@ class Form extends Data {
 	 * The form ID
 	 * @var int
 	 */
-	protected $count;
+	protected $id;
 	/**
 	 * A function to give control to change form inputs.
 	 * @var callable
@@ -104,10 +104,11 @@ class Form extends Data {
 
 	protected function addColumn(ColumnMap $column, array &$options) {
 		parent::addColumn($column, $options);
-		if ($column->getName() === 'id') {
+		$name = $column->getName();
+		if ($name === 'id' || $name === 'in_database') {
 			$options[self::OPT_VISIBLE] = false;
 		}
-		if ($column->getName() === 'created_at' || $column->getName() === 'updated_at') {
+		if ($name === 'created_at' || $name === 'updated_at') {
 			$options[self::OPT_ACCESS] = false;
 		}
 		if ($column->isNotNull()) {
@@ -266,30 +267,62 @@ class Form extends Data {
 	}
 
 	/**
+	 * Get the ID of this form. This will only during or after the form is rendered.
+	 * @return int
+	 */
+	function getId() {
+		return $this->id;
+	}
+
+	/**
 	 * Render the form.
 	 * @param array $input
 	 * @param Component $included
 	 * @return string
 	 */
 	function render($input = null, Component $included = null) {
-		if ($included instanceof Modal) {
-			$included->useButtons(['btn-primary wd-btn-submit' => 'Submit']);
-		} else {
-			$this->useBeforeClosingTag('<button type="submit" class="btn btn-default">Submit</button>');
-		}
-		if ($included instanceof Form) {
-			$this->setHtmlTag('div');
-		} else {
-			$this->setHtmlTag('form');
-		}
 		//Get an ID for the form.
-		static::$countForm++;
-		$count = static::$countForm;
-		$this->count = $count;
-		$this->useAfterOpeningTag("<input type='hidden' name='$count' value='" . $this->tableName . "'/>");
+		static::$formCount++;
+		$id = static::$formCount;
+		$this->id = $id;
+		$this->useAfterOpeningTag("<input type='hidden' name='$id' value='" . $this->tableName . "'/>");
+		//Add a button to create another entry.
 		if ($this->multiple) {
 			$this->useBeforeClosingTag("<button type='button' class='btn btn-default wd-multiple'>Add Another</button>");
 		}
+
+		$component = $included;
+		$modal = false;
+		$form = false;
+		while ($component !== null) {
+			//If this was included by a Modal, we need to change where the button is placed.
+			if ($component instanceof Modal) {
+				$component->useButtons(['btn-primary wd-btn-submit' => 'Submit']);
+				$modal = true;
+				break;
+			}
+			//If this was included from another Form, we need to specify how this relates to the other form.
+			if ($component instanceof Form) {
+				$this->setHtmlTag('div');
+				$name = "$id.with." . $component->getId();
+				$value = $component->getOption($component->getRenderedColumn(), self::OPT_PROPEL_COLUMN);
+				if ($value !== null) {
+					$this->useAfterOpeningTag("<input type='hidden' name='$name' value='$value'/>");
+				}
+				$form = true;
+				break;
+			}
+			$component = $component->getRenderedBy();
+		}
+		//If not included by a modal, then add a submit button.
+		if (!$modal) {
+			$this->useBeforeClosingTag('<button type="submit" class="btn btn-default">Submit</button>');
+		}
+		//If not included by a form, then just set the HTML tag.
+		if (!$form) {
+			$this->setHtmlTag('form');
+		}
+
 		return parent::render($input, $included);
 	}
 
@@ -303,13 +336,14 @@ class Form extends Data {
 	 * @param Component $component
 	 * @param string $manyColumn When you want to use an ID column in another table that points to this
 	 * table and there are multiple such columns, you must specify what column to actually use.
+	 * @param boolean $autoPropel If false, then will not try to automatically figure out
+	 * the related Propel method to call on the object.
 	 * @return static
 	 */
-	function link($column, Component $component, $manyColumn = null) {
+	function link($column, Component $component, $manyColumn = null, $autoPropel = true) {
+		parent::link($column, $component, $manyColumn, $autoPropel);
 		if ($component instanceof Select) {
-			$this->selectComponent[$column] = $component;
-		} else {
-			parent::link($column, $component, $manyColumn);
+			$this->selectComponent[$column] = array_pop($this->linked[$column]);
 		}
 		return $this;
 	}
@@ -320,10 +354,10 @@ class Form extends Data {
 	 * @param mixed $value
 	 * @return string
 	 */
-	function renderColumn($column, $value) {
+	protected function renderColumn($column, $value) {
 		$options = $this->columns[$column];
 		$selectComponent = isset($this->selectComponent[$column]) ? $this->selectComponent[$column] : null;
-		$name = $this->count . "-" . $column;
+		$name = $this->id . "." . $column;
 		$label = $selectComponent ? $selectComponent->getTitle() : $options[self::OPT_LABEL];
 		$labelHtml = $this->label->useHtml("for='$name'")->render($label, $this);
 		$disabled = $options[self::OPT_DISABLE] ? 'disabled=""' : '';

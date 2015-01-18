@@ -1,34 +1,32 @@
 <?php
 
-namespace WebDreamt\Filler;
+namespace WebDreamt;
 
-// PHP topological sort function
-// Author: Dan (http://www.calcatraz.com)
-// Licensing: None - use it as you see fit
-// Updates: http://blog.calcatraz.com/php-topological-sort-function-384
-//
-// Args:
-//		$nodeids - an array of node ids,
-//					e.g. array('paris', 'milan', 'vienna', ...);
-// 		$edges - an array of directed edges,
-//					e.g. array(array('paris','milan'),
-//							   array('milan', 'vienna'),
-//							   ...)
-// Returns:
-// 		topologically sorted array of node ids, or NULL if graph is
-//		unsortable (i.e. contains cycles)
-
+/**
+ * Enables one to perform a topological sort.
+ * Updates: http://blog.calcatraz.com/php-topological-sort-function-384
+ * @license None - use it as you see fit.
+ * @author Dan (http://www.calcatraz.com)
+ */
 class Topological {
 
+	/**
+	 * Do a topological sort.
+	 * @param array $nodeids An array of node IDs
+	 * @param array $edges An array of arrays (2-tuples) where the first value is a dependency of the
+	 * second value and therefore the first one must come before the second one in the sort.
+	 * @return array A sorted array of node IDs
+	 * @throws Exception Thrown if there is a circular dependence.
+	 */
 	static function sort($nodeids, $edges) {
 
-		// initialize variables
+		// Initialize variables.
 		$L = $S = $nodes = array();
 
-		// remove duplicate nodes
+		// Remove duplicate nodes.
 		$nodeids = array_unique($nodeids);
 
-		// remove duplicate edges
+		// Remove duplicate edges.
 		$hashes = array();
 		foreach ($edges as $k => $e) {
 			$hash = md5(serialize($e));
@@ -39,7 +37,7 @@ class Topological {
 			}
 		}
 
-		// Build a lookup table of each node's edges
+		// Build a lookup table of each node's edges.
 		foreach ($nodeids as $id) {
 			$nodes[$id] = array('in' => array(), 'out' => array());
 			foreach ($edges as $e) {
@@ -71,10 +69,10 @@ class Topological {
 			$nodes[$id]['out'] = array();
 		}
 
-		// Check if we have any edges left unprocessed
+		// Check if we have any edges left unprocessed.
 		foreach ($nodes as $n) {
 			if (!empty($n['in']) or ! empty($n['out'])) {
-				return null; // not sortable as graph is cyclic
+				throw new Exception("There is a circular dependency.");
 			}
 		}
 		return $L;

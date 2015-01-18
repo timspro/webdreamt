@@ -1,9 +1,9 @@
 <?php
-use WebDreamt\Component;
-use WebDreamt\Test;
 
 namespace WebDreamt;
 
+use WebDreamt\Component\Custom;
+use WebDreamt\Component\Wrapper;
 require_once __DIR__ . '/../../../bootstrap.php';
 
 class ComponentTest extends Test {
@@ -277,6 +277,22 @@ class ComponentTest extends Test {
 		$this->assertEquals(true, $this->component->getSelfClosing());
 		$output = $this->component->render();
 		$this->assertEquals('<div />', $output);
+	}
+
+	/**
+	 * @group Component
+	 */
+	function testRenderedBy() {
+		$this->assertEquals(null, $this->component->getRenderedBy());
+		$wrapper = new Wrapper();
+		$outer = new Wrapper($wrapper);
+		$custom = new Custom(function($value, $included) use ($outer) {
+			$this->assertEquals($outer, $included->getRenderedBy());
+		}, true);
+		$wrapper->setDisplayComponent($custom);
+		$outer->render();
+		$this->assertEquals(null, $wrapper->getRenderedBy());
+		$this->assertEquals(null, $custom->getRenderedBy());
 	}
 
 }

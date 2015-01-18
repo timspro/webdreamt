@@ -224,6 +224,9 @@ class DataTest extends Test {
 		$buyerCustomer = $sellerCustomer;
 		$move = new Data('move');
 		$move->hide('id', 'buyer_contract_id');
+		$services = new Data('service_contract');
+		$services->hide('contract_id');
+		$services->link('service_id', new Data('service'));
 
 		//Let's create the topmost customer component.
 		$topCustomer = new Data('customer');
@@ -240,10 +243,19 @@ class DataTest extends Test {
 				->link('buyer_agent_id', $agent)
 				->link('seller_agent_id', $agent)
 				->hide('buyer_customer_id');
+		$boughtContract->addExtraColumn('services')->link('services', new Group($services), 'contract_id');
 		$boughtContract->addExtraColumn('sold_contracts');
 		//Link in move component.
 		$boughtContract->link('sold_contracts', new Group($move), 'seller_contract_id');
 		$topCustomer->link('bought_contracts', new Group($boughtContract), 'buyer_customer_id');
+
+		//Test that things are linked up correctly.
+		$option = $boughtContract->getOption('services', Data::OPT_PROPEL_COLUMN);
+		$this->assertEquals('service_contract.contract_id', $option);
+		$option = $topCustomer->getOption('bought_contracts', Data::OPT_PROPEL_COLUMN);
+		$this->assertEquals('contract.buyer_customer_id', $option);
+		$option = $boughtContract->getOption('sold_contracts', Data::OPT_PROPEL_COLUMN);
+		$this->assertEquals('move.seller_contract_id', $option);
 
 		//Create the sold contract component.
 		$soldContract = new Data('contract');
@@ -253,9 +265,18 @@ class DataTest extends Test {
 				->link('buyer_agent_id', $agent)
 				->link('seller_agent_id', $agent)
 				->hide('seller_customer_id');
+		$soldContract->addExtraColumn('services')->link('services', new Group($services), 'contract_id');
 		//Link in sold contracts.
 		$move->link('seller_contract_id', $soldContract);
 
+		$option = $soldContract->getOption('services', Data::OPT_PROPEL_COLUMN);
+		$this->assertEquals('service_contract.contract_id', $option);
+		$option = $soldContract->getOption('location_id', Data::OPT_PROPEL_COLUMN);
+		$this->assertEquals('contract.location_id', $option);
+		$option = $soldContract->getOption('buyer_customer_id', Data::OPT_PROPEL_COLUMN);
+		$this->assertEquals('contract.buyer_customer_id', $option);
+		$option = $move->getOption('seller_contract_id', Data::OPT_PROPEL_COLUMN);
+		$this->assertEquals('move.seller_contract_id', $option);
 		//Get the data.
 		$data = \CustomerQuery::create()->find();
 		//Render

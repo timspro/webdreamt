@@ -31,7 +31,8 @@ class Data extends Wrapper {
 	 */
 	const OPT_VISIBLE = 'visible';
 	/**
-	 * The default value for the column.
+	 * The default value for the column that is displayed when the value cannot be retrieved from
+	 * the input.
 	 */
 	const OPT_DEFAULT = 'default';
 	/**
@@ -53,7 +54,12 @@ class Data extends Wrapper {
 	 */
 	const OPT_PROPEL_OBJECT = 'object';
 	/**
-	 * A string to output when a value is retrieved from the input and it in null.
+	 * The column that is ultimately used to get the Propel object. This is obvious for the case that the
+	 * column is in the data component's table, but is useful for noting many-to-many relationships.
+	 */
+	const OPT_PROPEL_COLUMN = 'method';
+	/**
+	 * A string to output when a value is retrieved from the input and it is null.
 	 */
 	const OPT_NULL_VALUE = 'null';
 
@@ -184,7 +190,8 @@ class Data extends Wrapper {
 			self::OPT_EXTRA => null,
 			self::OPT_PROPEL_OBJECT => null,
 			self::OPT_LABEL => null,
-			self::OPT_NULL_VALUE => null
+			self::OPT_NULL_VALUE => null,
+			self::OPT_PROPEL_COLUMN => null
 		];
 	}
 
@@ -359,18 +366,24 @@ class Data extends Wrapper {
 
 	/**
 	 * Link a column value with a component. This will prevent the default display component from
-	 * being rendered. If this is undesirable, then you can do before/after:
+	 * being rendered. If this is undesirable, then you can specify that the data component should
+	 * also do the default behavior by calling link() with null as the $component as in:
 	 * <code>
-	 * $a->link('column_name', $a->getDisplayComponent());
+	 * $a->link('column_name', null);
 	 * </code>
-	 * Multiple components can be linked to one column.
-	 * @param string $column
-	 * @param Component $component
-	 * @param string $manyColumn When you want to use an ID column in another table that points to this
-	 * table and there are multiple such columns, you must specify what column to actually use.
+	 * Multiple components can be linked to one column. Linked components will also attempt to use
+	 * a method to get the appropriate input based on the column linked to if the linked component is
+	 * data.
+	 * @param string $column A column name of this component.
+	 * @param Component $component Can be any component. However, there is unique functionality for
+	 * data components.
+	 * @param string $manyColumn Specifies a column in the linked component to link back
+	 * to this component, which will be used instead of the link column to retrieve input.
+	 * @param boolean $autoPropel If false, then will not try to automatically figure out
+	 * the related Propel method to call on the object.
 	 * @return static
 	 */
-	function link($column, Component $component, $manyColumn = null) {
+	function link($column, Component $component, $manyColumn = null, $autoPropel = true) {
 		if (!isset($this->columns[$column])) {
 			throw new Exception("Cannot link column $column since it doesn't exist.");
 		}
@@ -381,27 +394,31 @@ class Data extends Wrapper {
 
 		//Set the Propel method that needs to be called to get input for the linked component.
 		$propel = null;
-		while ($component instanceof Wrapper) {
-			if ($component instanceof Data) {
-				$table = Propel::getDatabaseMap()->getTable($this->getTableName());
-				$columnMap = $table->getColumn($column);
-				$propel = 'get' . $columnMap->getRelatedTable()->getPhpName();
-				if (!method_exists($table->getPhpName(), $propel)) {
-					$propel .= 'RelatedBy' . $columnMap->getPhpName();
-				}
-				break;
-			} else if ($component instanceof Group) {
-				$display = $component->getDisplayComponent();
-				if ($display instanceof Data) {
-					$table = Propel::getDatabaseMap()->getTable($display->getTableName());
-					$propel = 'get' . Box::now()->pluralize($table->getPhpName());
-					if ($manyColumn) {
-						$propel .= 'RelatedBy' . $table->getColumn($manyColumn)->getPhpName();
+		if ($autoPropel) {
+			while ($component instanceof Wrapper) {
+				if ($component instanceof Data) {
+					$thisTableName = $this->getTableName();
+					$thisTable = Propel::getDatabaseMap()->getTable($thisTableName);
+					if ($manyColumn === null) {
+						$thisColumnMap = $thisTable->getColumn($column);
+						$propel = 'get' . $thisColumnMap->getRelatedTable()->getPhpName();
+						if (!method_exists($thisTable->getPhpName(), $propel)) {
+							$propel .= 'RelatedBy' . $thisColumnMap->getPhpName();
+						}
+						$this->columns[$column][self::OPT_PROPEL_COLUMN] = "$thisTableName.$column";
+					} else {
+						$compTableName = $component->getTableName();
+						$compTable = Propel::getDatabaseMap()->getTable($compTableName);
+						$propel = 'get' . Box::now()->pluralize($compTable->getPhpName());
+						if (!method_exists($thisTable->getPhpName(), $propel)) {
+							$propel .= 'RelatedBy' . $compTable->getColumn($manyColumn)->getPhpName();
+						}
+						$this->columns[$column][self::OPT_PROPEL_COLUMN] = "$compTableName.$manyColumn";
 					}
+					break;
 				}
-				break;
+				$component = $component->getDisplayComponent();
 			}
-			$component = $component->getDisplayComponent();
 		}
 		$this->columns[$column][self::OPT_PROPEL_OBJECT] = $propel;
 		return $this;
@@ -684,11 +701,13 @@ class Data extends Wrapper {
 	protected function renderSpecial($input = null, $included = null) {
 		$output = null;
 		foreach ($this->columns as $column => $options) {
+			$this->renderedColumn = $column;
 			if ($options[self::OPT_ACCESS]) {
 				//Set the input of the label regardless as it might be used somewhere in the display
 				//component (such as via addExtraComponent()).
 				$this->label->setInput($options[self::OPT_LABEL]);
 				if ($this->showLabel && $options[self::OPT_LABEL] !== null) {
+					//Similar to renderComponent() but uses labelClass
 					if (!$options[self::OPT_VISIBLE]) {
 						$this->label->useHtml('style="display:none"');
 					}
@@ -698,15 +717,9 @@ class Data extends Wrapper {
 					$output .= $this->label->render(null, $this);
 				}
 				$value = $this->getValueFromInput($column, $input);
-				$linked = $this->renderLinkedComponents($column, $value);
+				$linked = $this->renderLinkedComponents($column, $value, $included);
 				if ($linked === null) {
-					if (!$options[self::OPT_VISIBLE]) {
-						$this->display->useHtml('style="display:none"');
-					}
-					if ($this->dataClass) {
-						$this->display->useCssClass($this->dataClass . "-$column");
-					}
-					$output .= $this->renderColumn($column, $value, $included);
+					$output .= $this->renderComponent($column, null, $value, $included);
 				} else {
 					$output .= $linked;
 				}
@@ -714,7 +727,16 @@ class Data extends Wrapper {
 		}
 		//Reset the label input to null to remove side-effects.
 		$this->label->setInput(null);
+		$this->renderedColumn = null;
 		return $output;
+	}
+
+	/**
+	 * Get the column name that is currently being rendered. Useful for linked components.
+	 * @return string
+	 */
+	function getRenderedColumn() {
+		return $this->renderedColumn;
 	}
 
 	/**
@@ -735,18 +757,44 @@ class Data extends Wrapper {
 	 * @param array|ActiveRecordInterface $input The input to be given to the component.
 	 * @return string Null if nothing was rendered; otherwise the output.
 	 */
-	protected function renderLinkedComponents($column, $input = null) {
+	protected function renderLinkedComponents($column, $input = null, $included = null) {
 		$result = null;
 		if (isset($this->linked[$column])) {
+			//Note that this code is a bit sloppy and likely could be refactored with code around where
+			//renderLinkedComponents() is called from renderSpecial().
 			foreach ($this->linked[$column] as $component) {
-				if (!$this->columns[$column][self::OPT_VISIBLE]) {
-					$component->useHtml('style="display:none"');
-				}
-				if ($this->dataClass) {
-					$component->useCssClass($this->dataClass . "-$column");
-				}
-				$result .= $component->render($input, $this);
+				$result .= $this->renderComponent($column, $component, $input, $included);
 			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Either renders an arbirtary component or the default component.
+	 * @param string $column
+	 * @param Component $component If null, then renders the default component.
+	 * @param mixed $input
+	 * @param string $included
+	 * @return string
+	 */
+	protected function renderComponent($column, $component, $input = null, $included = null) {
+		if ($component === null) {
+			$render = $this->display;
+		} else {
+			$render = $component;
+		}
+		//Set up HTML.
+		if (!$this->columns[$column][self::OPT_VISIBLE]) {
+			$render->useHtml('style="display:none"');
+		}
+		if ($this->dataClass) {
+			$render->useCssClass($this->dataClass . "-$column");
+		}
+		//Render
+		if ($component === null) {
+			$result = $this->renderColumn($column, $input, $included);
+		} else {
+			$result = $component->render($input, $this);
 		}
 		return $result;
 	}
