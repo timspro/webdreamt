@@ -172,12 +172,12 @@ class FormTest extends Test {
 	 * @group ComForm
 	 */
 	function testLinkPropel() {
-		$contract = \ContractQuery::create()->filterByBuyerAgentId(null, Criteria::ISNOTNULL)->find()[0];
+		$contract = \ContractQuery::create()->filterByBuyerAgentId(null, Criteria::NOT_EQUAL)->find()[0];
 		$agents = \AgentQuery::create()->find();
 		$data = [];
 		$buyerAgentId = $contract->getBuyerAgentId();
 		if ($buyerAgentId === null) {
-			throw Exception('Buyer agent ID is null.');
+			throw new Exception('Buyer agent ID is null.');
 		}
 		foreach ($agents as $agent) {
 			$id = $agent->getId();

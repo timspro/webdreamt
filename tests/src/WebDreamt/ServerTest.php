@@ -228,7 +228,6 @@ class ServerTest extends Test {
 			"1.id" => '1',
 			"1.location_id" => "",
 			"1.seller_customer_id" => "",
-			"1.buyer_customer_id" => '',
 			"1.created_at" => $date,
 			"2" => 'location',
 			"2.id" => '1',

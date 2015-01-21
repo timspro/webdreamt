@@ -1,51 +1,61 @@
 # To Install:
 
-## First:
+## First: Installing WebDreamt's PHP Code
 
-Install WebDreamt via Composer. If you don't know how to do this, it is actually pretty easy, but 
+Install WebDreamt via Composer. If you don't know how to do this, it is actually pretty easy, but
 I won't explain it here; just look at Composer's website.
 
-## Second:
+## Second: Installing WebDreamt's CSS and JavaScript Code
 
-A) If you want to be lazy, just look at the included files in the `js`, `css`, `img`, and `font` folders 
-in the `vendor/timspro/WebDreamt` directory and copy those to the corresponding place in your project.
+A) The simplest method is to just look at the included files in the `js`, `css`, `img`, and `font` folders
+in the `vendor/timspro/webdreamt` directory and copy those to the corresponding place in your project.
 
-B) If you want to have a robust solution that takes into account that the CSS and JavaScript 
-dependencies of WebDreamt might change, use Bower to install WebDreamt's JavaScript and CSS files, 
+B) If you want to have a robust solution that takes into account that the CSS and JavaScript
+dependencies of WebDreamt might change, use Bower to install WebDreamt's JavaScript and CSS files,
 and then use Grunt to merge the files together and create minified versions of the files. You can
-look at bower.json and Gruntfile.js in `vendor/timspro/WebDreamt` to see how I do this. Note
-that I make use of a tool called `bower-installer` to get only the needed files from given 
-bower repositories, which must be installed separately from bower.
+look at bower.json and Gruntfile.js in `vendor/timspro/webdreamt` to see how I do this for WebDreamt.
+Note that I make use of a tool called `bower-installer` to get only the needed files from given
+Bower repositories, which must be installed separately from bower.
 
-# Third:
+# Third: Configuring WebDreamt
 
 Create a new PHP script (It can either be run via command line or browser) and write:
 ```
 $box = new \WebDreamt\Box();
-$box->DatabaseHost = "localhost";
-$box->DatabaseName = "";
-$box->DatabaseUsername = "root";
-$box->DatabasePassword = "";
+$box->DatabaseHost = "localhost"; //Use your database host
+$box->DatabaseName = "";          //Use your database name
+$box->DatabaseUsername = "root";  //Use your database username
+$box->DatabasePassword = "";      //Use your database password
 $box->script()->manager();
 ```
 This sets up a way to update the database and Propel schema.
 
 Note just running this script will allow you to use the WebDreamt packages since WebDreamt
-will recognize that it hasn't been setup and so will set itself up based on the database. 
+will recognize that it hasn't been setup and so will set itself up based on the database.
 However, step four will show how you how to use commands to work with WebDreamt.
 At the very least, you will want to use the "Update Propel" command to update Propel when
 database changes are made.
 
-# Fourth:
+# Fourth: Working with WebDreamt
 
-A) If you want to run the script via command line, you can navigate to the script's directory
-in the command line and run PHP on the script. You can use the argument `--help` to see a list of 
-commands.
+WebDreamt provides a number of different scripts to help you work with the library, which you can
+include from your own scripts. These are currently are:
 
-B) If you want to run the script via web browser, you can navigate to the script via a URL and
-use the web form. Given the commands (such as destroy database), you should not let this URL be 
-publicly visible on a production server, although there is no risk of having arbitrary code running
-on the server or database information being leaked via the form.
+A) authorization.php: A browser-based script to allow creating and editing groups and their
+basic permissions to modify tables and tables' columns in the database.
 
-You can easily make a custom version of this script by looking at the source code in the 
-`vendor/timspro/WebDreamt/script` folder at the `manager.php` file.
+B) manager.php: A browser-based or command-line script to issue commands to WebDreamt to manipulate
+Propel and the database.
+
+C) push-with-db.php: A command-line script which adds all modified files to the local git repository,
+commits the modified files, pulls any changes, pushes the local changes, checks for WebDreamt updates,
+updates the database schema, dumps the composer autoload, deletes the data in the database, and
+fills the database with random data.
+
+D) push.php: A command-line script which adds all modified files to the local git repository,
+commits the modified files, pulls any changes, pushes the local changes, and dumps the composer
+autoload.
+
+All of these are located in `vendor/timspro/webdreamt/script`. It is strongly recommended that you
+secure these files if you place them on a public server. Also, feel free to look at the source code
+and adapt the scripts to your needs.

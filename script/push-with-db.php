@@ -4,6 +4,11 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
 	require_once __DIR__ . '/../vendor/autoload.php';
 }
 use WebDreamt\Box;
+if (php_sapi_name() !== 'cli' && !(isset($wdAllowWebGit) && $wdAllowWebGit === true)) {
+	throw new Exception('This script cannot be run via the web unless the variable $wdAllowWebPush is '
+	. 'set and is equal to true.');
+}
+
 $box = Box::get();
 if (!$box) {
 	echo "Could not find a Box!";

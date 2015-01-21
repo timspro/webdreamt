@@ -8,7 +8,6 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
 $error = "";
 $box = Box::get();
 if (!$box) {
-	$box = new Box(false);
 	echo "Could not find a Box! <br>";
 	return;
 }
