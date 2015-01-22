@@ -341,7 +341,7 @@ class DataTest extends Test {
 		$this->assertEquals(null, $data->getDateTimeFormat());
 		$this->assertEquals(null, $data->getTimeFormat());
 
-		$contracts = \ContractQuery::create()->limit(5)
+		$contracts = \ContractQuery::create()->limit(10)
 				->filterByCompletedTime(null, Criteria::NOT_EQUAL)
 				->filterByCompletedDate(null, Criteria::NOT_EQUAL)
 				->find();
@@ -359,7 +359,7 @@ class DataTest extends Test {
 			return date(Data::$DefaultDateTimeFormat, strtotime($value));
 		}, true, 'div'));
 		$sqlContracts = $this->all('SELECT * FROM contract '
-				. 'WHERE completed_time IS NOT NULL AND completed_date IS NOT NULL LIMIT 5');
+				. 'WHERE completed_time IS NOT NULL AND completed_date IS NOT NULL LIMIT 10');
 		$sqlGroup = new Group($sqlData);
 		$sqlOutput = $sqlGroup->render($sqlContracts);
 		$this->assertEquals($output, $sqlOutput);

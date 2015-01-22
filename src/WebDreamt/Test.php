@@ -8,6 +8,7 @@ use DOMText;
 use DOMXPath;
 use PDO;
 use PHPUnit_Framework_TestCase;
+use Propel\Runtime\Propel;
 use ReflectionMethod;
 use Symfony\Component\CssSelector\CssSelector;
 
@@ -35,6 +36,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 		static::$db = static::$box->db();
 		static::$db->exec("CREATE DATABASE IF NOT EXISTS test; USE test");
 		static::$box->DatabaseName = "test";
+		Propel::disableInstancePooling();
 	}
 
 	/**

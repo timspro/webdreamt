@@ -147,7 +147,7 @@ class Server {
 			if (is_numeric($key)) {
 				$tables[$key] = $value;
 			} else {
-				$parts = explode('.', $key);
+				$parts = explode(':', $key);
 				//4.with.3: contract.buyer_agent_id
 				if (count($parts) === 3) {
 					//This case is a bit tricky because we need to notate the dependency and figure out

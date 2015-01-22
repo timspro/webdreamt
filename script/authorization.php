@@ -38,8 +38,8 @@ $options = [
 	7 => 'All'
 ];
 //Create the group.
-if (isset($_POST['1-name'])) {
-	$sentry->createGroup(['name' => $_POST['1-name']]);
+if (isset($_POST['1:name'])) {
+	$sentry->createGroup(['name' => $_POST['1:name']]);
 	//Create the permission.
 } else if (isset($_POST['action'])) {
 	if ($_POST['action'] === 'permission') {
@@ -63,6 +63,9 @@ if (isset($_POST['1-name'])) {
 		}
 		$columns = $box->db()->query("SHOW COLUMNS FROM $table")->fetchAll(PDO::FETCH_COLUMN);
 		$groups = $sentry->findAllGroups();
+		usort($groups, function($a, $b) {
+			return strcmp($a['name'], $b['name']);
+		});
 		$data = [];
 		$count = 0;
 		foreach ($columns as $column) {
@@ -99,12 +102,15 @@ if (isset($_POST['1-name'])) {
 }
 
 $groups = $sentry->findAllGroups();
+usort($groups, function($a, $b) {
+	return strcmp($a['name'], $b['name']);
+});
 $tables = $box->db()->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
 
 $table = new Table(null, 'table-bordered');
 $tableWrapper = new Wrapper($table);
 $select = new Select($options, 'permission');
-$panel = new Panel($tableWrapper, null, 'style="margin: 40px auto 40px auto;"');
+$panel = new Panel($tableWrapper, 'table-panel', 'style="margin: 40px auto 40px auto;"');
 $panel->setTitle('Group Permissions');
 $groupNames = [];
 foreach ($groups as $group) {
@@ -152,18 +158,24 @@ echo $box->header(true, 'WebDreamt', function() {
 		td:first-child {
 			width: 200px;
 		}
+		td {
+			min-width: 150px;
+		}
 		.table-name {
 			cursor: pointer;
 		}
 		.table-name:hover {
 			background-color: lightgoldenrodyellow;
 		}
+		.table-panel .panel-body, .column-panel .panel-body {
+			overflow-x: auto;
+		}
 	</style>
 	<?php
 });
 echo $formPanel->render();
 echo $panel->render($data);
-$tablePanel = new Panel(new Component('div', 'column-table'), 'table-panel', 'style="display:none"');
+$tablePanel = new Panel(new Component('div', 'column-table'), 'column-panel', 'style="display:none"');
 $tablePanel->setTitle('Column Permissions');
 echo $tablePanel->render();
 
@@ -199,7 +211,7 @@ echo $box->footer(true, function() {
 						action: 'table'
 					}, function (data) {
 						$('.column-table').html(data);
-						$('.table-panel').show();
+						$('.column-panel').show();
 					});
 				});
 			});
@@ -214,7 +226,7 @@ echo $box->footer(true, function() {
 						action: 'table'
 					}, function (data) {
 						$('.column-table').html(data);
-						$('.table-panel').show();
+						$('.column-panel').show();
 					});
 				}
 			});

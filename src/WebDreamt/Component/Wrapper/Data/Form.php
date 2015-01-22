@@ -304,7 +304,7 @@ class Form extends Data {
 			//If this was included from another Form, we need to specify how this relates to the other form.
 			if ($component instanceof Form) {
 				$this->setHtmlTag('div');
-				$name = "$id.with." . $component->getId();
+				$name = "$id:with:" . $component->getId();
 				$value = $component->getOption($component->getRenderedColumn(), self::OPT_PROPEL_COLUMN);
 				if ($value !== null) {
 					$this->useAfterOpeningTag("<input type='hidden' name='$name' value='$value'/>");
@@ -357,7 +357,7 @@ class Form extends Data {
 	protected function renderColumn($column, $value) {
 		$options = $this->columns[$column];
 		$selectComponent = isset($this->selectComponent[$column]) ? $this->selectComponent[$column] : null;
-		$name = $this->id . "." . $column;
+		$name = $this->id . ":" . $column;
 		$label = $selectComponent ? $selectComponent->getTitle() : $options[self::OPT_LABEL];
 		$labelHtml = $this->label->useHtml("for='$name'")->render($label, $this);
 		$disabled = $options[self::OPT_DISABLE] ? 'disabled=""' : '';

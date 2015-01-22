@@ -39,7 +39,7 @@ class FormTest extends Test {
 			'.wd-active > select',
 			'.wd-type > select',
 			'.wd-created_at > input.wd-datetime-control',
-			'.wd-first_name > input[name="1.first_name"]'
+			'.wd-first_name > input[name="1:first_name"]'
 		]);
 		$this->checkCount($output, [
 			'option' => 5
@@ -177,6 +177,7 @@ class FormTest extends Test {
 		$data = [];
 		$buyerAgentId = $contract->getBuyerAgentId();
 		if ($buyerAgentId === null) {
+			print_r($contract);
 			throw new Exception('Buyer agent ID is null.');
 		}
 		foreach ($agents as $agent) {
