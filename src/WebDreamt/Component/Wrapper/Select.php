@@ -20,8 +20,10 @@ class Select extends Wrapper {
 
 	/**
 	 * Construct a select component. Also, this creates a component with an HTML tag of 'option' and
-	 * sets it be the select component's display component.
-	 * @param array $options A key-value array of the option's value and text
+	 * sets it be the select component's display component. Note that $input in this case specifies
+	 * what option is selected.
+	 * @param array $options A key-value array of the option's value and text. Call setNoValues()
+	 * to specify that the option should not use values.
 	 * @param string $class
 	 * @param string $html
 	 * @param mixed $input
