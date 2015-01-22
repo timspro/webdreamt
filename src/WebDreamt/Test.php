@@ -31,7 +31,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 	protected $ret;
 
 	static function setUpBeforeClass() {
-		static::$box = new Box(false);
+		static::$box = new Box();
 		static::$db = static::$box->db();
 		static::$db->exec("CREATE DATABASE IF NOT EXISTS test; USE test");
 		static::$box->DatabaseName = "test";
@@ -333,7 +333,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 		self::$box->db()->exec($sql);
 		$build = self::$box->builder();
 		$build->updatePropel();
-		self::$box->propel();
+		self::$box->enablePropel();
 		$build->loadAllClasses();
 	}
 

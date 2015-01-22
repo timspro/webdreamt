@@ -41,7 +41,7 @@ class Group extends Wrapper {
 		parent::__construct($display, $htmlTag, $class, $html, $input);
 		$title = $this->display->getTitle();
 		if ($title !== null) {
-			$this->title = Box::now()->pluralize($title);
+			$this->title = Box::get()->pluralize($title);
 		}
 	}
 
@@ -53,7 +53,7 @@ class Group extends Wrapper {
 	 */
 	function setDisplayComponent(Component $display) {
 		$this->display = $display;
-		$this->title = Box::now()->pluralize($display->getTitle());
+		$this->title = Box::get()->pluralize($display->getTitle());
 		return $this;
 	}
 

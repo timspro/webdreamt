@@ -1,16 +1,18 @@
 <?php
 use WebDreamt\Box;
 use WebDreamt\Component\Wrapper\Select;
-//This may be included from somewhere else.
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-	require_once __DIR__ . '/../vendor/autoload.php';
-}
-$error = "";
-$box = Box::get();
-if (!$box) {
-	echo "Could not find a Box! <br>";
+if (php_sapi_name() !== 'cli' && __FILE__ === $_SERVER["SCRIPT_FILENAME"]) {
+	echo 'As a security precaution, this file cannot be run directly and instead '
+	. 'must be included from somewhere else.';
 	return;
 }
+
+$box = Box::get();
+if (empty($box->DatabaseName)) {
+	echo "The box at the very least must be set to use a certain database name.";
+	return;
+}
+$box->enablePropel();
 
 $data = [
 	"update-database" => "Update DB from Propel",
@@ -23,6 +25,7 @@ $data = [
 ];
 
 $select = new Select($data, null, 'id="option" name="script"');
+$error = "";
 if (isset($_GET['script']) || isset($argv[1])) {
 	if (isset($argv[1]) && ($argv[1] === '--help' || $argv[1] === '-h')) {
 		echo 'Options are: update-database, update-propel, add-schemas (for authorization), fill-database, ' .

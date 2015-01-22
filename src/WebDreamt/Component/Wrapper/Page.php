@@ -16,7 +16,7 @@ class Page extends Wrapper {
 	 */
 	function __construct(Component $display, $title) {
 		parent::__construct($display, null);
-		$box = Box::now();
+		$box = Box::get();
 		$this->setAfterOpeningTag($box->header(true, $title))->setBeforeClosingTag($box->footer());
 	}
 

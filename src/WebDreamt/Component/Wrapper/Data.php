@@ -409,7 +409,7 @@ class Data extends Wrapper {
 					} else {
 						$compTableName = $component->getTableName();
 						$compTable = Propel::getDatabaseMap()->getTable($compTableName);
-						$propel = 'get' . Box::now()->pluralize($compTable->getPhpName());
+						$propel = 'get' . Box::get()->pluralize($compTable->getPhpName());
 						if (!method_exists($thisTable->getPhpName(), $propel)) {
 							$propel .= 'RelatedBy' . $compTable->getColumn($manyColumn)->getPhpName();
 						}

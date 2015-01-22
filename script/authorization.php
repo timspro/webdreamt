@@ -7,18 +7,23 @@ use WebDreamt\Component\Wrapper\Group\Table;
 use WebDreamt\Component\Wrapper\Panel;
 use WebDreamt\Component\Wrapper\Select;
 use WebDreamt\Server;
-//This may be included from somewhere else.
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-	require_once __DIR__ . '/../vendor/autoload.php';
-}
-
-//Check that the box is setup.
-$box = Box::get();
-if (!$box) {
-	echo "Could not find a Box! <br>";
+if (php_sapi_name() === 'cli') {
+	echo 'This script cannot be run from the command line.';
 	return;
 }
 
+if (__FILE__ === $_SERVER["SCRIPT_FILENAME"]) {
+	echo 'As a security precaution, this file cannot be run directly and instead '
+	. 'must be included from somewhere else.';
+	return;
+}
+
+$box = Box::get();
+if (empty($box->DatabaseName)) {
+	echo "The box at the very least must be set to use a certain database name.";
+	return;
+}
+$box->enablePropel();
 $sentry = $box->sentry();
 $server = $box->server();
 
@@ -40,21 +45,14 @@ if (isset($_POST['1-name'])) {
 	if ($_POST['action'] === 'permission') {
 		$value = intval($_POST['value']);
 		$column = isset($_POST['column']) ? $_POST['column'] : null;
-		if (($value & 4) === 4) {
-			$server->allow($_POST['group'], $_POST['table'], Server::ACT_CREATE, $column);
-		} else {
-			$server->deny($_POST['group'], $_POST['table'], Server::ACT_CREATE, $column);
-		}
-		if (($value & 2) === 2) {
-			$server->allow($_POST['group'], $_POST['table'], Server::ACT_UPDATE, $column);
-		} else {
-			$server->deny($_POST['group'], $_POST['table'], Server::ACT_UPDATE, $column);
-		}
-		if (($value & 1) === 1) {
-			$server->allow($_POST['group'], $_POST['table'], Server::ACT_DELETE, $column);
-		} else {
-			$server->deny($_POST['group'], $_POST['table'], Server::ACT_DELETE, $column);
-		}
+		$create = ($value & 4) === 4;
+		$update = ($value & 2) === 2;
+		$delete = ($value & 1) === 1;
+
+		$server->codify($create, $_POST['group'], $_POST['table'], Server::ACT_CREATE, $column);
+		$server->codify($update, $_POST['group'], $_POST['table'], Server::ACT_UPDATE, $column);
+		$server->codify($delete, $_POST['group'], $_POST['table'], Server::ACT_DELETE, $column);
+
 		return;
 		//Show the column table.
 	} else if ($_POST['action'] === 'table') {
@@ -70,10 +68,10 @@ if (isset($_POST['1-name'])) {
 		foreach ($columns as $column) {
 			$data[] = [$column];
 			foreach ($groups as $group) {
-				$perm = $group['permissions'];
-				$create = $server->permissionsContain($perm, $table, Server::ACT_CREATE, $column);
-				$update = $server->permissionsContain($perm, $table, Server::ACT_UPDATE, $column);
-				$delete = $server->permissionsContain($perm, $table, Server::ACT_DELETE, $column);
+				$permissions = $group['permissions'];
+				$create = $server->permissionsContain($permissions, $table, Server::ACT_CREATE, $column);
+				$update = $server->permissionsContain($permissions, $table, Server::ACT_UPDATE, $column);
+				$delete = $server->permissionsContain($permissions, $table, Server::ACT_DELETE, $column);
 
 				$value = 0;
 				$value += $create ? 4 : 0;

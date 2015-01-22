@@ -1,14 +1,28 @@
 # To Install:
 
-## First: Installing WebDreamt's PHP Code
+## First: Install WebDreamt's PHP Code
 
-Install WebDreamt via Composer. If you don't know how to do this, it is actually pretty easy, but
-I won't explain it here; just look at Composer's website.
+Install WebDreamt via Composer and add paths to the autoload's classmap to correspond to the files
+used by WebDreamt and Propel. If you don't know about Composer, it is actually pretty easy to use,
+but I won't explain it here; just look at Composer's website. You will need something similar to
+the following in your composer.json:
+```
+"autoload": {
+  "classmap": [
+     "db/propel/generated-classes/",
+     "db/classes/"
+  ]
+},
+"require": {
+	"timspro/webdreamt-propel": "dev-master"
+}
+```
 
-## Second: Installing WebDreamt's CSS and JavaScript Code
+## Second: Install WebDreamt's CSS and JavaScript Code
 
-A) The simplest method is to just look at the included files in the `js`, `css`, `img`, and `font` folders
-in the `vendor/timspro/webdreamt` directory and copy those to the corresponding place in your project.
+A) The simplest method is to just look at the included files in the `js`, `css`, `img`, and
+`font` folders in the `vendor/timspro/webdreamt` directory and copy those to the corresponding
+place in your project.
 
 B) If you want to have a robust solution that takes into account that the CSS and JavaScript
 dependencies of WebDreamt might change, use Bower to install WebDreamt's JavaScript and CSS files,
@@ -17,26 +31,55 @@ look at bower.json and Gruntfile.js in `vendor/timspro/webdreamt` to see how I d
 Note that I make use of a tool called `bower-installer` to get only the needed files from given
 Bower repositories, which must be installed separately from bower.
 
-# Third: Configuring WebDreamt
+# Third: Specify Database Information
 
-Create a new PHP script (It can either be run via command line or browser) and write:
+Create a new class with the following code:
 ```
-$box = new \WebDreamt\Box();
-$box->DatabaseHost = "localhost"; //Use your database host
-$box->DatabaseName = "";          //Use your database name
-$box->DatabaseUsername = "root";  //Use your database username
-$box->DatabasePassword = "";      //Use your database password
-$box->script()->manager();
+class CustomBox extends \WebDreamt\Box {
+  function __construct() {
+    $this->DatabaseHost = "localhost"; //Use your database host
+    $this->DatabaseName = "";          //Use your database name
+    $this->DatabaseUsername = "root";  //Use your database username
+    $this->DatabasePassword = "";      //Use your database password
+  }
+}
 ```
-This sets up a way to update the database and Propel schema.
 
-Note just running this script will allow you to use the WebDreamt packages since WebDreamt
-will recognize that it hasn't been setup and so will set itself up based on the database.
-However, step four will show how you how to use commands to work with WebDreamt.
-At the very least, you will want to use the "Update Propel" command to update Propel when
-database changes are made.
+Make sure that this class is in a location where your autoloader will find it (for composer, it's
+likely your `src` folder) or else include it manually.
 
-# Fourth: Working with WebDreamt
+# Fourth: Configure WebDreamt
+
+Now, create a script with the following code:
+```
+CustomBox::get()->script()->manager();
+```
+
+All you have to do is run this script to set up Propel and WebDreamt since it will automatically
+realize that Propel and WebDreamt have not been setup; you don't need to specify command. However,
+you will want to return to this script when you make changes to the database and run 'Update Database'.
+You can also use the script to fill the database with random data by running 'Fill Database with Data'.
+
+To run the script:
+
+A) If you want to run the script via command line, you can navigate to where you created the script via
+the command line and run PHP on the script. You can use the argument `--help` to see a list of
+commands.
+
+B) If you want to run the script via a web browser, you can navigate to the script via a URL and
+use the web form. Given the commands (such as destroy database), you should not let this URL be
+publicly visible on a production server, although there is no risk of having arbitrary code running
+on the server or database information being leaked via the form.
+
+You can easily make your own version of the manager by looking at the source code located at
+`vendor/timspro/WebDreamt/script/manager.php`.
+
+# Fifth: Use WebDreamt
+
+To make use of WebDreamt and Propel in your code, you should include the line:
+```
+Box::get()->enablePropel();
+```
 
 WebDreamt provides a number of different scripts to help you work with the library, which you can
 include from your own scripts. These are currently are:
@@ -56,6 +99,7 @@ D) push.php: A command-line script which adds all modified files to the local gi
 commits the modified files, pulls any changes, pushes the local changes, and dumps the composer
 autoload.
 
-All of these are located in `vendor/timspro/webdreamt/script`. It is strongly recommended that you
-secure these files if you place them on a public server. Also, feel free to look at the source code
-and adapt the scripts to your needs.
+All of these are located in `vendor/timspro/webdreamt/script`. As a security precaution, none of these
+scripts can be run directly by the web server via URL. If you make use of them in your own code, you
+make sure your code is secure. Also, feel free to look at the source code of the scripts and adapt them
+to your needs.

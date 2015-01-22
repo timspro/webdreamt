@@ -27,7 +27,7 @@ class Server {
 
 	/**
 	 * Executes the action for the requested table and the given parameters.
-	 * Throws an error if insufficient permissions.
+	 * Throws an exception if insufficient permissions.
 	 * If successful, returns the modified object.
 	 * @param string $tableName
 	 * @param string $action Note can be null, in which cases will try to infer create or delete based
@@ -39,6 +39,13 @@ class Server {
 	 * @return $object
 	 */
 	function run($tableName, $action, $columns, $connection = null) {
+		//Check the input.
+		if (!is_string($tableName)) {
+			throw new Exception('Did not specify the name of the table as a string.');
+		}
+		if ($action !== null && !in_array($action, self::$actions)) {
+			throw new Exception("Did not specify a valid action.");
+		}
 		//Propel throws an exception if the table is invalid.
 		/* @var $tableMap TableMap */
 		$tableMap = Propel::getDatabaseMap()->getTable($tableName);
@@ -47,9 +54,9 @@ class Server {
 		if ($action === null) {
 			//If the table is a cross-reference table, then we can't tell if we are supposed to update
 			//or create the entry in the database. So, we just assume that we will create one UNLESS
-			//$columns has 'in_database' set.
-			if ($tableMap->isCrossRef()) {
-				$keys = isset($columns['in_database']) && $columns['in_database'];
+			//$columns has 'in_database' set and it's not empty.
+			if ($tableMap->isCrossRef() && (!isset($columns['in_database']) || empty($columns['in_database']))) {
+				$keys = false;
 			} else {
 				$keys = $this->findWithKeys($tableMap, $columns);
 			}
@@ -73,7 +80,7 @@ class Server {
 		} else if ($action === self::ACT_UPDATE) {
 			//Update an existing an object.
 			$object = $keys ? : $this->findWithKeys($tableMap, $columns);
-			if ($object === false) {
+			if (!$object) {
 				throw new Exception("Tried to update but did not provide the primary keys.");
 			}
 			$object->fromArray($columns, TableMap::TYPE_FIELDNAME);
@@ -81,7 +88,7 @@ class Server {
 		} else if ($action === self::ACT_DELETE) {
 			//Delete an eisting object.
 			$object = $this->findWithKeys($tableMap, $columns);
-			if ($object === false) {
+			if (!$object) {
 				throw new Exception("Tried to delete but did not provide the primary keys.");
 			}
 			$object->delete($connection);
@@ -100,14 +107,16 @@ class Server {
 		$type = $tableMap->getPhpName();
 		$keys = $tableMap->getPrimaryKeys();
 		//Change the $keys array into a form we can use .
-		$keyColumns = [];
+		$findWith = [];
 		foreach ($keys as $key) {
-			$keyColumns[$key->getName()] = true;
+			$name = $key->getName();
+			if (isset($columns[$name])) {
+				$findWith[$name] = $columns[$name];
+			}
 		}
 		//Get the primary key columns from the input.
-		$findWith = array_intersect_key($columns, $keyColumns);
 		//Count the columns to make sure all were filled.
-		if (count($keyColumns) !== count($findWith)) {
+		if (count($keys) !== count($findWith)) {
 			return false;
 		}
 		//For the given query class, create a query object and call findPK() on it with the $findWith array.
@@ -227,9 +236,9 @@ class Server {
 	}
 
 	/**
-	 * Checks to see if the user is allowed to do the given action. It does this by checking if first the
-	 * user has permission to do the action on the table in general. If he or she, does then returns true.
-	 * If not, then checks the permissions for the given columns.
+	 * Checks to see if the current user is allowed to do the given action. It does this by
+	 * checking if first the user has permission to do the action on the table in general.
+	 * If he or she, does then returns true. If not, then checks the permissions for the given columns.
 	 * @param string $tableName
 	 * @param string $action
 	 * @param array $columns
@@ -265,20 +274,12 @@ class Server {
 	 * @throws Exception
 	 */
 	function groupPermitted($groupName, $tableName, $action, $columns = null) {
-		//Check the input.
-		if (!is_string($tableName)) {
-			throw new Exception('Did not specify the name of the table as a string.');
-		}
-		if (!in_array($action, self::$actions)) {
-			throw new Exception("Did not specify a valid action.");
-		}
 		$permissions = $this->sentry->findGroupByName($groupName)->getPermissions();
 		return $this->permissionsContain($permissions, $tableName, $action);
 	}
 
 	/**
-	 * Check to see if the permissions contain the given action for the table name. This function
-	 * does not attempt to validate input.
+	 * Check to see if the permissions contain the given action for the table name.
 	 * @param mixed $permissions
 	 * @param string $tableName
 	 * @param string $action
@@ -318,7 +319,7 @@ class Server {
 	 * @param array $columns
 	 */
 	function allow($groupName, $tableName, $action, $columns = null) {
-		$this->codify($groupName, 1, $tableName, $action, $columns);
+		$this->codify(true, $groupName, $tableName, $action, $columns);
 	}
 
 	/**
@@ -329,19 +330,19 @@ class Server {
 	 * @param array $columns
 	 */
 	function deny($groupName, $tableName, $action, $columns = null) {
-		$this->codify($groupName, -1, $tableName, $action, $columns);
+		$this->codify(false, $groupName, $tableName, $action, $columns);
 	}
 
 	/**
 	 * Allows or denies an action depending on the value of $permission.
+	 * @param boolean $permission If true then the action is allowed. If false then the action is denied.
 	 * @param string|array $groupNames
-	 * @param int $permission
 	 * @param string|array $tableNames
 	 * @param string|array $actions
 	 * @param array $columns
 	 * @throws Exception If the requested group is not found.
 	 */
-	protected function codify($groupNames, $permission, $tableNames, $actions, $columns = null) {
+	function codify($permission, $groupNames, $tableNames, $actions, $columns = null) {
 		//Coerce into an array.
 		if (!is_array($groupNames)) {
 			$groupNames = [$groupNames];
@@ -367,7 +368,7 @@ class Server {
 			foreach ($tableNames as $tableName) {
 				foreach ($actions as $action) {
 					//Allow the action.
-					if ($permission === 1) {
+					if ($permission) {
 						//Allow in general.
 						if (empty($columns) || $action === self::ACT_DELETE) {
 							$permissions["api/$tableName/$action"] = 1;
@@ -378,7 +379,7 @@ class Server {
 							}
 						}
 						//Deny the action.
-					} else if ($permission === -1) {
+					} else {
 						//Deny in general.
 						if (empty($columns) || $action === self::ACT_DELETE) {
 							$permissions["api/$tableName/$action"] = null;

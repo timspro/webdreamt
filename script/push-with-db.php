@@ -4,16 +4,20 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
 	require_once __DIR__ . '/../vendor/autoload.php';
 }
 use WebDreamt\Box;
+//Disallow most command line usage.
 if (php_sapi_name() !== 'cli' && !(isset($wdAllowWebGit) && $wdAllowWebGit === true)) {
-	throw new Exception('This script cannot be run via the web unless the variable $wdAllowWebPush is '
-	. 'set and is equal to true.');
+	echo 'This script cannot be run via the web unless the variable $wdAllowWebPush is '
+	. 'set and is equal to true since it is difficult to specify git credentials for the server.';
+	return;
 }
 
 $box = Box::get();
-if (!$box) {
-	echo "Could not find a Box!";
+if (empty($box->DatabaseName)) {
+	echo "The box at the very least must be set to use a certain database name.";
 	return;
 }
+$box->enablePropel();
+
 umask(0);
 $root = $box->VendorDirectory . "../";
 chdir($root);

@@ -55,19 +55,13 @@ class Box {
 	public $BuilderConsole = true;
 
 	/**
-	 * Constructs a Box.
-	 * @param boolean $automate If true, then calls Builder::guarantee which helps to maintain
-	 * consistency between the Propel and the database. Defaults to true. Use false when its unnecessary
-	 * to peform this check, such as when not using the database.
+	 * Construct a Box.
 	 */
-	function __construct($automate = true) {
+	function __construct() {
 		$this->VendorDirectory = (\file_exists(__DIR__ . '/../../vendor/') ?
 						__DIR__ . '/../../vendor/' : __DIR__ . '/../../../../');
-		if (!self::$box) {
-			self::$box = $this;
-		}
-		if ($automate) {
-			Builder::automate($this);
+		if (!static::$box) {
+			static::$box = $this;
 		}
 	}
 
@@ -193,7 +187,8 @@ class Box {
 	/**
 	 * Require the propel configuration file.
 	 */
-	function propel() {
+	function enablePropel() {
+		Builder::automate($this);
 		require_once $this->VendorDirectory . "../db/propel/generated-conf/config.php";
 	}
 
@@ -212,20 +207,14 @@ class Box {
 	}
 
 	/**
-	 * Get an instance of Box.
-	 * @return Box
+	 * Get an instance of Box. 
+	 * @return static
 	 */
 	static function get() {
+		if (static::$box === null) {
+			static::$box = new static();
+		}
 		return static::$box;
-	}
-
-	/**
-	 * Get an instance of Box or create a new one that does not guarantee consistency between the
-	 * database and Propel (and so has lower overhead).
-	 * @return Box
-	 */
-	static function now() {
-		return static::$box ? : new Box(false);
 	}
 
 	/**
@@ -235,7 +224,7 @@ class Box {
 	 * @param function $custom A function to use to output custom CSS
 	 * @return string
 	 */
-	public function header($css = true, $title = 'WebDreamt', $custom = null) {
+	public function header($css = true, $title = '', $custom = null) {
 		if ($custom) {
 			ob_start();
 			$custom();
