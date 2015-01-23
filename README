@@ -14,8 +14,21 @@ the following in your composer.json:
   ]
 },
 "require": {
-	"timspro/webdreamt-propel": "dev-master"
+	"timspro/webdreamt": "dev-master"
 }
+```
+
+Note that the first time you run composer, it will complain that it can't find the folders it is
+supposed to look for classes in. This is okay, but you will need to rerun composer after Step #4.
+
+Include the following if you want to load from the repository:
+```
+"repositories": [
+	{
+		"type": "vcs",
+		"url": "git@bitbucket.org:timspro/webdreamt.git"
+	}
+]
 ```
 
 ## Second: Install WebDreamt's CSS and JavaScript Code
@@ -48,6 +61,9 @@ class CustomBox extends \WebDreamt\Box {
 Make sure that this class is in a location where your autoloader will find it (for composer, it's
 likely your `src` folder) or else include it manually.
 
+Note that you could name the class something else besides `CustomBox`. If you do use some other name,
+be sure to change references in the rest of the code in this README to whatever you name the class.
+
 # Fourth: Configure WebDreamt
 
 Now, create a script with the following code:
@@ -55,9 +71,11 @@ Now, create a script with the following code:
 CustomBox::get()->script()->manager();
 ```
 
-All you have to do is run this script to set up Propel and WebDreamt since it will automatically
-realize that Propel and WebDreamt have not been setup; you don't need to specify command. However,
-you will want to return to this script when you make changes to the database and run 'Update Database'.
+Run this script to set up Propel and WebDreamt; you don't need to specify command. However,
+you still need to regenerate composer's autoload files by doing `composer update` or
+`composer dumpautoload`.
+
+You will want to return to this script when you make changes to the database and run 'Update Database'.
 You can also use the script to fill the database with random data by running 'Fill Database with Data'.
 
 To run the script:
@@ -78,7 +96,7 @@ You can easily make your own version of the manager by looking at the source cod
 
 To make use of WebDreamt and Propel in your code, you should include the line:
 ```
-Box::get()->enablePropel();
+CustomBox::get()->enable();
 ```
 
 WebDreamt provides a number of different scripts to help you work with the library, which you can

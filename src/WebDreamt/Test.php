@@ -335,7 +335,7 @@ abstract class Test extends PHPUnit_Framework_TestCase {
 		self::$box->db()->exec($sql);
 		$build = self::$box->builder();
 		$build->updatePropel();
-		self::$box->enablePropel();
+		self::$box->enable();
 		$build->loadAllClasses();
 	}
 

@@ -16,7 +16,7 @@ if (empty($box->DatabaseName)) {
 	echo "The box at the very least must be set to use a certain database name.";
 	return;
 }
-$box->enablePropel();
+$box->enable();
 
 umask(0);
 $root = $box->VendorDirectory . "../";

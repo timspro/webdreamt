@@ -187,7 +187,7 @@ class Box {
 	/**
 	 * Require the propel configuration file.
 	 */
-	function enablePropel() {
+	function enable() {
 		Builder::automate($this);
 		require_once $this->VendorDirectory . "../db/propel/generated-conf/config.php";
 	}
@@ -207,7 +207,7 @@ class Box {
 	}
 
 	/**
-	 * Get an instance of Box. 
+	 * Get an instance of Box.
 	 * @return static
 	 */
 	static function get() {
@@ -248,7 +248,7 @@ class Box {
 	 * @return string
 	 */
 	public function css() {
-		return '<link href="' . $this->root() . '/dist/build.min.css" rel="stylesheet">';
+		return '<link href="' . $this->root() . '/dist/webdreamt-build.min.css" rel="stylesheet">';
 	}
 
 	/**
@@ -274,7 +274,7 @@ class Box {
 	 * @return string
 	 */
 	public function javascript() {
-		return '<script src="' . $this->root() . '/dist/build.js"></script>';
+		return '<script src="' . $this->root() . '/dist/webdreamt-build.js"></script>';
 	}
 
 }

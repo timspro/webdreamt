@@ -1,14 +1,19 @@
 module.exports = function (grunt) {
+	var path = require('path');
 
 	var copy = [];
 	var targets = ['css', 'less', 'img', 'js', 'fonts'];
+	var extra = '';
+	if (path.basename(__dirname) === 'timspro') {
+		extra = '../../../';
+	}
 	for (var i = 0; i < targets.length; i++) {
 		var name = targets[i];
 		copy.push({
 			flatten: true,
 			expand: true,
 			src: ["**"],
-			dest: name,
+			dest: extra + name,
 			cwd: "build/" + name,
 			filter: 'isFile'
 		});
@@ -19,7 +24,7 @@ module.exports = function (grunt) {
 		cssmin: {
 			do: {
 				files: {
-					'dist/build.min.css': ['css/bootstrap.css', 'css/bootstrap-datetime.css',
+					'dist/client/webdreamt-build.min.css': ['css/bootstrap.css', 'css/bootstrap-datetime.css',
 						'css/select2.css', 'css/select2-bootstrap.css', 'css/webdreamt.css']
 				}
 			}
@@ -30,7 +35,7 @@ module.exports = function (grunt) {
 			},
 			dist: {
 				src: ['js/jquery.js', 'js/boostrap.js', 'js/moment.js', 'js/*.js'],
-				dest: 'dist/build.js'
+				dest: 'dist/client/webdreamt-build.js'
 			}
 		},
 		uglify: {
@@ -39,7 +44,7 @@ module.exports = function (grunt) {
 			},
 			dist: {
 				files: {
-					'dist/build.min.js': ['<%= concat.dist.dest %>']
+					'dist/client/webdreamt-build.min.js': ['<%= concat.dist.dest %>']
 				}
 			}
 		},
@@ -56,6 +61,11 @@ module.exports = function (grunt) {
 					livereload: true
 				}
 			}
+		},
+		shell: {
+			do: {
+				command: 'node_modules/.bin/bower-installer'
+			}
 		}
 	});
 	grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -63,8 +73,10 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
 	grunt.loadNpmTasks('grunt-contrib-copy');
-	grunt.registerTask('guard', ['watch:do']);
+	grunt.loadNpmTasks('grunt-shell');
+
+	grunt.registerTask('autoupdate', ['watch:do']);
 	grunt.registerTask('default', ['concat', 'cssmin:do']);
-	grunt.registerTask('setup', ['copy:do']);
-	grunt.registerTask('minimize', ['uglify']);
+	grunt.registerTask('setup', ['shell:do', 'copy:do']);
+	grunt.registerTask('optimize', ['uglify']);
 };

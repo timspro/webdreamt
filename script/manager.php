@@ -12,7 +12,7 @@ if (empty($box->DatabaseName)) {
 	echo "The box at the very least must be set to use a certain database name.";
 	return;
 }
-$box->enablePropel();
+$box->enable();
 
 $data = [
 	"update-database" => "Update DB from Propel",
@@ -30,6 +30,7 @@ if (isset($_GET['script']) || isset($argv[1])) {
 	if (isset($argv[1]) && ($argv[1] === '--help' || $argv[1] === '-h')) {
 		echo 'Options are: update-database, update-propel, add-schemas (for authorization), fill-database, ' .
 		'delete-database (data), and destroy-database (schemas)';
+		return;
 	}
 	$value = $_GET['script'] ? : $argv[1];
 	try {
@@ -49,8 +50,11 @@ if (isset($_GET['script']) || isset($argv[1])) {
 		} else if ($value === "destroy-database") {
 			$box->builder()->deleteDatabase();
 		} else {
-			throw new Exception("Unknown command. Use --help to see a list of command if you are "
-			. "using a command line.");
+			$message = "Unknown command. ";
+			if (php_sapi_name() === 'cli') {
+				$message .= "Use --help to see a list of command if you are using a command line.";
+			}
+			throw new Exception($message);
 		}
 		$error = "Completed successfully.";
 	} catch (Exception $err) {

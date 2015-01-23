@@ -1,13 +1,18 @@
 {
 	"name": "webdreamt",
 	"version": "0.0.1",
-	"description": "A list of grunt tasks needed to run the associated build tasks for WebDreamt.",
+	"description": "A list of dependencies needed to run the associated build tasks for WebDreamt.",
 	"devDependencies": {
 		"grunt": ">=0.4",
 		"grunt-contrib-uglify": ">=0.5",
 		"grunt-contrib-cssmin": ">=0.10",
 		"grunt-contrib-concat": ">=0.5",
 		"grunt-contrib-watch": ">=0.6",
-		"grunt-contrib-copy": ">=0.1"
+		"grunt-contrib-copy": ">=0.1",
+		"grunt-shell": ">=1.1",
+		"bower-installer": ">=1.2"
+	},
+	"scripts": {
+		"postinstall": "grunt setup"
 	}
 }

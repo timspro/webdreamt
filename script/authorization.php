@@ -23,7 +23,7 @@ if (empty($box->DatabaseName)) {
 	echo "The box at the very least must be set to use a certain database name.";
 	return;
 }
-$box->enablePropel();
+$box->enable();
 $sentry = $box->sentry();
 $server = $box->server();
 
@@ -165,7 +165,7 @@ echo $box->header(true, 'WebDreamt', function() {
 			cursor: pointer;
 		}
 		.table-name:hover {
-			background-color: lightgoldenrodyellow;
+			background-color: #c4e3f3;
 		}
 		.table-panel .panel-body, .column-panel .panel-body {
 			overflow-x: auto;
@@ -227,6 +227,9 @@ echo $box->footer(true, function() {
 					}, function (data) {
 						$('.column-table').html(data);
 						$('.column-panel').show();
+						if ($target.is('.table-name')) {
+							$('html, body').scrollTop($(document).height());
+						}
 					});
 				}
 			});
