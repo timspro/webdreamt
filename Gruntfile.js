@@ -7,7 +7,7 @@ module.exports = function (grunt) {
 	var path = path.basename(path.normalize(__dirname + "/.."));
 	console.log(path);
 	if (path === 'node_modules') {
-		extra = '../';
+		extra = '../../';
 	}
 	for (var i = 0; i < targets.length; i++) {
 		var name = targets[i];
