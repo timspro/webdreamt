@@ -5,6 +5,7 @@ module.exports = function (grunt) {
 	var targets = ['css', 'less', 'img', 'js', 'fonts'];
 	var extra = '';
 	var path = path.basename(path.normalize(__dirname + "/.."));
+	console.log(path);
 	if (path === 'node_modules') {
 		extra = '../';
 	}
