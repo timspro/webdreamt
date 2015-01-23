@@ -4,7 +4,8 @@ module.exports = function (grunt) {
 	var copy = [];
 	var targets = ['css', 'less', 'img', 'js', 'fonts'];
 	var extra = '';
-	if (path.basename(__dirname) === 'node_modules') {
+	var path = path.basename(path.normalize(__dirname + "/.."));
+	if (path === 'node_modules') {
 		extra = '../';
 	}
 	for (var i = 0; i < targets.length; i++) {
