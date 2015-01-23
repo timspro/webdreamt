@@ -82,7 +82,7 @@ Box::get()->enablePropel();
 ```
 
 WebDreamt provides a number of different scripts to help you work with the library, which you can
-include from your own scripts. These are currently are:
+include from your own scripts. These currently are:
 
 A) authorization.php: A browser-based script to allow creating and editing groups and their
 basic permissions to modify tables and tables' columns in the database.
