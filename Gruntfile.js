@@ -1,5 +1,19 @@
 module.exports = function (grunt) {
 
+	var copy = [];
+	var targets = ['css', 'less', 'img', 'js', 'fonts'];
+	for (var i = 0; i < targets.length; i++) {
+		var name = targets[i];
+		copy.push({
+			flatten: true,
+			expand: true,
+			src: ["**"],
+			dest: name,
+			cwd: "build/" + name,
+			filter: 'isFile'
+		});
+	}
+
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		cssmin: {
@@ -29,6 +43,11 @@ module.exports = function (grunt) {
 				}
 			}
 		},
+		copy: {
+			do: {
+				files: copy
+			}
+		},
 		watch: {
 			do: {
 				files: ['Gruntfile.js', 'js/*.js', 'css/*.css'],
@@ -39,15 +58,13 @@ module.exports = function (grunt) {
 			}
 		}
 	});
-
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
-
+	grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.registerTask('guard', ['watch:do']);
 	grunt.registerTask('default', ['concat', 'cssmin:do']);
-	//
+	grunt.registerTask('setup', ['copy:do']);
 	grunt.registerTask('minimize', ['uglify']);
-
 };
