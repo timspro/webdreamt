@@ -2,7 +2,7 @@
 	"name": "webdreamt",
 	"version": "0.0.1",
 	"description": "A list of dependencies needed to run the associated build tasks for WebDreamt.",
-	"devDependencies": {
+	"dependencies": {
 		"grunt": ">=0.4",
 		"grunt-contrib-uglify": ">=0.5",
 		"grunt-contrib-cssmin": ">=0.10",
