@@ -544,17 +544,29 @@ class Builder {
 		if (!file_exists($filename)) {
 			throw new Exception('There are no classes to load. Does the database have tables?');
 		}
-		$this->loadAll($filename);
-		$this->loadAll($this->GeneratedClasses);
-		$this->loadAll($this->GeneratedClasses . "Map/");
-		$this->loadAll($this->Classes);
+		static::loadAll($filename);
+		static::loadAll($this->GeneratedClasses);
+		static::loadAll($this->GeneratedClasses . "Map/");
+		static::loadAll($this->Classes);
+	}
+
+	/**
+	 * Load all maps.
+	 * @throws Exception Thrown if the map folder doesn't exist.
+	 */
+	static public function loadMaps() {
+		$filename = Box::get()->VendorDirectory . "../db/propel/generated-classes/Map/";
+		if (!file_exists($filename)) {
+			throw new Exception('There are no classes to load. Does the database have tables?');
+		}
+		static::loadAll($filename);
 	}
 
 	/**
 	 * Load all PHP files in a directory. Assumes directory has a trailing slash.
 	 * @param string $directory
 	 */
-	protected function loadAll($directory) {
+	protected static function loadAll($directory) {
 		foreach (scandir($directory) as $file) {
 			$require = $directory . $file;
 			if ($file !== '.' && $file !== ".." && is_file($require)) {

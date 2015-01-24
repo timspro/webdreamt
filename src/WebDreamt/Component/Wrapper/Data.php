@@ -3,13 +3,14 @@
 namespace WebDreamt\Component\Wrapper;
 
 use DateTime;
+use Exception;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Map\ColumnMap;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
-use Exception;
 use WebDreamt\Box;
+use WebDreamt\Builder;
 use WebDreamt\Component;
 use WebDreamt\Component\Wrapper;
 
@@ -134,6 +135,11 @@ class Data extends Wrapper {
 	 * @var string
 	 */
 	static public $DefaultDateFormat = 'm/d/y';
+	/**
+	 * Indicates if the Propel maps have been loaded.
+	 * @var boolean
+	 */
+	static protected $mapsLoaded = false;
 
 	/**
 	 * Construct a component that represents a row from a table in the database.
@@ -147,6 +153,12 @@ class Data extends Wrapper {
 	function __construct($tableName, Component $display = null, $htmlTag = 'div', $class = null,
 			$html = null, $input = null) {
 		parent::__construct($display, $htmlTag, $class, $html, $input);
+
+		if (!static::$mapsLoaded) {
+			Builder::loadMaps();
+			static::$mapsLoaded = true;
+		}
+
 		$table = Propel::getDatabaseMap()->getTable($tableName);
 		$this->tableName = $tableName;
 		$this->title = static::beautify($tableName);
