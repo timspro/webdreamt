@@ -58,7 +58,7 @@ module.exports = function (grunt) {
 		},
 		shell: {
 			do: {
-				command: 'node_modules/.bin/bower-installer'
+				command: 'node_modules/.bin/bower-installer --remove'
 			}
 		}
 	});
