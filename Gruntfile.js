@@ -1,21 +1,13 @@
 module.exports = function (grunt) {
-	var path = require('path');
-
 	var copy = [];
 	var targets = ['css', 'less', 'img', 'js', 'fonts'];
-	var extra = '';
-	var path = path.basename(path.normalize(__dirname + "/.."));
-	console.log(path);
-	if (path === 'node_modules') {
-		extra = '../../';
-	}
 	for (var i = 0; i < targets.length; i++) {
 		var name = targets[i];
 		copy.push({
 			flatten: true,
 			expand: true,
 			src: ["**"],
-			dest: extra + name,
+			dest: name,
 			cwd: "build/" + name,
 			filter: 'isFile'
 		});

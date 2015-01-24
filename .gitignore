@@ -10,8 +10,10 @@
 /tests/src/WebDreamt/output/
 /tests/src/WebDreamt/Component/output/
 /build/
-/css/
 /fonts/
 /img/
-/js/
 /less/
+css
+!css/webdreamt.css
+js
+!js/webdreamt.js
