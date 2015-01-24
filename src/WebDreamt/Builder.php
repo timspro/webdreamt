@@ -459,6 +459,19 @@ class Builder {
 			$marker->setAttribute("size", "[" . $values . "]");
 		}
 
+		//Fix sentry table Propel names.
+		$markers = (new \DOMXpath($schemaDom))->query("//*[@name='users_groups']");
+		foreach ($markers as $marker) {
+			$marker->setAttribute('phpName', 'UserGroup');
+		}
+		$markers = (new \DOMXpath($schemaDom))->query("//*[@name='users']");
+		foreach ($markers as $marker) {
+			$marker->setAttribute('phpName', 'User');
+		}
+		$markers = (new \DOMXpath($schemaDom))->query("//*[@name='groups']");
+		foreach ($markers as $marker) {
+			$marker->setAttribute('phpName', 'Group');
+		}
 
 		//Save as the build schema.
 		echo $schemaDom->save($this->BuildSchema);
