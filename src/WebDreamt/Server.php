@@ -4,6 +4,8 @@ namespace WebDreamt;
 
 use Cartalyst\Sentry\Sentry;
 use Exception;
+use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
+use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
 
@@ -31,6 +33,8 @@ class Server {
 
 	function __construct(Box $box) {
 		$this->sentry = $box->sentry();
+
+		Builder::loadMaps();
 	}
 
 	/**

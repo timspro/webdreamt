@@ -4,6 +4,7 @@ namespace WebDreamt;
 
 use Cartalyst\Sentry\Sentry;
 use WebDreamt\Test;
+
 require_once __DIR__ . '/../../bootstrap.php';
 
 class ServerTest extends Test {
@@ -169,7 +170,7 @@ class ServerTest extends Test {
 	}
 
 	/**
-	 * @group ServerTest
+	 * @group Server
 	 */
 	function testBatchWith() {
 		self::$sentry->authenticate([
