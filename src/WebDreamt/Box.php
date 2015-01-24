@@ -212,7 +212,11 @@ class Box {
 	 */
 	static function get() {
 		if (static::$box === null) {
-			static::$box = new static();
+			if (class_exists('\Box')) {
+				static::$box = new \Box();
+			} else {
+				static::$box = new static();
+			}
 		}
 		return static::$box;
 	}
