@@ -224,7 +224,7 @@ class Box {
 	 * @param function $custom A function to use to output custom CSS
 	 * @return string
 	 */
-	public function header($css = true, $title = '', $custom = null) {
+	function header($css = true, $title = '', $custom = null) {
 		if ($custom) {
 			ob_start();
 			$custom();
@@ -247,7 +247,7 @@ class Box {
 	 * Returns the link tags representing the CSS.
 	 * @return string
 	 */
-	public function css() {
+	function css() {
 		return '<link href="' . $this->root() . '/dist/client/webdreamt-build.min.css" rel="stylesheet">';
 	}
 
@@ -257,7 +257,7 @@ class Box {
 	 * @param function $custom A function to use to output custom HTML.
 	 * @return string
 	 */
-	public function footer($javascript = true, $custom = null) {
+	function footer($javascript = true, $custom = null) {
 		if ($custom) {
 			ob_start();
 			$custom();
@@ -273,7 +273,7 @@ class Box {
 	 * Returns the script tags representing the javascript.
 	 * @return string
 	 */
-	public function javascript() {
+	function javascript() {
 		return '<script src="' . $this->root() . '/dist/client/webdreamt-build.js"></script>';
 	}
 
