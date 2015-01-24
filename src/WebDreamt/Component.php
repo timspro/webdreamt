@@ -38,7 +38,7 @@ class Component {
 	 * An array of components to render. Note that null means the child component.
 	 * @var array
 	 */
-	protected $components;
+	protected $components = [null];
 	/**
 	 * The input to be passed to the render method. If set, then overrides what is passed via the render()
 	 * method.
@@ -108,7 +108,6 @@ class Component {
 		$this->htmlTag = $htmlTag;
 		$this->class = $class;
 		$this->html = $html;
-		$this->components = [null];
 		$this->input = $input;
 	}
 
