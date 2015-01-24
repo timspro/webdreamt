@@ -248,7 +248,7 @@ class Box {
 	 * @return string
 	 */
 	public function css() {
-		return '<link href="' . $this->root() . '/dist/webdreamt-build.min.css" rel="stylesheet">';
+		return '<link href="' . $this->root() . '/dist/client/webdreamt-build.min.css" rel="stylesheet">';
 	}
 
 	/**
@@ -274,7 +274,7 @@ class Box {
 	 * @return string
 	 */
 	public function javascript() {
-		return '<script src="' . $this->root() . '/dist/webdreamt-build.js"></script>';
+		return '<script src="' . $this->root() . '/dist/client/webdreamt-build.js"></script>';
 	}
 
 }
