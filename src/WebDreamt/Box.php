@@ -240,7 +240,7 @@ class Box {
 				($css ? $this->css() : '') . "\n" .
 				$custom . '
 			</head>
-			<body style="background-color: #e3e3e3; padding: 50px;">';
+			<body>';
 	}
 
 	/**
