@@ -135,11 +135,6 @@ class Data extends Wrapper {
 	 * @var string
 	 */
 	static public $DefaultDateFormat = 'm/d/y';
-	/**
-	 * Indicates if the Propel maps have been loaded.
-	 * @var boolean
-	 */
-	static protected $mapsLoaded = false;
 
 	/**
 	 * Construct a component that represents a row from a table in the database.
@@ -154,10 +149,7 @@ class Data extends Wrapper {
 			$html = null, $input = null) {
 		parent::__construct($display, $htmlTag, $class, $html, $input);
 
-		if (!static::$mapsLoaded) {
-			Builder::loadMaps();
-			static::$mapsLoaded = true;
-		}
+		Builder::loadMaps();
 
 		$table = Propel::getDatabaseMap()->getTable($tableName);
 		$this->tableName = $tableName;

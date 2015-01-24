@@ -96,6 +96,11 @@ class Builder {
 	 * @var ConsoleOutput
 	 */
 	protected $propelOutput;
+	/**
+	 * Indicates if the maps have been loaded with either loadAll() or loadMaps().
+	 * @var boolean
+	 */
+	protected static $mapsLoaded = false;
 
 	/**
 	 * Construct a Builder object. Note that this will ensure/create a basic Propel setup, but
@@ -548,6 +553,7 @@ class Builder {
 		static::loadAll($this->GeneratedClasses);
 		static::loadAll($this->GeneratedClasses . "Map/");
 		static::loadAll($this->Classes);
+		static::$mapsLoaded = true;
 	}
 
 	/**
@@ -555,11 +561,15 @@ class Builder {
 	 * @throws Exception Thrown if the map folder doesn't exist.
 	 */
 	static public function loadMaps() {
+		if (static::$mapsLoaded) {
+			return;
+		}
 		$filename = Box::get()->VendorDirectory . "../db/propel/generated-classes/Map/";
 		if (!file_exists($filename)) {
 			throw new Exception('There are no classes to load. Does the database have tables?');
 		}
 		static::loadAll($filename);
+		static::$mapsLoaded = true;
 	}
 
 	/**

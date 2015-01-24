@@ -13,7 +13,15 @@ class Server {
 	const ACT_UPDATE = 'update';
 	const ACT_DELETE = 'delete';
 
-	/** @var Sentry $sentry */
+	/**
+	 * The name to use to try to get the default group.
+	 * @var string
+	 */
+	protected $defaultGroupName = 'default';
+	/**
+	 * The sentry instance
+	 * @var Sentry $sentry
+	 */
 	protected $sentry;
 	/**
 	 * The available actions.
@@ -23,6 +31,24 @@ class Server {
 
 	function __construct(Box $box) {
 		$this->sentry = $box->sentry();
+	}
+
+	/**
+	 * Set the default group name.
+	 * @param string $name
+	 * @return static
+	 */
+	function setDefaultGroupName($name) {
+		$this->defaultGroupName = $name;
+		return $this;
+	}
+
+	/**
+	 * Get the default group name. By default, it is default.
+	 * @return string
+	 */
+	function getDefaultGroupName() {
+		return $this->defaultGroupName;
 	}
 
 	/**
@@ -237,7 +263,7 @@ class Server {
 
 	/**
 	 * Checks to see if the current user is allowed to do the given action. It does this by
-	 * checking if first the user has permission to do the action on the table in general.
+	  e	 * checking if first the user has permission to do the action on the table in general.
 	 * If he or she, does then returns true. If not, then checks the permissions for the given columns.
 	 * @param string $tableName
 	 * @param string $action
@@ -257,7 +283,8 @@ class Server {
 		//Get user permissions.
 		$user = $this->sentry->getUser();
 		if (!$user) {
-			throw new Exception("No user is logged in.");
+			$group = $this->sentry->findGroupByName($this->defaultGroupName);
+			$permissions = $group->getPermissions();
 		} else {
 			$permissions = $user->getMergedPermissions();
 		}
