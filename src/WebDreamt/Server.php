@@ -88,7 +88,7 @@ class Server {
 			if ($tableMap->isCrossRef() && (!isset($columns['in_database']) || empty($columns['in_database']))) {
 				$keys = false;
 			} else {
-				$keys = $this->findWithKeys($tableMap, $columns);
+				$keys = $this->useKeys($tableMap, $columns);
 			}
 			if ($keys === false) {
 				$action = self::ACT_CREATE;
@@ -109,7 +109,7 @@ class Server {
 			$object->save($connection);
 		} else if ($action === self::ACT_UPDATE) {
 			//Update an existing an object.
-			$object = $keys ? : $this->findWithKeys($tableMap, $columns);
+			$object = $keys ? : $this->useKeys($tableMap, $columns);
 			if (!$object) {
 				throw new Exception("Tried to update but did not provide the primary keys.");
 			}
@@ -117,7 +117,7 @@ class Server {
 			$object->save($connection);
 		} else if ($action === self::ACT_DELETE) {
 			//Delete an eisting object.
-			$object = $this->findWithKeys($tableMap, $columns);
+			$object = $this->useKeys($tableMap, $columns);
 			if (!$object) {
 				throw new Exception("Tried to delete but did not provide the primary keys.");
 			}
@@ -128,12 +128,14 @@ class Server {
 
 	/**
 	 * Tries to find a Propel object based off the $columns given in the given table. Returns
-	 * false if not enough information is given.
+	 * false if not enough information is given. This has a side-effect of removing any
+	 * primary key column in $columns that is empty (on the assumption that it is not a valid primary
+	 * key).
 	 * @param TableMap $tableMap
 	 * @param array $columns
 	 * @return boolean|ActiveRecordInterface
 	 */
-	protected function findWithKeys(TableMap $tableMap, $columns) {
+	protected function useKeys(TableMap $tableMap, &$columns) {
 		$type = $tableMap->getPhpName();
 		$keys = $tableMap->getPrimaryKeys();
 		//Change the $keys array into a form we can use .
@@ -141,19 +143,17 @@ class Server {
 		foreach ($keys as $key) {
 			$name = $key->getName();
 			if (isset($columns[$name])) {
-				$findWith[$name] = $columns[$name];
+				if ($columns[$name] === '') {
+					unset($columns[$name]);
+				} else {
+					$findWith[$name] = $columns[$name];
+				}
 			}
 		}
 		//Get the primary key columns from the input.
 		//Count the columns to make sure all were filled.
 		if (count($keys) !== count($findWith)) {
 			return false;
-		}
-		//Check that none of the values are the empty string.
-		foreach ($findWith as $value) {
-			if ($value === '') {
-				return false;
-			}
 		}
 		//For the given query class, create a query object and call findPK() on it with the $findWith array.
 		$query = $type . "Query";
