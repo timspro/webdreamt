@@ -13,7 +13,7 @@
 /fonts/
 /img/
 /less/
-css
+css/*
 !css/webdreamt.css
-js
+js/*
 !js/webdreamt.js
