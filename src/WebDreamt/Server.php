@@ -149,6 +149,12 @@ class Server {
 		if (count($keys) !== count($findWith)) {
 			return false;
 		}
+		//Check that none of the values are the empty string.
+		foreach ($findWith as $value) {
+			if ($value === '') {
+				return false;
+			}
+		}
 		//For the given query class, create a query object and call findPK() on it with the $findWith array.
 		$query = $type . "Query";
 		if (count($findWith) === 1) {
