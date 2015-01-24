@@ -7,6 +7,7 @@ use WebDreamt\Component\Wrapper\Group\Table;
 use WebDreamt\Component\Wrapper\Panel;
 use WebDreamt\Component\Wrapper\Select;
 use WebDreamt\Server;
+
 if (php_sapi_name() === 'cli') {
 	echo 'This script cannot be run from the command line.';
 	return;
@@ -169,6 +170,9 @@ echo $box->header(true, 'WebDreamt', function() {
 		}
 		.table-panel .panel-body, .column-panel .panel-body {
 			overflow-x: auto;
+		}
+		body {
+			padding: 50px !important;
 		}
 	</style>
 	<?php

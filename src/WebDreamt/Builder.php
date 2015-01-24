@@ -587,7 +587,8 @@ class Builder {
 	 * If not, then returns false.
 	 * @return boolean Indicates if the synchronization was carried out.
 	 */
-	public static function automate(Box $box) {
+	public static function automate() {
+		$box = Box::get();
 		$generatedSchema = $box->VendorDirectory . "../db/schemas/schema.xml";
 		if (!file_exists($generatedSchema)) {
 			ob_start();
