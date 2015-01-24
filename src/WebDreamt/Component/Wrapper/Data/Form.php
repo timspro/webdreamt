@@ -40,6 +40,10 @@ class Form extends Data {
 	 */
 	const HTML_TEXT = 'text';
 	/**
+	 * An input with type 'text'
+	 */
+	const HTML_PASSWORD = 'password';
+	/**
 	 * A textarea input
 	 */
 	const HTML_TEXTAREA = 'textarea';
@@ -386,6 +390,10 @@ class Form extends Data {
 					break;
 				case self::HTML_TEXT:
 					$component = new Component('input', $classes, "type='text' value='$value' $attributes");
+					$this->display->setDisplayComponent($component->setInput('')->setSelfClosing(true));
+					break;
+				case self::HTML_PASSWORD:
+					$component = new Component('input', $classes, "type='password' value='$value' $attributes");
 					$this->display->setDisplayComponent($component->setInput('')->setSelfClosing(true));
 					break;
 				case self::HTML_TEXTAREA:
