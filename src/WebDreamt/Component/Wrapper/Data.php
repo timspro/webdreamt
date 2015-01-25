@@ -170,7 +170,7 @@ class Data extends Wrapper {
 	 * @param array $options
 	 */
 	protected function addColumn(ColumnMap $column, array &$options) {
-		if (substr($column->getName(), -3) === '_id') {
+		if (substr($column->getName(), -3) === '_id' || $column->getName() === 'id') {
 			$options[self::OPT_VISIBLE] = false;
 		}
 
