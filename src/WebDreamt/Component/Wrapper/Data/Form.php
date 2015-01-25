@@ -94,6 +94,7 @@ class Form extends Data {
 		$display = new Wrapper($this->input, 'div', "form-group", null);
 		parent::__construct($tableName, $display, 'form', "wd-form $class", "role='form' $html");
 		$this->setLabelComponent(new Component('label'), null);
+		$this->setLabelable(true);
 	}
 
 	protected function getDefaultOptions() {
