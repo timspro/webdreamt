@@ -375,7 +375,7 @@ class Data extends Wrapper {
 	 * </code>
 	 * Multiple components can be linked to one column. Linked components will also attempt to use
 	 * a method to get the appropriate input based on the column linked to if the linked component is
-	 * data.
+	 * data. This will also make the column visible.
 	 * @param string $column A column name of this component.
 	 * @param Component $component Can be any component. However, there is unique functionality for
 	 * data components.
@@ -393,6 +393,7 @@ class Data extends Wrapper {
 			$this->linked[$column] = [];
 		}
 		$this->linked[$column][] = $component;
+		$this->columns[$column][self::OPT_VISIBLE] = true;
 
 		//Set the Propel method that needs to be called to get input for the linked component.
 		$propel = null;
