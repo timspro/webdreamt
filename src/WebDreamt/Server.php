@@ -246,7 +246,11 @@ class Server {
 		try {
 			//Create or update for the given items.
 			foreach ($sortedIds as $id) {
-				$object = $this->run($tables[$id], null, $items[$id], $connection);
+				try {
+					$object = $this->run($tables[$id], null, $items[$id], $connection);
+				} catch (Exception $e) {
+					//
+				}
 				if (method_exists($object, 'getId')) {
 					$objectId = $object->getId();
 					//Now that we have added the object, we need to update other items with the ID.
