@@ -289,10 +289,12 @@ class Form extends Data {
 		static::$formCount++;
 		$id = static::$formCount;
 		$this->id = $id;
-		$this->useAfterOpeningTag("<input type='hidden' name='$id' value='" . $this->tableName . "'/>");
+		$this->useAfterOpeningTag("<input type='hidden' class='wd-form-id' name='$id' value='" .
+				$this->tableName . "'/>");
 		//Add a button to create another entry.
 		if ($this->multiple) {
-			$this->useBeforeClosingTag("<button type='button' class='btn btn-default wd-multiple'>Add Another</button>");
+			$this->useBeforeClosingTag("<button type='button' class='btn btn-default wd-multiple'>"
+					. "Add Another</button>");
 		}
 
 		$component = $included;
@@ -311,7 +313,8 @@ class Form extends Data {
 				$name = "$id:with:" . $component->getId();
 				$value = $component->getOption($component->getRenderedColumn(), self::OPT_PROPEL_COLUMN);
 				if ($value !== null) {
-					$this->useAfterOpeningTag("<input type='hidden' name='$name' value='$value'/>");
+					$this->useAfterOpeningTag("<input class='wd-form-relation' type='hidden' name='$name' "
+							. "value='$value'/>");
 				}
 				$form = true;
 				break;
@@ -325,6 +328,8 @@ class Form extends Data {
 		//If not included by a form, then just set the HTML tag.
 		if (!$form) {
 			$this->setHtmlTag('form');
+		} else {
+			$this->useCssClass('wd-subform');
 		}
 
 		return parent::render($input, $included);
