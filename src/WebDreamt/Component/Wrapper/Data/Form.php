@@ -85,6 +85,11 @@ class Form extends Data {
 	 * @var array
 	 */
 	protected $selectComponent = [];
+	/**
+	 * Indicate if the form should have labels.
+	 * @var boolean
+	 */
+	protected $formLabel = true;
 
 	/**
 	 * Construct a Form.
@@ -93,8 +98,7 @@ class Form extends Data {
 	function __construct($tableName, $class = null, $html = null) {
 		$display = new Wrapper($this->input, 'div', "form-group", null);
 		parent::__construct($tableName, $display, 'form', "wd-form $class", "role='form' $html");
-		$this->setLabelComponent(new Component('label'), null);
-		$this->setLabelable(true);
+		$this->setLabelComponent(new Component('label'));
 	}
 
 	protected function getDefaultOptions() {
@@ -161,6 +165,22 @@ class Form extends Data {
 				$options[self::OPT_HTML_CLASS] = 'wd-datetime-control';
 				break;
 		}
+	}
+
+	/**
+	 * Set if the form shows labels.
+	 * @param boolean $show
+	 */
+	function setLabelable($show) {
+		$this->formLabel = $show;
+	}
+
+	/**
+	 * Get if the form has labels.
+	 * @return boolean
+	 */
+	function getLabelable() {
+		return $this->formLabel;
 	}
 
 	/**
@@ -369,7 +389,7 @@ class Form extends Data {
 		$selectComponent = isset($this->selectComponent[$column]) ? $this->selectComponent[$column] : null;
 		$name = $this->id . ":" . $column;
 		$label = $selectComponent ? $selectComponent->getTitle() : $options[self::OPT_LABEL];
-		if ($this->getLabelable()) {
+		if ($this->formLabel) {
 			$labelHtml = $this->label->useHtml("for='$name'")->render($label, $this);
 		} else {
 			$labelHtml = '';
