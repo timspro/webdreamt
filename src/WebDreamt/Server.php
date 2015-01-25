@@ -246,13 +246,18 @@ class Server {
 		try {
 			//Create or update for the given items.
 			foreach ($sortedIds as $id) {
+				$objectId = null;
 				try {
 					$object = $this->run($tables[$id], null, $items[$id], $connection);
+					if (method_exists($object, 'getId')) {
+						$objectId = $object->getId();
+					}
 				} catch (Exception $e) {
-					//
+					if (isset($items[$id]['id']) && $items[$id]['id'] !== '') {
+						$objectId = intval($items[$id]['id']);
+					}
 				}
-				if (method_exists($object, 'getId')) {
-					$objectId = $object->getId();
+				if ($objectId !== null) {
 					//Now that we have added the object, we need to update other items with the ID.
 					if (isset($fulfills[$id])) {
 						foreach ($fulfills[$id] as $incompleteId) {
