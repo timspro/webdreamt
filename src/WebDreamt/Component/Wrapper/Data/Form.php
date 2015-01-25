@@ -368,7 +368,11 @@ class Form extends Data {
 		$selectComponent = isset($this->selectComponent[$column]) ? $this->selectComponent[$column] : null;
 		$name = $this->id . ":" . $column;
 		$label = $selectComponent ? $selectComponent->getTitle() : $options[self::OPT_LABEL];
-		$labelHtml = $this->label->useHtml("for='$name'")->render($label, $this);
+		if ($this->getLabelable()) {
+			$labelHtml = $this->label->useHtml("for='$name'")->render($label, $this);
+		} else {
+			$labelHtml = '';
+		}
 		$disabled = $options[self::OPT_DISABLE] ? 'disabled=""' : '';
 		$required = $options[self::OPT_REQUIRE] && $options[self::OPT_VISIBLE] ? 'required=""' : '';
 		$type = $options[self::OPT_HTML_TYPE];
