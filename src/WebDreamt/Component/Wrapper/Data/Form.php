@@ -170,9 +170,11 @@ class Form extends Data {
 	/**
 	 * Set if the form shows labels.
 	 * @param boolean $show
+	 * @return static
 	 */
 	function setLabelable($show) {
 		$this->formLabel = $show;
+		return $this;
 	}
 
 	/**
