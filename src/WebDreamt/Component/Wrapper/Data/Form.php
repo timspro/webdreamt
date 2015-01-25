@@ -92,7 +92,7 @@ class Form extends Data {
 	 */
 	function __construct($tableName, $class = null, $html = null) {
 		$display = new Wrapper($this->input, 'div', "form-group", null);
-		parent::__construct($tableName, $display, 'form', $class, "role='form' $html");
+		parent::__construct($tableName, $display, 'form', "wd-form $class", "role='form' $html");
 		$this->setLabelComponent(new Component('label'), null);
 	}
 
