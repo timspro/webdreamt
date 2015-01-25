@@ -431,7 +431,7 @@ class Server {
 							$permissions["api/$tableName/$action"] = null;
 						} else {
 							//Deny for given columns.
-							foreach ($columns as $column) {
+							foreach ($columns as $column => $value) {
 								$permissions["api/$tableName/$action/$column"] = null;
 							}
 						}
