@@ -161,7 +161,7 @@ class Data extends Wrapper {
 			$name = $column->getName();
 			$this->columns[$name] = $this->getDefaultOptions();
 			$this->addColumn($column, $this->columns[$name]);
-			if (in_array($name, $keys)) {
+			if (isset($keys[$name])) {
 				$this->columns[$name][self::OPT_VISIBLE] = false;
 			}
 		}
