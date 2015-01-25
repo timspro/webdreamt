@@ -156,14 +156,10 @@ class Data extends Wrapper {
 		$this->className = $table->getPhpName();
 		$this->title = static::beautify($tableName);
 		$this->label = new Component();
-		$keys = $table->getPrimaryKeys();
 		foreach ($table->getColumns() as $column) {
 			$name = $column->getName();
 			$this->columns[$name] = $this->getDefaultOptions();
 			$this->addColumn($column, $this->columns[$name]);
-			if (in_array($name, $keys)) {
-				$this->columns[$name][self::OPT_VISIBLE] = false;
-			}
 		}
 	}
 
@@ -174,6 +170,10 @@ class Data extends Wrapper {
 	 * @param array $options
 	 */
 	protected function addColumn(ColumnMap $column, array &$options) {
+		if ($column->isPrimaryKey()) {
+			$options[self::OPT_VISIBLE] = false;
+		}
+
 		$options[self::OPT_DEFAULT] = $column->getDefaultValue();
 		$options[self::OPT_TYPE] = $column->getType();
 		//Set up enum.
