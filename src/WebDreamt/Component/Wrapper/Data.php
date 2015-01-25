@@ -126,15 +126,15 @@ class Data extends Wrapper {
 	 */
 	static public $DefaultTimeFormat = "g:i a";
 	/**
-	 * The default date time format for the class: g:i a, m/d/y
+	 * The default date time format for the class: g:i a, n/d/y
 	 * @var string
 	 */
-	static public $DefaultDateTimeFormat = "g:i a, m/d/y";
+	static public $DefaultDateTimeFormat = "g:i a, n/d/y";
 	/**
-	 * The default date format for the class: m/d/y
+	 * The default date format for the class: n/d/y
 	 * @var string
 	 */
-	static public $DefaultDateFormat = 'm/d/y';
+	static public $DefaultDateFormat = 'n/d/y';
 
 	/**
 	 * Construct a component that represents a row from a table in the database.
@@ -295,7 +295,7 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Set the date time format used by the component. Default is 'g:i a, m/d/y'.
+	 * Set the date time format used by the component. Default is 'g:i a, n/d/y'.
 	 * @param string $format
 	 * @return static
 	 */
@@ -313,7 +313,7 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Set the date format used by the component. Default is 'm/d/y'.
+	 * Set the date format used by the component. Default is 'n/d/y'.
 	 * @param string $format
 	 * @return static
 	 */
