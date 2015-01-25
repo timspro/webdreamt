@@ -535,7 +535,9 @@ class Builder {
 		$db->exec("SET FOREIGN_KEY_CHECKS=0");
 		$tables = $db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
 		foreach ($tables as $table) {
-			$db->exec("TRUNCATE $table");
+			if ($table !== 'users' && $table !== 'users_groups' && $table !== 'groups') {
+				$db->exec("TRUNCATE $table");
+			}
 		}
 		$db->exec("SET FOREIGN_KEY_CHECKS=1");
 	}
