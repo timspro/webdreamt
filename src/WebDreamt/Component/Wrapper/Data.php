@@ -170,6 +170,9 @@ class Data extends Wrapper {
 	 * @param array $options
 	 */
 	protected function addColumn(ColumnMap $column, array &$options) {
+		if ($column->isPrimaryKey()) {
+			$options[self::OPT_VISIBLE] = false;
+		}
 		$options[self::OPT_DEFAULT] = $column->getDefaultValue();
 		$options[self::OPT_TYPE] = $column->getType();
 		//Set up enum.

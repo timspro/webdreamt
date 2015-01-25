@@ -109,7 +109,7 @@ class Form extends Data {
 	protected function addColumn(ColumnMap $column, array &$options) {
 		parent::addColumn($column, $options);
 		$name = $column->getName();
-		if ($name === 'id' || $name === 'in_database') {
+		if ($name === 'in_database') {
 			$options[self::OPT_VISIBLE] = false;
 		}
 		if ($name === 'created_at' || $name === 'updated_at') {
