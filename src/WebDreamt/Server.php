@@ -420,7 +420,7 @@ class Server {
 							$permissions["api/$tableName/$action"] = 1;
 						} else {
 							//Allow for given columns.
-							foreach ($columns as $column) {
+							foreach ($columns as $column => $value) {
 								$permissions["api/$tableName/$action/$column"] = 1;
 							}
 						}
