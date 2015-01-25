@@ -58,7 +58,7 @@ class Data extends Wrapper {
 	 * The column that is ultimately used to get the Propel object. This is obvious for the case that the
 	 * column is in the data component's table, but is useful for noting many-to-many relationships.
 	 */
-	const OPT_PROPEL_COLUMN = 'method';
+	const OPT_PROPEL_COLUMN = 'column';
 	/**
 	 * A string to output when a value is retrieved from the input and it is null.
 	 */
@@ -153,6 +153,7 @@ class Data extends Wrapper {
 
 		$table = Propel::getDatabaseMap()->getTable($tableName);
 		$this->tableName = $tableName;
+		$this->className = $table->getPhpName();
 		$this->title = static::beautify($tableName);
 		$this->label = new Component();
 		foreach ($table->getColumns() as $column) {
@@ -188,14 +189,7 @@ class Data extends Wrapper {
 	protected function getDefaultOptions() {
 		return [
 			self::OPT_ACCESS => true,
-			self::OPT_VISIBLE => true,
-			self::OPT_DEFAULT => null,
-			self::OPT_TYPE => null,
-			self::OPT_EXTRA => null,
-			self::OPT_PROPEL_OBJECT => null,
-			self::OPT_LABEL => null,
-			self::OPT_NULL_VALUE => null,
-			self::OPT_PROPEL_COLUMN => null
+			self::OPT_VISIBLE => true
 		];
 	}
 
@@ -610,7 +604,7 @@ class Data extends Wrapper {
 	 * @return mixed
 	 */
 	function getOption($column, $option) {
-		return $this->columns[$column][$option];
+		return isset($this->columns[$column][$option]) ? $this->columns[$column][$option] : null;
 	}
 
 	/**
@@ -636,7 +630,7 @@ class Data extends Wrapper {
 		$ret = [];
 		foreach ($this->columns as $column => $options) {
 			if (count($columns) === 0 || in_array($column, $columns)) {
-				$ret[$column] = $options[$option];
+				$ret[$column] = isset($options[$option]) ? $options[$option] : null;
 			}
 		}
 		return $ret;
@@ -836,14 +830,15 @@ class Data extends Wrapper {
 		if ($key === null) {
 			return $input;
 		}
+		$className = '\\' . $this->className;
 		if (is_array($input) && array_key_exists($key, $input)) {
 			$value = $input[$key];
 			if ($value === null) {
-				return $this->columns[$key][self::OPT_NULL_VALUE];
+				return $this->getOption($key, self::OPT_NULL_VALUE);
 			}
 			return $value;
-		} else if ($input instanceof ActiveRecordInterface) {
-			$object = $this->columns[$key][self::OPT_PROPEL_OBJECT];
+		} else if ($input instanceof $className) {
+			$object = $this->getOption($key, self::OPT_PROPEL_OBJECT);
 			if ($object) {
 				return $input->$object();
 			} else {
@@ -860,7 +855,7 @@ class Data extends Wrapper {
 					return $value->format($format);
 				}
 				if ($value === null) {
-					return $this->columns[$key][self::OPT_NULL_VALUE];
+					return $this->getOption($key, self::OPT_NULL_VALUE);
 				}
 				return $value;
 			}

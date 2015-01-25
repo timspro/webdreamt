@@ -318,8 +318,8 @@ class Form extends Data {
 			}
 			$component = $component->getRenderedBy();
 		}
-		//If not included by a modal, then add a submit button.
-		if (!$modal) {
+		//If not included by a modal or a form, then add a submit button.
+		if (!$modal && !$form) {
 			$this->useBeforeClosingTag('<button type="submit" class="btn btn-default">Submit</button>');
 		}
 		//If not included by a form, then just set the HTML tag.
