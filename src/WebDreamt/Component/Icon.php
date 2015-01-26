@@ -41,7 +41,7 @@ class Icon extends Component {
 				break;
 		}
 		$this->type = $type;
-		$class .= ' gyphicon';
+		$class .= ' glyphicon';
 		$html .= ' aria-hidden="true"';
 		parent::__construct($htmlTag, $class, $html, $input);
 	}
