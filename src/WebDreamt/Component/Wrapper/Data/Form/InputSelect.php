@@ -22,7 +22,7 @@ class InputSelect extends Form {
 		$this->link('id', new Select(array_merge(["" => 'Choose...'], $options), 'wd-is-select'));
 		$this->deny()->allow('id', $columnName);
 		$this->reorder([$columnName, 'id'])->setHtmlExtra([$columnName => 'placeholder="Create or..."'])
-				->setHtmlClass('wd-is-input');
+				->setHtmlClass([$columnName => 'wd-is-input']);
 		$this->setLabels(['id' => null]);
 	}
 
