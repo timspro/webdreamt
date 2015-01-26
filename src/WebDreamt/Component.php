@@ -2,6 +2,8 @@
 
 namespace WebDreamt;
 
+use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
+
 class Component {
 
 	/**
@@ -96,6 +98,11 @@ class Component {
 	 * @var Component
 	 */
 	protected $renderedBy;
+	/**
+	 * Get the groups that can access the component.
+	 * @var string|array
+	 */
+	protected $groups;
 
 	/**
 	 * Get a new component.
@@ -505,6 +512,25 @@ class Component {
 	}
 
 	/**
+	 * Set the groups that can access this component. Can be null in which case all groups can
+	 * access the component.
+	 * @param string|array $groups
+	 * @return static
+	 */
+	function setGroups($groups) {
+		$this->groups = $groups;
+		return $this;
+	}
+
+	/**
+	 * Get the groups that can access this component.
+	 * @return array
+	 */
+	function getGroups() {
+		return $this->groups;
+	}
+
+	/**
 	 * Renders the component.
 	 * @param mixed $input Any input for the component. The effect of the input depends on the child
 	 * class of the component. By default, it is simply echoed.
@@ -515,6 +541,11 @@ class Component {
 	function render($input = null, Component $included = null) {
 		if ($this->input !== null) {
 			$input = $this->input;
+		}
+		if ($this->groups !== null) {
+			if (!Box::get()->server()->checkGroups($this->groups)) {
+				return '';
+			}
 		}
 		$output = null;
 		$htmlTag = $this->htmlTag;

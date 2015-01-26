@@ -12,9 +12,8 @@ use Propel\Runtime\Propel;
 use WebDreamt\Box;
 use WebDreamt\Builder;
 use WebDreamt\Component;
-use WebDreamt\Component\Custom;
+use WebDreamt\Component\Icon;
 use WebDreamt\Component\Wrapper;
-use WebDreamt\Server;
 
 /**
  * A class used as a base to render data from the database.
@@ -136,7 +135,7 @@ class Data extends Wrapper {
 	 * The icons
 	 * @var Component
 	 */
-	protected $iconComponent;
+	protected $iconContainer;
 	/**
 	 * The default time format for the class: g:i a
 	 * @var string
@@ -890,81 +889,87 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Add an icon that when clicked, deletes the data element.
-	 * @return static
-	 */
-	function removable($url, $ajax = false, $groups = null) {
-		$this->actionable($url, $ajax, true);
-		return $this;
-	}
-
-	/**
-	 * Adds an icon that when clicked, fills the modal with the available values.
-	 * @param string $modal
-	 * @return static
-	 */
-	function editable($url, $ajax = false, $groups = null) {
-		$this->actionable($url, $ajax, $groups, false);
-		return $this;
-	}
-
-	/**
-	 * Get the icon component.
+	 * Get the icon container component.
 	 * @return Component
 	 */
-	function getIconComponent() {
-		if (!$this->iconComponent) {
-			$this->iconComponent = new Component('div', 'wd-icon');
-			$this->addExtraComponent($this->iconComponent);
+	function getIconContainer() {
+		if (!$this->iconContainer) {
+			$this->iconContainer = new Component('div', 'wd-icon');
+			$this->addExtraComponent($this->iconContainer);
 		}
-		return $this->iconComponent;
+		return $this->iconContainer;
 	}
 
 	/**
-	 * Set the icon component.
+	 * Set the icon containercomponent.
 	 * @param Component $component
 	 * @return static
 	 */
-	function setIconComponent(Component $component) {
-		$this->iconComponent = $component;
+	function setIconContainer(Component $component) {
+		$this->iconContainer = $component;
 		return $this;
 	}
 
-	protected function actionable($url, $ajax = false, $groups = null, $remove = false) {
-		if ($remove) {
-			$icon = new Component('span', 'glyphicon glyphicon-remove', 'aria-hidden="true"');
-			$action = 'delete';
-		} else {
-			$icon = new Component('span', 'glyphicon glyphicon-edit', 'aria-hidden="true"');
-			$action = 'update';
-		}
-		if ($ajax) {
-			$icon->appendCssClass('wd-icon-ajax');
-			$attribute = "data-wd-url";
-		} else {
-			$icon = new Wrapper($icon, 'a');
-			$attribute = "href";
-		}
-
-		$icon->setHtmlCallback(function ($input) use ($url, $action, $attribute) {
-			$paramString = "$attribute='$url?";
-			foreach ($this->primaryKeys as $key) {
-				$paramString .= "id-$key=" . $this->getValueFromInput($key, $input) . "&";
+	/**
+	 * Add an icon.
+	 * @param Icon $icon
+	 * @param string $url
+	 * @param boolean $ajax
+	 * @return Data
+	 */
+	function addIcon(Icon $icon, $url = null, $ajax = false) {
+		if ($url !== null) {
+			$type = $icon->getType();
+			if ($type === Icon::TYPE_DELETE) {
+				$action = 'delete';
+			} else if ($type === Icon::TYPE_EDIT) {
+				$action = 'update';
 			}
-			$paramString .= "action=$action'";
-			return $paramString;
-		});
-
-		if ($groups !== null) {
-			$icon = new Custom(function() use ($groups, $icon) {
-				if (Server::checkGroups($groups)) {
-					return $icon->render();
+			if ($ajax) {
+				$icon = new Wrapper($icon, 'a');
+				$attribute = 'href';
+			} else {
+				$attribute = 'data-wd-url';
+			}
+			$class = $this->className;
+			$icon->setHtmlCallback(function ($input) use ($url, $action, $class, $attribute) {
+				$paramString = "$attribute='$url?";
+				foreach ($this->primaryKeys as $key) {
+					$paramString .= "pk-$key=" . $this->getValueFromInput($key, $input) . "&";
 				}
-			}, true);
+				$paramString .= "class=$class&action=$action'";
+				return $paramString;
+			});
 		}
 
-		$this->iconComponent->addExtraComponent($icon);
+		$this->iconContainer->addExtraComponent($icon);
 		return $this;
+	}
+
+	/**
+	 * Get an object based on the GET parameters of the URL.
+	 * @return ActiveRecordInterface
+	 */
+	static function getObjectFromUrl() {
+		if (count($_GET) > 0 && isset($_GET['action']) && isset($_GET['class'])) {
+			$pks = [];
+			foreach ($_GET as $key => $value) {
+				if (substr($key, 0, 3) === 'pk-') {
+					$pks[] = $value;
+				}
+			}
+
+			$class = $_GET['class'];
+			$query = $class . "Query";
+			if (count($pks) === 1) {
+				$object = call_user_func_array([$query::create(), "findPk"], $pks);
+			} else {
+				$object = call_user_func([$query::create(), "findPk"], array_values($pks));
+			}
+
+			return $object;
+		}
+		return null;
 	}
 
 }

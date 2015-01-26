@@ -100,6 +100,11 @@ class Form extends Data {
 	 * @var boolean
 	 */
 	protected $ajax = false;
+	/**
+	 * Indicate if the form deletes the object.
+	 * @var boolean
+	 */
+	protected $deleteForm = false;
 
 	/**
 	 * Construct a Form.
@@ -127,7 +132,7 @@ class Form extends Data {
 	protected function addColumn(ColumnMap $column, array &$options) {
 		parent::addColumn($column, $options);
 		$name = $column->getName();
-		if ($name === 'in_database') {
+		if ($name === 'in_database' || $name === 'id' || substr($name, -3) === '_id') {
 			$options[self::OPT_VISIBLE] = false;
 		}
 		if ($name === 'created_at' || $name === 'updated_at') {
@@ -178,6 +183,30 @@ class Form extends Data {
 				$options[self::OPT_HTML_CLASS] = 'wd-datetime-control';
 				break;
 		}
+	}
+
+	/**
+	 * Makes the form a "delete" form. If true, then disables the inputs. If false, then
+	 * enables the inputs.
+	 * @param boolean $delete
+	 * @return static
+	 */
+	function setDeleteForm($delete) {
+		$this->deleteForm = $delete;
+		if ($delete) {
+			$this->disable();
+		} else {
+			$this->enable();
+		}
+		return $this;
+	}
+
+	/**
+	 * Get whether this form deletes the object.
+	 * @return boolean
+	 */
+	function getDeleteForm() {
+		return $this->deleteForm;
 	}
 
 	/**
@@ -327,6 +356,9 @@ class Form extends Data {
 		$this->id = $id;
 		$this->useAfterOpeningTag("<input type='hidden' class='wd-form-id' name='$id' value='" .
 				$this->tableName . "'/>");
+		if ($this->deleteForm) {
+			$this->useAfterOpeningTag("<input type='hidden' class='wd-form-delete' name='$id:::delete'/>");
+		}
 		//Add a button to create another entry.
 		if ($this->multiple) {
 			$this->useBeforeClosingTag("<button type='button' class='btn btn-default wd-multiple'>"

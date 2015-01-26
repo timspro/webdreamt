@@ -33,8 +33,6 @@ class Server {
 
 	function __construct(Box $box) {
 		$this->sentry = $box->sentry();
-
-		Builder::loadMaps();
 	}
 
 	/**
@@ -68,6 +66,8 @@ class Server {
 	 * @return ActiveRecordInterface|boolean
 	 */
 	function run($tableName, $action, $columns, $connection = null) {
+		Builder::loadMaps();
+
 		//Check the input.
 		if (!is_string($tableName)) {
 			throw new Exception('Did not specify the name of the table as a string.');
@@ -191,7 +191,16 @@ class Server {
 	}
 
 	/**
-	 * Attempts to infer how to modify the database (create or update) based on data on passed in data.
+	 * Allow the server to handle forms.
+	 */
+	function automate() {
+		if (count($_POST) >= 0) {
+			$this->batch($_POST);
+		}
+	}
+
+	/**
+	 * Attempts to infer how to modify the database (create or update) based on passed in data.
 	 * @param array $data See test cases for examples of format.
 	 * @throws Exception If Propel can't commit the batch.
 	 */
@@ -202,6 +211,7 @@ class Server {
 		$items = [];
 		$tables = [];
 		$store = [];
+		$delete = [];
 		//Change POST data into a more usable format.
 		foreach ($data as $key => $value) {
 			//Get the table name if of the form '1' => 'customer'
@@ -209,8 +219,10 @@ class Server {
 				$tables[$key] = $value;
 			} else {
 				$parts = explode(':', $key);
-				//4.with.3: contract.buyer_agent_id
-				if (count($parts) === 3) {
+				//4:with:3: contract.buyer_agent_id
+				if (count($parts) === 4) {
+					$delete[$parts[0]] = true;
+				} else if (count($parts) === 3) {
 					//This case is a bit tricky because we need to notate the dependency and figure out
 					//how to fill it. We will deal with this once we know the tables for all IDs.
 					if (intval($parts[0]) < intval($parts[2])) {
@@ -223,7 +235,7 @@ class Server {
 					}
 					$store[$index][] = $value;
 					//Get the value for the specified column.
-					//This will be of the form '1-first_name' => 'John'
+					//This will be of the form '1:first_name' => 'John'
 				} else if (count($parts) === 2) {
 					//Make an array if it doesn't exist aleady for the item.
 					if (!isset($items[$parts[0]])) {
@@ -272,7 +284,11 @@ class Server {
 			//Create or update for the given items.
 			foreach ($sortedIds as $id) {
 				$objectId = null;
-				$object = $this->run($tables[$id], null, $items[$id], $connection);
+				$action = null;
+				if (isset($delete[$id])) {
+					$action = Server::ACT_DELETE;
+				}
+				$object = $this->run($tables[$id], $action, $items[$id], $connection);
 				if ($object !== false) {
 					if (method_exists($object, 'getId')) {
 						$objectId = $object->getId();
