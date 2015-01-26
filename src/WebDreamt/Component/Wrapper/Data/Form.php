@@ -90,14 +90,27 @@ class Form extends Data {
 	 * @var boolean
 	 */
 	protected $formLabel = true;
+	/**
+	 * Indicate if the form should use JavaScript to submit.
+	 * @var boolean
+	 */
+	protected $javascript = true;
+	/**
+	 * Indicate if the form should use AJAX to submit.
+	 * @var boolean
+	 */
+	protected $ajax = false;
 
 	/**
 	 * Construct a Form.
 	 * @param string $tableName
+	 * @param string $class
+	 * @param string $html
+	 * @param array $input
 	 */
-	function __construct($tableName, $class = null, $html = null) {
+	function __construct($tableName, $class = null, $html = null, $input = null) {
 		$display = new Wrapper($this->input, 'div', "form-group", null);
-		parent::__construct($tableName, $display, 'form', "wd-form $class", "role='form' $html");
+		parent::__construct($tableName, $display, 'form', "wd-form $class", "role='form' $html", $input);
 		$this->setLabelComponent(new Component('label'));
 	}
 
@@ -326,7 +339,7 @@ class Form extends Data {
 		while ($component !== null) {
 			//If this was included by a Modal, we need to change where the button is placed.
 			if ($component instanceof Modal) {
-				$component->useButtons(['btn-primary wd-btn-submit' => 'Submit']);
+				$component->useButtons(['btn-primary wd-modal-submit' => 'Submit']);
 				$modal = true;
 				break;
 			}
@@ -346,7 +359,16 @@ class Form extends Data {
 		}
 		//If not included by a modal or a form, then add a submit button.
 		if (!$modal && !$form) {
-			$this->useBeforeClosingTag('<button type="submit" class="btn btn-default">Submit</button>');
+			$class = '';
+			if ($this->javascript) {
+				if ($this->ajax) {
+					$class = 'wd-form-ajax';
+				} else {
+					$class = 'wd-form-submit';
+				}
+			} else {
+				$this->useBeforeClosingTag("<button type='submit' class='btn btn-default $class'>Submit</button>");
+			}
 		}
 		//If not included by a form, then just set the HTML tag.
 		if (!$form) {
@@ -391,7 +413,7 @@ class Form extends Data {
 		$selectComponent = isset($this->selectComponent[$column]) ? $this->selectComponent[$column] : null;
 		$name = $this->id . ":" . $column;
 		$label = $selectComponent ? $selectComponent->getTitle() : $options[self::OPT_LABEL];
-		if ($this->formLabel) {
+		if ($this->formLabel && $label !== null) {
 			$labelHtml = $this->label->useHtml("for='$name'")->render($label, $this);
 		} else {
 			$labelHtml = '';
@@ -440,6 +462,44 @@ class Form extends Data {
 			}
 		}
 		return $this->display->render($value, $this);
+	}
+
+	/**
+	 * If true, then the form will use JavaScript to submit the form.
+	 * @param boolean $javascript
+	 * @return static
+	 */
+	function setUseJavascript($javascript) {
+		$this->javascript = $javascript;
+		return $this;
+	}
+
+	/**
+	 * Indicate if the form will use JavaScript to submit.
+	 * @return boolean
+	 */
+	function getUseJavascript() {
+		return $this->javascript;
+	}
+
+	/**
+	 * Indicate if the form will use AJAX.
+	 * @return boolean
+	 */
+	function getAjax() {
+		return $this->ajax;
+	}
+
+	/**
+	 * If true, then the form will use AJAX to submit the form. Note that this also sets if the form
+	 * uses JavaScript.
+	 * @param boolean $ajax
+	 * @return static
+	 */
+	function setAjax($ajax) {
+		$this->ajax = $ajax;
+		$this->javascript = $ajax;
+		return $this;
 	}
 
 }

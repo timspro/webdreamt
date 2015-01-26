@@ -57,8 +57,7 @@ class Server {
 
 	/**
 	 * Executes the action for the requested table and the given parameters.
-	 * Throws an exception if insufficient permissions.
-	 * If successful, returns the modified object.
+	 * If successful, returns the modified object. If insufficient permissions, returns false.
 	 * @param string $tableName
 	 * @param string $action Note can be null, in which cases will try to infer create or delete based
 	 * on whether the columns given contain the primary keys
@@ -66,7 +65,7 @@ class Server {
 	 * update/delete to find)
 	 * @param ConnectionInterface $connection A Propel connnection so that the operations can be batched.
 	 * Defaults to not using connection (and so not batching).
-	 * @return $object
+	 * @return ActiveRecordInterface|boolean
 	 */
 	function run($tableName, $action, $columns, $connection = null) {
 		//Check the input.
@@ -98,8 +97,7 @@ class Server {
 		}
 		//Note that permissible will flag if the $action is invalid.
 		if (!$this->permitted($tableName, $action, $columns)) {
-			throw new Exception("Insufficient permissions for the requested table or the "
-			. "requested table doesn't exist");
+			return false;
 		}
 		if ($action === self::ACT_CREATE) {
 			//Create and save an object.
@@ -124,6 +122,33 @@ class Server {
 			$object->delete($connection);
 		}
 		return $object;
+	}
+
+	/**
+	 * Check if the the user belongs to any of the passed in groups.
+	 * @param array|string $requiredGroups
+	 * @return boolean
+	 */
+	function checkGroups($requiredGroups) {
+		if (!is_array($requiredGroups)) {
+			$requiredGroups = [$requiredGroups];
+		}
+		$sentry = Box::get()->sentry();
+		$user = $sentry->getUser();
+		$groupNames = [];
+		if ($user) {
+			$groups = $user->getGroups();
+			foreach ($groups as $group) {
+				$groupNames[] = $group['name'];
+			}
+		} else {
+			$groupNames[] = $this->getDefaultGroupName();
+		}
+
+		if (count(array_intersect($requiredGroups, $groupNames)) >= 1) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -247,12 +272,12 @@ class Server {
 			//Create or update for the given items.
 			foreach ($sortedIds as $id) {
 				$objectId = null;
-				try {
-					$object = $this->run($tables[$id], null, $items[$id], $connection);
+				$object = $this->run($tables[$id], null, $items[$id], $connection);
+				if ($object !== false) {
 					if (method_exists($object, 'getId')) {
 						$objectId = $object->getId();
 					}
-				} catch (Exception $e) {
+				} else {
 					if (isset($items[$id]['id']) && $items[$id]['id'] !== '') {
 						$objectId = intval($items[$id]['id']);
 					}

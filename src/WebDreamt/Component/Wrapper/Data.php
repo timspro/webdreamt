@@ -12,7 +12,9 @@ use Propel\Runtime\Propel;
 use WebDreamt\Box;
 use WebDreamt\Builder;
 use WebDreamt\Component;
+use WebDreamt\Component\Custom;
 use WebDreamt\Component\Wrapper;
+use WebDreamt\Server;
 
 /**
  * A class used as a base to render data from the database.
@@ -86,6 +88,16 @@ class Data extends Wrapper {
 	 */
 	protected $tableName;
 	/**
+	 * The class name for the table.
+	 * @var string
+	 */
+	protected $className;
+	/**
+	 * The primary keys for the table.
+	 * @var array
+	 */
+	protected $primaryKeys;
+	/**
 	 * A component to show labels in.
 	 * @var Component
 	 */
@@ -121,6 +133,11 @@ class Data extends Wrapper {
 	 */
 	protected $dateFormat;
 	/**
+	 * The icons
+	 * @var Component
+	 */
+	protected $iconComponent;
+	/**
 	 * The default time format for the class: g:i a
 	 * @var string
 	 */
@@ -154,6 +171,7 @@ class Data extends Wrapper {
 		$table = Propel::getDatabaseMap()->getTable($tableName);
 		$this->tableName = $tableName;
 		$this->className = $table->getPhpName();
+		$this->primaryKeys = $table->getPrimaryKeys();
 		$this->title = static::beautify($tableName);
 		$this->label = new Component();
 		foreach ($table->getColumns() as $column) {
@@ -869,6 +887,84 @@ class Data extends Wrapper {
 			return $this->columns[$key][self::OPT_DEFAULT];
 		}
 		return null;
+	}
+
+	/**
+	 * Add an icon that when clicked, deletes the data element.
+	 * @return static
+	 */
+	function removable($url, $ajax = false, $groups = null) {
+		$this->actionable($url, $ajax, true);
+		return $this;
+	}
+
+	/**
+	 * Adds an icon that when clicked, fills the modal with the available values.
+	 * @param string $modal
+	 * @return static
+	 */
+	function editable($url, $ajax = false, $groups = null) {
+		$this->actionable($url, $ajax, $groups, false);
+		return $this;
+	}
+
+	/**
+	 * Get the icon component.
+	 * @return Component
+	 */
+	function getIconComponent() {
+		if (!$this->iconComponent) {
+			$this->iconComponent = new Component('div', 'wd-icon');
+			$this->addExtraComponent($this->iconComponent);
+		}
+		return $this->iconComponent;
+	}
+
+	/**
+	 * Set the icon component.
+	 * @param Component $component
+	 * @return static
+	 */
+	function setIconComponent(Component $component) {
+		$this->iconComponent = $component;
+		return $this;
+	}
+
+	protected function actionable($url, $ajax = false, $groups = null, $remove = false) {
+		if ($remove) {
+			$icon = new Component('span', 'glyphicon glyphicon-remove', 'aria-hidden="true"');
+			$action = 'delete';
+		} else {
+			$icon = new Component('span', 'glyphicon glyphicon-edit', 'aria-hidden="true"');
+			$action = 'update';
+		}
+		if ($ajax) {
+			$icon->appendCssClass('wd-icon-ajax');
+			$attribute = "data-wd-url";
+		} else {
+			$icon = new Wrapper($icon, 'a');
+			$attribute = "href";
+		}
+
+		$icon->setHtmlCallback(function ($input) use ($url, $action, $attribute) {
+			$paramString = "$attribute='$url?";
+			foreach ($this->primaryKeys as $key) {
+				$paramString .= "id-$key=" . $this->getValueFromInput($key, $input) . "&";
+			}
+			$paramString .= "action=$action'";
+			return $paramString;
+		});
+
+		if ($groups !== null) {
+			$icon = new Custom(function() use ($groups, $icon) {
+				if (Server::checkGroups($groups)) {
+					return $icon->render();
+				}
+			}, true);
+		}
+
+		$this->iconComponent->addExtraComponent($icon);
+		return $this;
 	}
 
 }

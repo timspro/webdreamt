@@ -85,12 +85,11 @@ class ServerTest extends Test {
 			'email' => 'user@email.com',
 			'password' => 'test'
 		]);
-		$this->setExpectedException('Exception');
-		self::$server->run('agent', 'create', [
-			'first_name' => "John",
-			'last_name' => 'Smith',
-			'salary' => '1000'
-		]);
+		$this->assertEquals(false, self::$server->run('agent', 'create', [
+					'first_name' => "John",
+					'last_name' => 'Smith',
+					'salary' => '1000'
+		]));
 	}
 
 	/**
@@ -101,11 +100,10 @@ class ServerTest extends Test {
 			'email' => 'user@email.com',
 			'password' => 'test'
 		]);
-		$this->setExpectedException('Exception');
-		self::$server->run('agent', 'update', [
-			'id' => '1',
-			'first_name' => "Peter",
-		]);
+		$this->assertEquals(false, self::$server->run('agent', 'update', [
+					'id' => '1',
+					'first_name' => "Peter",
+		]));
 	}
 
 	/**
@@ -116,10 +114,9 @@ class ServerTest extends Test {
 			'email' => 'user@email.com',
 			'password' => 'test'
 		]);
-		$this->setExpectedException('Exception');
-		self::$server->run('agent', 'delete', [
-			'id' => '1'
-		]);
+		$this->assertEquals(false, self::$server->run('agent', 'delete', [
+					'id' => '1'
+		]));
 	}
 
 	/**

@@ -73,3 +73,6 @@ Make it so that any extra Forms when linked will have access to the linking form
 How to do select and Form?
 Linked Components
 Circular references
+
+//Add error outputting for ajax.
+//Add server AJAX
