@@ -942,7 +942,7 @@ class Data extends Wrapper {
 			});
 		}
 
-		$this->iconContainer->addExtraComponent($icon);
+		$this->getIconContainer()->addExtraComponent($icon);
 		return $this;
 	}
 

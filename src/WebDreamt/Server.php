@@ -205,7 +205,6 @@ class Server {
 	 * @throws Exception If Propel can't commit the batch.
 	 */
 	function batch($data) {
-		Propel::disableInstancePooling();
 		$connection = Propel::getWriteConnection(Propel::getDefaultDatasource());
 		//Maybe disable instance pooling?
 
@@ -320,7 +319,6 @@ class Server {
 			$connection->rollBack();
 			throw $e;
 		}
-		Propel::enableInstancePooling();
 	}
 
 	/**
