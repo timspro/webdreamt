@@ -468,7 +468,7 @@ class Form extends Data {
 		$classes = "form-control $class";
 		$this->display->setAfterOpeningTag($labelHtml);
 		if ($selectComponent !== null) {
-			$this->display->setDisplayComponent($selectComponent->useHtml($attributes)->useCssClass($classes));
+			$this->display->setDisplayComponent($selectComponent->useHtml($attributes)->useCssClass($class));
 		} else {
 			switch ($type) {
 				case self::HTML_NUMBER:
