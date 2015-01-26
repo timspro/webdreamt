@@ -19,7 +19,11 @@ class InputSelect extends Form {
 	public function __construct($tableName, $columnName, $options, $class = null, $html = null,
 			$input = null) {
 		parent::__construct($tableName, $class, $html, $input);
-		$this->link('id', new Select(array_merge(["" => 'Choose...'], $options), 'wd-is-select'));
+		$newOptions = ["" => 'Choose...'];
+		foreach ($options as $key => $value) {
+			$newOptions[$key] = $value;
+		}
+		$this->link('id', new Select($newOptions, 'wd-is-select'));
 		$this->deny()->allow('id', $columnName);
 		$this->reorder([$columnName, 'id'])->setHtmlExtra([$columnName => 'placeholder="Create or..."'])
 				->setHtmlClass([$columnName => 'wd-is-input']);
