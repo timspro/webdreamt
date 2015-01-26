@@ -3,14 +3,15 @@
 namespace WebDreamt\Component\Wrapper\Data\Form;
 
 use WebDreamt\Component\Wrapper\Data\Form;
+use WebDreamt\Component\Wrapper\Select;
 
 class InputSelect extends Form {
 
 	/**
 	 * Create an abbreviated form that allows you to select from options or create a new entry.
-	 * @param string $tableName
-	 * @param string $columnName
-	 * @param array $options
+	 * @param string $tableName The name of the table to use for the input and the select
+	 * @param string $columnName The column to use for the input
+	 * @param array $options The ids of choices
 	 * @param string $class
 	 * @param string $html
 	 * @param array $input

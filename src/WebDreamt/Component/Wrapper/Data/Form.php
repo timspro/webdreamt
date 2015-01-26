@@ -398,8 +398,10 @@ class Form extends Data {
 				} else {
 					$class = 'wd-form-submit';
 				}
+				$this->useBeforeClosingTag("<button type='button' class='btn btn-default $class'>Submit</button>");
+			} else {
+				$this->useBeforeClosingTag("<button type='submit' class='btn btn-default'>Submit</button>");
 			}
-			$this->useBeforeClosingTag("<button type='submit' class='btn btn-default $class'>Submit</button>");
 		}
 		//If not included by a form, then just set the HTML tag.
 		if (!$form) {
