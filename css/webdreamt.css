@@ -1,17 +1,35 @@
 input::-moz-focus-inner, button::-moz-focus-inner {
   border: 0;
 }
+
 a:focus {
   outline: 0;
 }
+
 select:-moz-focusring {
   color: transparent;
   text-shadow: 0 0 0 #000;
 }
+
 body {
 	background-color: #e3e3e3;
 	padding: 50px;
 }
+
 .wd-subform {
 	margin-bottom: 15px
+}
+
+.wd-icon {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.wd-icon .glyphicon {
+	margin: 2px;
+}
+
+.wd-relative {
+	position: relative;
 }

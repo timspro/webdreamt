@@ -9,7 +9,7 @@ class Icon extends Component {
 	/**
 	 * An edit icon.
 	 */
-	const TYPE_EDIT = 'edit';
+	const TYPE_EDIT = 'update';
 	/**
 	 * A delete icon.
 	 */
