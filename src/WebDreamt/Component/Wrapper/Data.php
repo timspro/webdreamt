@@ -894,7 +894,7 @@ class Data extends Wrapper {
 	 */
 	function getIconContainer() {
 		if (!$this->iconContainer) {
-			$this->iconContainer = new Component('div', 'wd-icon', null, '');
+			$this->iconContainer = new Wrapper(new Component(null), 'div', 'wd-icon');
 			$this->addExtraComponent($this->iconContainer);
 			$this->appendCssClass('wd-relative');
 		}
@@ -926,7 +926,7 @@ class Data extends Wrapper {
 			} else if ($type === Icon::TYPE_EDIT) {
 				$action = 'update';
 			}
-			if ($ajax) {
+			if (!$ajax) {
 				$icon = new Wrapper($icon, 'a');
 				$attribute = 'href';
 			} else {
@@ -936,6 +936,7 @@ class Data extends Wrapper {
 			$icon->setHtmlCallback(function ($input) use ($url, $action, $class, $attribute) {
 				$paramString = "$attribute='$url?";
 				foreach ($this->primaryKeys as $key) {
+					$key = $key->getName();
 					$paramString .= "pk-$key=" . $this->getValueFromInput($key, $input) . "&";
 				}
 				$paramString .= "class=$class&action=$action'";

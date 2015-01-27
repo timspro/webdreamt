@@ -31,7 +31,7 @@ class Icon extends Component {
 	 */
 	protected $type;
 
-	function __construct($type, $htmlTag = 'span', $class = null, $html = null, $input = '') {
+	function __construct($type, $htmlTag = 'span', $class = null, $html = null, $input = null) {
 		switch ($type) {
 			case static::TYPE_DELETE:
 				$class .= ' glyphicon-remove';
@@ -52,6 +52,10 @@ class Icon extends Component {
 	 */
 	function getType() {
 		return $this->type;
+	}
+
+	function renderSpecial($input = null, Component $included = null) {
+		return '';
 	}
 
 }
