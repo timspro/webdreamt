@@ -950,17 +950,29 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Get an object based on the GET parameters of the URL.
-	 * @return ActiveRecordInterface
+	 * Get the primary keys from the GET parameters of the URL.
+	 * @return array
 	 */
-	static function getObjectFromUrl() {
+	static function getPrimaryKeysFromUrl() {
 		if (count($_GET) > 0 && isset($_GET['action']) && isset($_GET['class'])) {
 			$pks = [];
 			foreach ($_GET as $key => $value) {
 				if (substr($key, 0, 3) === 'pk-') {
-					$pks[] = $value;
+					$pks[substr($key, 3)] = $value;
 				}
 			}
+			return $pks;
+		}
+		return null;
+	}
+
+	/**
+	 * Get an object based on the GET parameters of the URL.
+	 * @return ActiveRecordInterface
+	 */
+	static function getObjectFromUrl() {
+		$pks = static::getPrimaryKeysFromUrl();
+		if ($pks !== null) {
 
 			$class = $_GET['class'];
 			$query = $class . "Query";

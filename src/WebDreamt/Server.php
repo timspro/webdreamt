@@ -8,6 +8,7 @@ use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Propel;
+use WebDreamt\Component\Wrapper\Data;
 
 class Server {
 
@@ -191,11 +192,24 @@ class Server {
 	}
 
 	/**
-	 * Allow the server to handle forms.
+	 * Allow the server to handle forms via $_POST. Note this will also check for delete
+	 * conditions in the $_GET variable.
 	 */
 	function automate() {
 		if (count($_POST) >= 0) {
 			$this->batch($_POST);
+		}
+		if (count($_GET) >= 0 && isset($_GET['delete']) && isset($_GET['class'])) {
+			$pks = Data::getPrimaryKeysFromUrl();
+			if ($pks !== null) {
+				Builder::loadMaps();
+
+				$mapClass = "\\Map\\" . $_GET['class'] . "TableMap";
+				$tableMap = $mapClass::getTableMap();
+				$tableName = $tableMap->getName();
+
+				$this->run($tableName, Server::ACT_DELETE, $pks);
+			}
 		}
 	}
 
