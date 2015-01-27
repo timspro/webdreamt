@@ -83,14 +83,12 @@ class Server {
 		$keys = null;
 		if ($action === null) {
 			//If the table is a cross-reference table, then we can't tell if we are supposed to update
-			//or create the entry in the database. So, we just assume that we will create one UNLESS
-			//$columns has 'in_database' set and it's not empty.
-			if ($tableMap->isCrossRef() && (!isset($columns['in_database']) || empty($columns['in_database']))) {
-				$keys = false;
-			} else {
-				$keys = $this->useKeys($tableMap, $columns);
-			}
-			if ($keys === false) {
+			//or create the entry in the database. So, we just assume that we update unless we can't find
+			//the item, which is indicated by $keys being null. Note that in other cases we assume it is an
+			//error when we can't find the item, but could find the primary keys (which is indicated when
+			//$keys is false).
+			$keys = $this->useKeys($tableMap, $columns);
+			if ($keys === false || ($tableMap->isCrossRef() && $keys === null)) {
 				$action = self::ACT_CREATE;
 			} else {
 				$action = self::ACT_UPDATE;
