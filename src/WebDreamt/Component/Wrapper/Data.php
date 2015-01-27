@@ -894,7 +894,7 @@ class Data extends Wrapper {
 	 */
 	function getIconContainer() {
 		if (!$this->iconContainer) {
-			$this->iconContainer = new Wrapper(new Component(null), 'div', 'wd-icon');
+			$this->iconContainer = new Wrapper(new Component(null, null, null, ''), 'div', 'wd-icon');
 			$this->addExtraComponent($this->iconContainer);
 			$this->appendCssClass('wd-relative');
 		}
