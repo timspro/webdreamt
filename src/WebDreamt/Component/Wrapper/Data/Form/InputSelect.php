@@ -28,6 +28,11 @@ class InputSelect extends Form {
 		$this->reorder([$columnName, 'id'])->setHtmlExtra([$columnName => 'placeholder="Create or..."'])
 				->setHtmlClass([$columnName => 'wd-is-input']);
 		$this->setLabels(['id' => null]);
+		$this->setInputHook(function($column, $options, $name, &$value) {
+			if ($column === 'id') {
+				$value = '';
+			}
+		});
 	}
 
 }

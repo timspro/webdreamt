@@ -1,6 +1,7 @@
 <?php
 use WebDreamt\Box;
 use WebDreamt\Component\Wrapper\Select;
+
 if (php_sapi_name() !== 'cli' && __FILE__ === $_SERVER["SCRIPT_FILENAME"]) {
 	echo 'As a security precaution, this file cannot be run directly and instead '
 	. 'must be included from somewhere else.';
