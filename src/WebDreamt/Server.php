@@ -194,10 +194,10 @@ class Server {
 	 * conditions in the $_GET variable.
 	 */
 	function automate() {
-		if (count($_POST) >= 0) {
+		if (count($_POST) > 0) {
 			$this->batch($_POST);
 		}
-		if (count($_GET) >= 0 && isset($_GET['delete']) && isset($_GET['class']) &&
+		if (count($_GET) > 0 && isset($_GET['action']) && isset($_GET['class']) &&
 				$_GET['action'] === 'delete') {
 			$pks = Data::getPrimaryKeysFromUrl();
 			if ($pks !== null) {
