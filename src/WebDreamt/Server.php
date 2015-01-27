@@ -197,7 +197,8 @@ class Server {
 		if (count($_POST) >= 0) {
 			$this->batch($_POST);
 		}
-		if (count($_GET) >= 0 && isset($_GET['delete']) && isset($_GET['class'])) {
+		if (count($_GET) >= 0 && isset($_GET['delete']) && isset($_GET['class']) &&
+				$_GET['action'] === 'delete') {
 			$pks = Data::getPrimaryKeysFromUrl();
 			if ($pks !== null) {
 				Builder::loadMaps();
