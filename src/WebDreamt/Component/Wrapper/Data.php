@@ -846,9 +846,10 @@ class Data extends Wrapper {
 	 * methods depending on the type of the column in the database.
 	 * @param string $key The key to use to try to get the value from the input.
 	 * @param mixed $input
+	 * @param boolean $noObject
 	 * @return string
 	 */
-	protected function getValueFromInput($key, $input) {
+	protected function getValueFromInput($key, $input, $noObject = false) {
 		if ($key === null) {
 			return $input;
 		}
@@ -861,7 +862,7 @@ class Data extends Wrapper {
 			return $value;
 		} else if ($input instanceof $className) {
 			$object = $this->getOption($key, self::OPT_PROPEL_OBJECT);
-			if ($object) {
+			if ($object && !$noObject) {
 				return $input->$object();
 			} else {
 				$value = $input->getByName($key, TableMap::TYPE_FIELDNAME);
@@ -937,7 +938,7 @@ class Data extends Wrapper {
 				$paramString = "$attribute='$url?";
 				foreach ($this->primaryKeys as $key) {
 					$key = $key->getName();
-					$paramString .= "pk-$key=" . $this->getValueFromInput($key, $input) . "&";
+					$paramString .= "pk-$key=" . $this->getValueFromInput($key, $input, true) . "&";
 				}
 				$paramString .= "class=$class&action=$action'";
 				return $paramString;
