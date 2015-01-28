@@ -210,7 +210,7 @@ class Server {
 				$tableMap = $mapClass::getTableMap();
 				$tableName = $tableMap->getName();
 
-				if (!empty($this->run($tableName, Server::ACT_DELETE, $pks))) {
+				if ($this->run($tableName, Server::ACT_DELETE, $pks) !== false) {
 					header("HTTP/1.1 303 See Other");
 					$url = explode('?', $_SERVER['REQUEST_URI']);
 					header('Location: ' . $url[0]);

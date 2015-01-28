@@ -601,15 +601,16 @@ class Builder {
 	 */
 	public static function automate() {
 		$box = Box::get();
-		$generatedSchema = $box->VendorDirectory . "../db/schemas/schema.xml";
-		if (!file_exists($generatedSchema)) {
+		$userSchema = $box->VendorDirectory . "../db/schemas/schema.xml";
+		$generatedSchema = $box->VendorDirectory . "../db/propel/schema.xml";
+		if (!file_exists($userSchema)) {
+			//Then, generate the user schema from the database.
 			ob_start();
 			$box->builder()->updatePropel();
 			ob_get_clean();
 			return true;
-		} else
-		if (filemtime($generatedSchema) >
-				filemtime($box->VendorDirectory . "../db/propel/schema.xml")) {
+		} else if (file_exists($generatedSchema) && filemtime($userSchema) > filemtime($generatedSchema)) {
+			//Then, generate the real schema from the user schema.
 			ob_start();
 			$box->builder()->updateDatabase();
 			ob_get_clean();
