@@ -609,7 +609,7 @@ class Builder {
 			$box->builder()->updatePropel();
 			ob_get_clean();
 			return true;
-		} else if (file_exists($generatedSchema) && filemtime($userSchema) > filemtime($generatedSchema)) {
+		} else if (!file_exists($generatedSchema) || (filemtime($userSchema) > filemtime($generatedSchema))) {
 			//Then, generate the real schema from the user schema.
 			ob_start();
 			$box->builder()->updateDatabase();
