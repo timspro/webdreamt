@@ -195,7 +195,10 @@ class Server {
 	 */
 	function automate() {
 		if (count($_POST) > 0) {
-			$this->batch($_POST);
+			if ($this->batch($_POST)) {
+				header("HTTP/1.1 303 See Other");
+				header('Location: ' . $_SERVER['REQUEST_URI']);
+			}
 		}
 		if (count($_GET) > 0 && isset($_GET['action']) && isset($_GET['class']) &&
 				$_GET['action'] === 'delete') {
@@ -207,7 +210,11 @@ class Server {
 				$tableMap = $mapClass::getTableMap();
 				$tableName = $tableMap->getName();
 
-				$this->run($tableName, Server::ACT_DELETE, $pks);
+				if (!empty($this->run($tableName, Server::ACT_DELETE, $pks))) {
+					header("HTTP/1.1 303 See Other");
+					$url = explode('?', $_SERVER['REQUEST_URI']);
+					header('Location: ' . $url[0]);
+				}
 			}
 		}
 	}
@@ -220,6 +227,8 @@ class Server {
 	function batch($data) {
 		$connection = Propel::getWriteConnection(Propel::getDefaultDatasource());
 		//Maybe disable instance pooling?
+
+		$result = false;
 
 		$items = [];
 		$tables = [];
@@ -302,6 +311,9 @@ class Server {
 					$action = Server::ACT_DELETE;
 				}
 				$object = $this->run($tables[$id], $action, $items[$id], $connection);
+				if (!empty($object)) {
+					$result = true;
+				}
 				if ($object !== false) {
 					if (method_exists($object, 'getId')) {
 						$objectId = $object->getId();
@@ -332,6 +344,7 @@ class Server {
 			$connection->rollBack();
 			throw $e;
 		}
+		return $result;
 	}
 
 	/**
