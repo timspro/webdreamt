@@ -98,7 +98,8 @@
 			form.setAttribute('method', 'POST');
 		}
 		if (!form.hasAttribute('action')) {
-			form.setAttribute('action', '?');
+			var url = document.URL.toString();
+			form.setAttribute('action', url.split("?")[0]);
 		}
 		form.submit();
 	});
