@@ -4,6 +4,8 @@ namespace WebDreamt;
 
 use Cartalyst\Sentry\Facades\Native\Sentry as SentryNative;
 use Cartalyst\Sentry\Sentry as Sentry;
+use Cartalyst\Sentry\Users\Eloquent\Provider as UserProvider;
+use Cartalyst\Sentry\Hashing\BcryptHasher;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use PDO;
 use Propel\Common\Pluralizer\StandardEnglishPluralizer;
@@ -141,7 +143,7 @@ class Box {
 
 					$capsule->bootEloquent();
 
-					return SentryNative::instance();
+					return SentryNative::instance(new UserProvider(new BcryptHasher()));
 				});
 	}
 
