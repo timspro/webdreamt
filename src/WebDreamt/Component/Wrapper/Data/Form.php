@@ -347,8 +347,8 @@ class Form extends Data {
 	 * @return static
 	 */
 	function unlink($column) {
-		if ($this->columns[self::OPT_LABEL_ACCESS]) {
-			$this->columns[self::OPT_LABEL_ACCESS] = self::FORM_LABEL;
+		if ($this->columns[$column][self::OPT_LABEL_ACCESS]) {
+			$this->columns[$column][self::OPT_LABEL_ACCESS] = self::FORM_LABEL;
 		}
 		return parent::unlink($column);
 	}
@@ -446,7 +446,7 @@ class Form extends Data {
 		if ($component instanceof Select) {
 			$this->formComponent[$column] = array_pop($this->linked[$column]);
 		} else {
-			$this->columns[self::OPT_LABEL_ACCESS] = true;
+			$this->columns[$column][self::OPT_LABEL_ACCESS] = true;
 		}
 		return $this;
 	}
