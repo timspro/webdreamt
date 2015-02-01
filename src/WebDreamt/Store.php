@@ -11,21 +11,25 @@ class Store {
 	protected $store = [];
 
 	/**
-	 * Execute and return the result of the function for the given key.
+	 * If $key has been set to a function, then get() executes the function and keeps the result
+	 * as the new value for the key. If $key is set to a value, then returns the value.
 	 * @param string $key
 	 * @return mixed
 	 */
 	function get($key) {
-		return $this->store[$key]();
+		if (is_callable($this->store[$key])) {
+			$this->store[$key] = $this->store[$key]();
+		}
+		return $this->store[$key];
 	}
 
 	/**
-	 * Set a function to execute for a particular key.
+	 * Set a variable to retrieve or a function to execute for a particular key.
 	 * @param string $key
-	 * @param function $callable
+	 * @param mixed $value
 	 */
-	function set($key, $callable) {
-		$this->store[$key] = $callable;
+	function set($key, $value) {
+		$this->store[$key] = $value;
 	}
 
 }
