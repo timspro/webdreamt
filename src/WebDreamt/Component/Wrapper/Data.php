@@ -106,11 +106,6 @@ class Data extends Wrapper {
 	 */
 	protected $label;
 	/**
-	 * Indicate that the label component should be used.
-	 * @var boolean
-	 */
-	protected $useLabel = true;
-	/**
 	 * The css prefix used to identify the column label.
 	 * @var string
 	 */
@@ -370,29 +365,6 @@ class Data extends Wrapper {
 	 */
 	function getLabelComponent() {
 		return $this->label;
-	}
-
-	/**
-	 * Set if the label component should be used in the rendering. Setting this to false is useful
-	 * when you want to render the label in a different way, such as inside the display component:
-	 * <code>
-	 * $this->getDisplayComponent()->addExtraComponent($this->setUseLabel(false)->getLabelComponent())
-	 * </code>
-	 * Defaults to true.
-	 * @param boolean $label
-	 * @return static
-	 */
-	function setUseLabel($label) {
-		$this->useLabel = $label;
-		return $this;
-	}
-
-	/**
-	 * Get whether the label component will be used in the rendering.
-	 * @return boolean
-	 */
-	function getUseLabel() {
-		return $this->useLabel;
 	}
 
 	/**
@@ -759,7 +731,7 @@ class Data extends Wrapper {
 				//Set the input of the label regardless as it might be used somewhere in the display
 				//component (such as via addExtraComponent()).
 				$label->setInput($options[self::OPT_LABEL]);
-				if ($this->useLabel && $options[self::OPT_LABEL_ACCESS] && $options[self::OPT_LABEL] !== null) {
+				if ($options[self::OPT_LABEL_ACCESS] && $options[self::OPT_LABEL] !== null) {
 					//Similar to renderComponent() but uses labelClass
 					if (!$options[self::OPT_VISIBLE]) {
 						$label->useHtml('style="display:none"');

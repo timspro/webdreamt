@@ -16,6 +16,11 @@ use WebDreamt\Component\Wrapper\Modal;
 class Form extends Data {
 
 	/**
+	 * If used as the value for OPT_LABEL_ACCESS, then it indicates that the Form class should
+	 * label the column instead of the Data class.
+	 */
+	const FORM_LABEL = null;
+	/**
 	 * Whether the input type is disabled.
 	 */
 	const OPT_DISABLE = 'disable';
@@ -117,7 +122,7 @@ class Form extends Data {
 
 	protected function getDefaultOptions() {
 		$options = parent::getDefaultOptions();
-		$options[self::OPT_LABEL_ACCESS] = true;
+		$options[self::OPT_LABEL_ACCESS] = self::FORM_LABEL;
 		$options[self::OPT_DISABLE] = false;
 		$options[self::OPT_REQUIRE] = false;
 		$options[self::OPT_HTML_TYPE] = null;
@@ -325,6 +330,30 @@ class Form extends Data {
 	}
 
 	/**
+	 * Show labels for the given columns. Defaults to all.
+	 * @param array $columns
+	 * @return static
+	 */
+	function allowLabels($columns = null) {
+		$columns = is_array($columns) ? $columns : func_get_args();
+		$this->setOptions($columns, self::OPT_LABEL_ACCESS, self::FORM_LABEL);
+		$this->setOptions(array_keys($this->linked), self::OPT_LABEL_ACCESS, true);
+		return $this;
+	}
+
+	/**
+	 * Removes linked components for a given column.
+	 * @param string $column
+	 * @return static
+	 */
+	function unlink($column) {
+		if ($this->columns[self::OPT_LABEL_ACCESS]) {
+			$this->columns[self::OPT_LABEL_ACCESS] = self::FORM_LABEL;
+		}
+		return parent::unlink($column);
+	}
+
+	/**
 	 * Render the form.
 	 * @param array $input
 	 * @param Component $included
@@ -416,6 +445,8 @@ class Form extends Data {
 		parent::link($column, $component, $manyColumn, $autoPropel);
 		if ($component instanceof Select) {
 			$this->formComponent[$column] = array_pop($this->linked[$column]);
+		} else {
+			$this->columns[self::OPT_LABEL_ACCESS] = true;
 		}
 		return $this;
 	}
@@ -431,7 +462,7 @@ class Form extends Data {
 		$selectComponent = isset($this->formComponent[$column]) ? $this->formComponent[$column] : null;
 		$name = $this->id . ":" . $column;
 		$label = $selectComponent ? $selectComponent->getTitle() : $options[self::OPT_LABEL];
-		if ($options[self::OPT_LABEL_ACCESS] && $label !== null) {
+		if ($options[self::OPT_LABEL_ACCESS] !== false && $label !== null) {
 			$this->label->useHtml("for='$name'")->setHtmlTag('label');
 		} else {
 			$this->label->setHtmlTag(null)->setInput('');
