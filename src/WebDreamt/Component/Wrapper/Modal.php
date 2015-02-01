@@ -69,7 +69,7 @@ class Modal extends Wrapper {
 	 * @param Component $included
 	 * @return string
 	 */
-	protected function renderSpecial($input = null, Component $included = null) {
+	protected function renderInput($input = null, Component $included = null) {
 		ob_start();
 		?>
 		<div class="modal-dialog">

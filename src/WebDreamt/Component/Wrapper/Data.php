@@ -51,6 +51,10 @@ class Data extends Wrapper {
 	 */
 	const OPT_LABEL = 'label';
 	/**
+	 * Whether the label is sent in the HTML or not.
+	 */
+	const OPT_LABEL_ACCESS = 'label_access';
+	/**
 	 * The method to call on the propel object to access a different object. This only applies if input is
 	 * given as a Propel object.
 	 */
@@ -102,10 +106,10 @@ class Data extends Wrapper {
 	 */
 	protected $label;
 	/**
-	 * Indicates if the labels should output alongside the data.
+	 * Indicate that the label component should be used.
 	 * @var boolean
 	 */
-	protected $showLabel = false;
+	protected $useLabel = true;
 	/**
 	 * The css prefix used to identify the column label.
 	 * @var string
@@ -167,16 +171,18 @@ class Data extends Wrapper {
 
 		Builder::loadMaps();
 
-		$table = Propel::getDatabaseMap()->getTable($tableName);
-		$this->tableName = $tableName;
-		$this->className = $table->getPhpName();
-		$this->primaryKeys = $table->getPrimaryKeys();
-		$this->title = static::beautify($tableName);
 		$this->label = new Component();
-		foreach ($table->getColumns() as $column) {
-			$name = $column->getName();
-			$this->columns[$name] = $this->getDefaultOptions();
-			$this->addColumn($column, $this->columns[$name]);
+		if ($tableName !== null) {
+			$table = Propel::getDatabaseMap()->getTable($tableName);
+			$this->tableName = $tableName;
+			$this->className = $table->getPhpName();
+			$this->primaryKeys = $table->getPrimaryKeys();
+			$this->title = static::beautify($tableName);
+			foreach ($table->getColumns() as $column) {
+				$name = $column->getName();
+				$this->columns[$name] = $this->getDefaultOptions();
+				$this->addColumn($column, $this->columns[$name]);
+			}
 		}
 	}
 
@@ -210,7 +216,8 @@ class Data extends Wrapper {
 	protected function getDefaultOptions() {
 		return [
 			self::OPT_ACCESS => true,
-			self::OPT_VISIBLE => true
+			self::OPT_VISIBLE => true,
+			self::OPT_LABEL_ACCESS => false
 		];
 	}
 
@@ -348,24 +355,6 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Set if labels should be shown. Defaults to false.
-	 * @param boolean $show
-	 * @return static
-	 */
-	function setLabelable($show) {
-		$this->showLabel = $show;
-		return $this;
-	}
-
-	/**
-	 * Get if labels should be shown.
-	 * @return boolean
-	 */
-	function getLabelable() {
-		return $this->showLabel;
-	}
-
-	/**
 	 * Set a component to show labels in.
 	 * @param Component $label
 	 * @return static
@@ -381,6 +370,29 @@ class Data extends Wrapper {
 	 */
 	function getLabelComponent() {
 		return $this->label;
+	}
+
+	/**
+	 * Set if the label component should be used in the rendering. Setting this to false is useful
+	 * when you want to render the label in a different way, such as inside the display component:
+	 * <code>
+	 * $this->getDisplayComponent()->addExtraComponent($this->setUseLabel(false)->getLabelComponent())
+	 * </code>
+	 * Defaults to true.
+	 * @param boolean $label
+	 * @return static
+	 */
+	function setUseLabel($label) {
+		$this->useLabel = $label;
+		return $this;
+	}
+
+	/**
+	 * Get whether the label component will be used in the rendering.
+	 * @return boolean
+	 */
+	function getUseLabel() {
+		return $this->useLabel;
 	}
 
 	/**
@@ -481,6 +493,26 @@ class Data extends Wrapper {
 	 */
 	function hide($columns = null) {
 		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_VISIBLE, false);
+		return $this;
+	}
+
+	/**
+	 * Make labels visible. Defaults to making labels visible for all columns.
+	 * @param array|... $columns Column names should be the values of the array.
+	 * @return static
+	 */
+	function allowLabels($columns = null) {
+		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_LABEL_ACCESS, true);
+		return $this;
+	}
+
+	/**
+	 * Hide labels. Defaults to making labels hidden for all columns.
+	 * @param array|... $columns Column names should be the values of the array.
+	 * @return static
+	 */
+	function denyLabels($columns = null) {
+		$this->setOptions(is_array($columns) ? $columns : func_get_args(), self::OPT_LABEL_ACCESS, false);
 		return $this;
 	}
 
@@ -718,23 +750,24 @@ class Data extends Wrapper {
 	 * if not being called from a component.
 	 * @return string
 	 */
-	protected function renderSpecial($input = null, $included = null) {
+	protected function renderInput($input = null, $included = null) {
 		$output = null;
+		$label = $this->getLabelComponent();
 		foreach ($this->columns as $column => $options) {
 			$this->renderedColumn = $column;
 			if ($options[self::OPT_ACCESS]) {
 				//Set the input of the label regardless as it might be used somewhere in the display
 				//component (such as via addExtraComponent()).
-				$this->label->setInput($options[self::OPT_LABEL]);
-				if ($this->showLabel && $options[self::OPT_LABEL] !== null) {
+				$label->setInput($options[self::OPT_LABEL]);
+				if ($this->useLabel && $options[self::OPT_LABEL_ACCESS] && $options[self::OPT_LABEL] !== null) {
 					//Similar to renderComponent() but uses labelClass
 					if (!$options[self::OPT_VISIBLE]) {
-						$this->label->useHtml('style="display:none"');
+						$label->useHtml('style="display:none"');
 					}
 					if ($this->labelClass !== null) {
-						$this->label->useClass($this->labelClass . "-$column");
+						$label->useClass($this->labelClass . "-$column");
 					}
-					$output .= $this->label->render(null, $this);
+					$output .= $label->render(null, $this);
 				}
 				$value = $this->getValueFromInput($column, $input);
 				$linked = $this->renderLinkedComponents($column, $value, $included);
@@ -746,7 +779,7 @@ class Data extends Wrapper {
 			}
 		}
 		//Reset the label input to null to remove side-effects.
-		$this->label->setInput(null);
+		$label->setInput(null);
 		$this->renderedColumn = null;
 		return $output;
 	}
@@ -890,36 +923,12 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Get the icon container component.
-	 * @return Component
-	 */
-	function getIconContainer() {
-		if (!$this->iconContainer) {
-			$this->iconContainer = new Wrapper(new Component(null, null, null, ''), 'div', 'wd-icon');
-			$this->addExtraComponent($this->iconContainer);
-			$this->appendCssClass('wd-relative');
-		}
-		return $this->iconContainer;
-	}
-
-	/**
-	 * Set the icon containercomponent.
-	 * @param Component $component
-	 * @return static
-	 */
-	function setIconContainer(Component $component) {
-		$this->iconContainer = $component;
-		return $this;
-	}
-
-	/**
 	 * Add an icon.
 	 * @param Icon $icon
 	 * @param string $url
-	 * @param boolean $ajax
-	 * @return Data
+	 * @return static
 	 */
-	function addIcon(Icon $icon, $url = null, $ajax = false) {
+	function addIcon(Icon $icon, $url = null) {
 		if ($url !== null) {
 			$type = $icon->getType();
 			if ($type === Icon::TYPE_DELETE) {
@@ -927,12 +936,12 @@ class Data extends Wrapper {
 			} else if ($type === Icon::TYPE_EDIT) {
 				$action = 'update';
 			}
-			if (!$ajax) {
-				$icon = new Wrapper($icon, 'a');
-				$attribute = 'href';
-			} else {
-				$attribute = 'data-wd-url';
-			}
+//			if (!$ajax) {
+			$icon = new Wrapper($icon, 'a');
+			$attribute = 'href';
+//			} else {
+//				$attribute = 'data-wd-url';
+//			}
 			$class = $this->className;
 			$icon->setHtmlCallback(function ($input) use ($url, $action, $class, $attribute) {
 				$paramString = "$attribute='$url?";
@@ -945,7 +954,7 @@ class Data extends Wrapper {
 			});
 		}
 
-		$this->getIconContainer()->addExtraComponent($icon, false);
+		$this->getIconContainer()->addExtraComponent($icon);
 		return $this;
 	}
 

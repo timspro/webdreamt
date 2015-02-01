@@ -233,16 +233,17 @@ class Box {
 			$custom = ob_get_clean();
 		}
 		return '
-			<html lang="en">
-			<head>
-				<meta charset="utf-8">
-				<meta http-equiv="X-UA-Compatible" content="IE=edge">
-				<meta name="viewport" content="width=device-width, initial-scale=1">
-				<title>' . $title . '</title> ' .
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>' . $title . '</title> ' .
 				($css ? $this->css() : '') . "\n" .
 				$custom . '
-			</head>
-			<body>';
+	</head>
+<body>';
 	}
 
 	/**
@@ -267,8 +268,8 @@ class Box {
 		}
 		return ($javascript ? $this->javascript() : '') . "\n" .
 				$custom . '
-		</body>
-		</html>';
+</body>
+</html>';
 	}
 
 	/**

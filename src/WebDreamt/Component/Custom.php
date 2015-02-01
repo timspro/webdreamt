@@ -44,7 +44,7 @@ class Custom extends Component {
 	 * @param Component $included
 	 * @return string
 	 */
-	protected function renderSpecial($input = null, Component $included = null) {
+	protected function renderInput($input = null, Component $included = null) {
 		$function = $this->function;
 		if ($this->always || $input !== null) {
 			return $function($input, $included);

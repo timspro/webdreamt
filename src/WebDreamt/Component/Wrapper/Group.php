@@ -20,7 +20,7 @@ class Group extends Wrapper {
 	 * A component to display the first input in.
 	 * @type Component
 	 */
-	protected $firstComponent;
+	protected $first;
 	/**
 	 * Indicates if a different component should be used for the first column.
 	 * @var boolean
@@ -83,7 +83,12 @@ class Group extends Wrapper {
 	 * @return static
 	 */
 	function setFirstComponent(Component $firstComponent) {
-		$this->firstComponent = $firstComponent;
+		$this->first = $firstComponent;
+		if ($firstComponent === null) {
+			$this->useFirst = false;
+		} else {
+			$this->useFirst = true;
+		}
 		return $this;
 	}
 
@@ -92,7 +97,7 @@ class Group extends Wrapper {
 	 * @return Component
 	 */
 	function getFirstComponent() {
-		return $this->firstComponent;
+		return $this->first;
 	}
 
 	/**
@@ -101,8 +106,8 @@ class Group extends Wrapper {
 	 * @return static
 	 */
 	function setUseFirst($first) {
-		if ($this->firstComponent === null) {
-			$this->firstComponent = new Component();
+		if ($first && $this->first === null) {
+			$this->first = new Component();
 		}
 		$this->useFirst = $first;
 		return $this;
@@ -122,13 +127,13 @@ class Group extends Wrapper {
 	 * @param Component $included
 	 * @return string
 	 */
-	protected function renderSpecial($input = null, Component $included = null) {
+	protected function renderInput($input = null, Component $included = null) {
 		if (!$input) {
 			return;
 		}
 		$output = '';
 		if ($this->useFirst) {
-			$output .= $this->firstComponent->render(array_shift($input), $this);
+			$output .= $this->first->render(array_shift($input), $this);
 		}
 		foreach ($input as $index => $value) {
 			if ($this->indexClass !== null) {

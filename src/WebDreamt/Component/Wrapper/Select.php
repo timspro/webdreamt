@@ -37,7 +37,13 @@ class Select extends Wrapper {
 		$this->options = $options;
 	}
 
-	protected function renderSpecial($input = null, Component $included = null) {
+	/**
+	 * Render the input by outputting the select box and the selected element if any.
+	 * @param type $input
+	 * @param Component $included
+	 * @return type
+	 */
+	protected function renderInput($input = null, Component $included = null) {
 		$output = '';
 		foreach ($this->options as $key => $value) {
 			if ($this->noValues) {
@@ -92,10 +98,10 @@ class Select extends Wrapper {
 	}
 
 	/**
-	 * Make the select box use Select2.js
+	 * Make the select box be a "fancier" select box that uses Select2.js.
 	 * @return static
 	 */
-	function useSelect2() {
+	function fancy() {
 		$this->setCssClass('wd-select2');
 		return $this;
 	}

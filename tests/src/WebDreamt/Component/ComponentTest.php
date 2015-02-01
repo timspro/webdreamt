@@ -175,7 +175,7 @@ class ComponentTest extends Test {
 		$this->ret($this->component->addExtraComponent(new Component('div', 'b', null, '')));
 		$this->ret($this->component->addExtraComponent(new Component('div', 'c', null, '')));
 		$this->assertEquals(4, count($this->component->getComponents()));
-		$this->assertEquals(0, $this->component->getChildComponentIndex());
+		$this->assertEquals(0, $this->component->getInputIndex());
 		$this->component->setInput('<div class="me"></div>');
 		$this->checkIndex($this->component->render(), [
 			'.me' => 0,
@@ -183,16 +183,16 @@ class ComponentTest extends Test {
 			'.b' => 2,
 			'.c' => 3
 		]);
-		$this->ret($this->component->setChildComponentIndex(3));
-		$this->assertEquals(3, $this->component->getChildComponentIndex());
+		$this->ret($this->component->setInputIndex(3));
+		$this->assertEquals(3, $this->component->getInputIndex());
 		$this->checkIndex($this->component->render(), [
 			'.a' => 0,
 			'.b' => 1,
 			'.c' => 2,
 			'.me' => 3
 		]);
-		$this->ret($this->component->setChildComponentIndex(1));
-		$this->assertEquals(1, $this->component->getChildComponentIndex());
+		$this->ret($this->component->setInputIndex(1));
+		$this->assertEquals(1, $this->component->getInputIndex());
 		$this->checkIndex($this->component->render(), [
 			'.a' => 0,
 			'.me' => 1,

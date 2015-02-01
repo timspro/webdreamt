@@ -7,6 +7,7 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use WebDreamt\Component\Wrapper\Data\Form;
 use WebDreamt\Component\Wrapper\Modal;
 use WebDreamt\Component\Wrapper\Select;
+
 require_once __DIR__ . '/../../../bootstrap.php';
 
 class FormTest extends Test {

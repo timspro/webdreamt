@@ -3,6 +3,8 @@
 namespace WebDreamt;
 
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
+use WebDreamt\Component\Icon;
+use WebDreamt\Component\Wrapper;
 
 /**
  * An object-oriented representation of an HTML block.
@@ -102,6 +104,12 @@ class Component {
 	 * @var Component
 	 */
 	protected $renderedBy;
+	/**
+	 * The icon container for the component. Note that this is lazily initiated, so use getIconContainer()
+	 * to access it, especially for the potential first time.
+	 * @var Wrapper
+	 */
+	protected $iconContainer;
 	/**
 	 * The group(s) that can access the component.
 	 * @var string|array
@@ -377,13 +385,12 @@ class Component {
 	}
 
 	/**
-	 * Set the child component index and thus the order that the child component appears along with
-	 * extra components.
+	 * Set the index of where the input is rendered in relation to added extra components.
 	 * @param int $newIndex If invalid (negative or larger than the array can handle), then the
 	 * child component will appear last.
 	 * @return static
 	 */
-	function setChildComponentIndex($newIndex) {
+	function setInputIndex($newIndex) {
 		$array = [];
 		//Assume that we are moving the component forward in the array or keeping at the same spot.
 		$backward = false;
@@ -420,10 +427,10 @@ class Component {
 	}
 
 	/**
-	 * Get the child component index.
+	 * Get the index of where the input is rendered in relation to the added extra components.
 	 * @return int
 	 */
-	function getChildComponentIndex() {
+	function getInputIndex() {
 		foreach ($this->components as $index => $component) {
 			if (!$component) {
 				return $index;
@@ -640,7 +647,7 @@ class Component {
 		$output = null;
 		foreach ($this->components as $component) {
 			if (!$component) {
-				$output .= $this->renderSpecial($input, $included);
+				$output .= $this->renderInput($input, $included);
 			} else {
 				$output .= $component->render($input, $this);
 			}
@@ -655,8 +662,31 @@ class Component {
 	 * @param Component $included
 	 * @return string
 	 */
-	protected function renderSpecial($input = null, Component $included = null) {
+	protected function renderInput($input = null, Component $included = null) {
 		return $input;
+	}
+
+	/**
+	 * Get the icon container component.
+	 * @return Component
+	 */
+	function getIconContainer() {
+		if (!$this->iconContainer) {
+			$this->iconContainer = new Wrapper(new Component(null, null, null, ''), 'span', 'wd-icon');
+			$this->addExtraComponent($this->iconContainer);
+			$this->appendCssClass('wd-relative');
+		}
+		return $this->iconContainer;
+	}
+
+	/**
+	 * Add an icon to the icon container.
+	 * @param Icon $icon
+	 * @return Component
+	 */
+	function addIcon(Icon $icon) {
+		$this->getIconContainer()->addExtraComponent($icon);
+		return $this;
 	}
 
 	/**

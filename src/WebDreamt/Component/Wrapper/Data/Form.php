@@ -84,12 +84,7 @@ class Form extends Data {
 	 * Linked select components.
 	 * @var array
 	 */
-	protected $selectComponent = [];
-	/**
-	 * Indicate if the form should have labels.
-	 * @var boolean
-	 */
-	protected $formLabel = true;
+	protected $formComponent = [];
 	/**
 	 * Indicate if the form should use JavaScript to submit.
 	 * @var boolean
@@ -116,11 +111,13 @@ class Form extends Data {
 	function __construct($tableName, $class = null, $html = null, $input = null) {
 		$display = new Wrapper($this->input, 'div', "form-group", null);
 		parent::__construct($tableName, $display, 'form', "wd-form $class", "role='form' $html", $input);
-		$this->setLabelComponent(new Component('label'));
+		$display->addExtraComponent($this->label, false);
+		$this->useLabel = false;
 	}
 
 	protected function getDefaultOptions() {
 		$options = parent::getDefaultOptions();
+		$options[self::OPT_LABEL_ACCESS] = true;
 		$options[self::OPT_DISABLE] = false;
 		$options[self::OPT_REQUIRE] = false;
 		$options[self::OPT_HTML_TYPE] = null;
@@ -186,8 +183,10 @@ class Form extends Data {
 	}
 
 	/**
-	 * Makes the form a "delete" form. If true, then disables the inputs. If false, then
-	 * enables the inputs.
+	 * Makes the form a "delete" form. This is just a form that has its inputs disabled by default and
+	 * has a hidden input with the name "$formId:::delete". When paired with server automate, this
+	 * will delete the input. Note that if $delete is true, then automatically disables the inputs.
+	 * If $delete is false, then automatically enables the inputs.
 	 * @param boolean $delete
 	 * @return static
 	 */
@@ -207,24 +206,6 @@ class Form extends Data {
 	 */
 	function getDeleteForm() {
 		return $this->deleteForm;
-	}
-
-	/**
-	 * Set if the form shows labels.
-	 * @param boolean $show
-	 * @return static
-	 */
-	function setLabelable($show) {
-		$this->formLabel = $show;
-		return $this;
-	}
-
-	/**
-	 * Get if the form has labels.
-	 * @return boolean
-	 */
-	function getLabelable() {
-		return $this->formLabel;
 	}
 
 	/**
@@ -336,7 +317,7 @@ class Form extends Data {
 	}
 
 	/**
-	 * Get the ID of this form. This will work only during or after the form is rendered.
+	 * Get the ID of this form. This will return null if the form is not being rendered.
 	 * @return int
 	 */
 	function getId() {
@@ -410,7 +391,11 @@ class Form extends Data {
 			$this->useCssClass('wd-subform');
 		}
 
-		return parent::render($input, $included);
+		$result = parent::render($input, $included);
+
+		$this->id = null;
+
+		return $result;
 	}
 
 	/**
@@ -430,7 +415,7 @@ class Form extends Data {
 	function link($column, Component $component, $manyColumn = null, $autoPropel = true) {
 		parent::link($column, $component, $manyColumn, $autoPropel);
 		if ($component instanceof Select) {
-			$this->selectComponent[$column] = array_pop($this->linked[$column]);
+			$this->formComponent[$column] = array_pop($this->linked[$column]);
 		}
 		return $this;
 	}
@@ -443,13 +428,13 @@ class Form extends Data {
 	 */
 	protected function renderColumn($column, $value) {
 		$options = $this->columns[$column];
-		$selectComponent = isset($this->selectComponent[$column]) ? $this->selectComponent[$column] : null;
+		$selectComponent = isset($this->formComponent[$column]) ? $this->formComponent[$column] : null;
 		$name = $this->id . ":" . $column;
 		$label = $selectComponent ? $selectComponent->getTitle() : $options[self::OPT_LABEL];
-		if ($this->formLabel && $label !== null) {
-			$labelHtml = $this->label->useHtml("for='$name'")->render($label, $this);
+		if ($options[self::OPT_LABEL_ACCESS] && $label !== null) {
+			$this->label->useHtml("for='$name'")->setHtmlTag('label');
 		} else {
-			$labelHtml = '';
+			$this->label->setHtmlTag(null)->setInput('');
 		}
 		$disabled = $options[self::OPT_DISABLE] ? 'disabled=""' : '';
 		$required = $options[self::OPT_REQUIRE] && $options[self::OPT_VISIBLE] ? 'required=""' : '';
@@ -466,7 +451,6 @@ class Form extends Data {
 		}
 		$attributes = "name='$name' $disabled $required $extra";
 		$classes = "form-control $class";
-		$this->display->setAfterOpeningTag($labelHtml);
 		if ($selectComponent !== null) {
 			$this->display->setDisplayComponent($selectComponent->useHtml($attributes)->useCssClass($class));
 		} else {
@@ -519,9 +503,9 @@ class Form extends Data {
 	 * Indicate if the form will use AJAX.
 	 * @return boolean
 	 */
-	function getAjax() {
-		return $this->ajax;
-	}
+//	function getUseAjax() {
+//		return $this->ajax;
+//	}
 
 	/**
 	 * If true, then the form will use AJAX to submit the form. Note that this also sets if the form
@@ -529,10 +513,9 @@ class Form extends Data {
 	 * @param boolean $ajax
 	 * @return static
 	 */
-	function setAjax($ajax) {
-		$this->ajax = $ajax;
-		$this->javascript = $ajax;
-		return $this;
-	}
-
+//	function setUseAjax($ajax) {
+//		$this->ajax = $ajax;
+//		$this->javascript = $ajax;
+//		return $this;
+//	}
 }

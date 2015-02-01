@@ -59,7 +59,7 @@ class Wrapper extends Component {
 	 * @param mixed $input
 	 * @param Component $included
 	 */
-	protected function renderSpecial($input = null, Component $included = null) {
+	protected function renderInput($input = null, Component $included = null) {
 		return $this->display->render($input, $this);
 	}
 

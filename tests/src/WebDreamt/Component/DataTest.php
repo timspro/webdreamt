@@ -7,6 +7,7 @@ use WebDreamt\Component\Custom;
 use WebDreamt\Component\Wrapper;
 use WebDreamt\Component\Wrapper\Data;
 use WebDreamt\Component\Wrapper\Group;
+
 require_once __DIR__ . '/../../../bootstrap.php';
 
 class DataTest extends Test {
@@ -75,9 +76,7 @@ class DataTest extends Test {
 		$array = ["id" => 'ID', 'price' => 'cost'];
 		$this->assertEquals($array, $data->getOptions(['id', 'price'], Data::OPT_LABEL));
 		$this->ret($data->setLabelComponent(new Component('label')));
-		$this->assertEquals(false, $data->getLabelable());
-		$this->ret($data->setLabelable(true));
-		$this->assertEquals(true, $data->getLabelable());
+		$this->ret($data->allowLabels());
 		$this->checkCount($data->render(), [
 			'label' => 4,
 			'[style]' => 4
@@ -216,11 +215,11 @@ class DataTest extends Test {
 		//contract(s) associated in the "move" table where they were a seller.
 		//First, setup common components.
 		$agent = new Data('agent');
-		$agent->setDataClass('agent')->setLabelable(true);
+		$agent->setDataClass('agent')->allowLabels();
 		$location = new Data('location');
-		$location->setDataClass('location')->setLabelable(true);
+		$location->setDataClass('location')->allowLabels();
 		$sellerCustomer = new Data('customer');
-		$sellerCustomer->setDataClass('customer')->setLabelable(true);
+		$sellerCustomer->setDataClass('customer')->allowLabels();
 		$buyerCustomer = $sellerCustomer;
 		$move = new Data('move');
 		$move->hide('id', 'buyer_contract_id');
@@ -230,14 +229,14 @@ class DataTest extends Test {
 
 		//Let's create the topmost customer component.
 		$topCustomer = new Data('customer');
-		$topCustomer->setDataClass('top-customer')->setLabelable(true);
+		$topCustomer->setDataClass('top-customer')->allowLabels();
 		//Link in the buyer contracts. Note that we will finish setting this up when make the contract
 		//component.
 		$topCustomer->addExtraColumn('bought_contracts');
 
 		//Now, create the bought contract component.
 		$boughtContract = new Data('contract');
-		$boughtContract->setDataClass('bought-contract')->setLabelable(true);
+		$boughtContract->setDataClass('bought-contract')->allowLabels();
 		$boughtContract->link('location_id', $location)
 				->link('seller_customer_id', $sellerCustomer)
 				->link('buyer_agent_id', $agent)
@@ -259,7 +258,7 @@ class DataTest extends Test {
 
 		//Create the sold contract component.
 		$soldContract = new Data('contract');
-		$soldContract->setDataClass('sold-contract')->setLabelable(true);
+		$soldContract->setDataClass('sold-contract')->allowLabels();
 		$soldContract->link('location_id', $location)
 				->link('buyer_customer_id', $buyerCustomer)
 				->link('buyer_agent_id', $agent)

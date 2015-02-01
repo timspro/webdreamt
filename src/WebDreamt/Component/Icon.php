@@ -56,12 +56,12 @@ class Icon extends Component {
 	}
 
 	/**
-	 * This simply returns ''.
+	 * This simply returns '' as the icon doesn't/shouldn't need to use input.
 	 * @param mixed $input
 	 * @param Component $included
 	 * @return string
 	 */
-	function renderSpecial($input = null, Component $included = null) {
+	function renderInput($input = null, Component $included = null) {
 		return '';
 	}
 

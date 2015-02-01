@@ -24,12 +24,12 @@ class Panel extends Wrapper {
 	}
 
 	/**
-	 * Render the panel.
+	 * Render the input by giving it to the display component to fill the panel's body.
 	 * @param array $input
 	 * @param Component $included
 	 * @return string
 	 */
-	protected function renderSpecial($input = null, Component $included = null) {
+	protected function renderInput($input = null, Component $included = null) {
 		$output = '';
 		if ($this->title !== null) {
 			$output .= '<div class="panel-heading"><span class="panel-title">' . $this->title . '</span></div>';
