@@ -19,7 +19,7 @@ class Form extends Data {
 	 * If used as the value for OPT_LABEL_ACCESS, then it indicates that the Form class should
 	 * label the column instead of the Data class.
 	 */
-	const FORM_LABEL = null;
+	const FORM_LABEL = 0;
 	/**
 	 * Whether the input type is disabled.
 	 */
