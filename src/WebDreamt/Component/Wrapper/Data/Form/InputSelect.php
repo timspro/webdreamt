@@ -31,6 +31,7 @@ class InputSelect extends Form {
 		}
 		$this->link('id', new Select($newOptions, 'wd-is-select'));
 		$this->deny()->allow('id', $columnName);
+		$this->denyLabels();
 		$this->reorder([$columnName, 'id'])->setHtmlExtra([$columnName => 'placeholder="Create or..."'])
 				->setHtmlClass([$columnName => 'wd-is-input']);
 		$this->setInputHook(function($column, $options, $name, &$value) use ($columnName) {
