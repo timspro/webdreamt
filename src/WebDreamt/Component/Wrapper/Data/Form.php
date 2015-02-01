@@ -135,7 +135,7 @@ class Form extends Data {
 		parent::addColumn($column, $options);
 		$name = $column->getName();
 		if ($name === 'id' || substr($name, -3) === '_id') {
-			$options[self::OPT_VISIBLE] = false;
+			$options[self::OPT_LABEL_ACCESS] = false;
 		}
 		if ($name === 'created_at' || $name === 'updated_at') {
 			$options[self::OPT_ACCESS] = false;
