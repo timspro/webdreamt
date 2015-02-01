@@ -6,6 +6,9 @@ use WebDreamt\Box;
 use WebDreamt\Component;
 use WebDreamt\Component\Wrapper;
 
+/**
+ * Create a HTML page.
+ */
 class Page extends Wrapper {
 
 	/**

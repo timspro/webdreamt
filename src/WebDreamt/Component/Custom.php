@@ -10,7 +10,7 @@ use WebDreamt\Component;
 class Custom extends Component {
 
 	/**
-	 * The function to use
+	 * The function to use.
 	 * @var callable
 	 */
 	protected $function;
@@ -39,7 +39,7 @@ class Custom extends Component {
 	}
 
 	/**
-	 * Renders the custom component.
+	 * Render the custom component.
 	 * @param array $input
 	 * @param Component $included
 	 * @return string

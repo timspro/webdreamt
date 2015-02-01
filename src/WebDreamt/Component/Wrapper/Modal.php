@@ -22,7 +22,7 @@ class Modal extends Wrapper {
 	protected $withButtons = [];
 
 	/**
-	 * Constructs a modal. Note that the constructor does not allow you to specify the HTML tag
+	 * Construct a modal. Note that the constructor does not allow you to specify the HTML tag
 	 * and requires a value for $display (which can be null).
 	 * @param Component $display
 	 * @param string $class

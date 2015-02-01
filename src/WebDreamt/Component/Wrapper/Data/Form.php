@@ -336,7 +336,7 @@ class Form extends Data {
 	}
 
 	/**
-	 * Get the ID of this form. This will only during or after the form is rendered.
+	 * Get the ID of this form. This will work only during or after the form is rendered.
 	 * @return int
 	 */
 	function getId() {

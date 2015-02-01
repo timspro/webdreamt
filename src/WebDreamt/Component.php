@@ -4,6 +4,9 @@ namespace WebDreamt;
 
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 
+/**
+ * An object-oriented representation of an HTML block.
+ */
 class Component {
 
 	/**
@@ -17,7 +20,7 @@ class Component {
 	 */
 	protected $beforeClosing;
 	/**
-	 * The title of the component. Effect depends on child component.
+	 * The title of the component. The fffect depends on child component class.
 	 * @var string
 	 */
 	protected $title;
@@ -27,7 +30,7 @@ class Component {
 	 */
 	protected $html;
 	/**
-	 * The HTML tag of the top-level element.
+	 * The HTML tag of the top-level element, not including the HTML tag and the classes.
 	 * @var string
 	 */
 	protected $htmlTag;
@@ -37,13 +40,14 @@ class Component {
 	 */
 	protected $class;
 	/**
-	 * An array of components to render. Note that null means the child component.
+	 * An array of components to render. Note that null represents where the component renders the input
+	 * in relation to the extra components added.
 	 * @var array
 	 */
 	protected $components = [null];
 	/**
-	 * The input to be passed to the render method. If set, then overrides what is passed via the render()
-	 * method.
+	 * The input to be passed to the render method. If not null, then overrides what is passed
+	 * via the render() method.
 	 * @var array
 	 */
 	protected $input;
@@ -58,22 +62,22 @@ class Component {
 	 */
 	protected $htmlCallback;
 	/**
-	 * A string used after the opening tag.
+	 * A string used after the opening tag and that is reset by render().
 	 * @var string
 	 */
 	protected $withAfterOpening;
 	/**
-	 * A string used before the closing tag.
+	 * A string used before the closing tag and that is reset by render().
 	 * @var string
 	 */
 	protected $withBeforeClosing;
 	/**
-	 * A string used for the HTML of the element.
+	 * A string used for the HTML of the element and that is reset by render().
 	 * @var string
 	 */
 	protected $withHtml;
 	/**
-	 * A string used for the class of the element.
+	 * A string used for the class of the element and that is reset by render().
 	 * @var string
 	 */
 	protected $withCssClass;
@@ -99,13 +103,13 @@ class Component {
 	 */
 	protected $renderedBy;
 	/**
-	 * Get the groups that can access the component.
+	 * The group(s) that can access the component.
 	 * @var string|array
 	 */
 	protected $groups;
 
 	/**
-	 * Get a new component.
+	 * Make a new component using the given HTML tag, class string, HTML attributes, and component input.
 	 * @param string $htmlTag
 	 * @param string $class
 	 * @param string $html
@@ -119,7 +123,8 @@ class Component {
 	}
 
 	/**
-	 * Set the title of the component. The effect of this depends on the child component.
+	 * Set the title of the component. The effect of this depends on the child component class;
+	 * the title is not displayed automatically.
 	 * @param string $title
 	 * @return static
 	 */
@@ -147,7 +152,7 @@ class Component {
 	}
 
 	/**
-	 * Get the string set to go after opening tag.
+	 * Get the string set to go after the opening tag.
 	 * @return string
 	 */
 	function getAfterOpeningTag() {
@@ -155,7 +160,7 @@ class Component {
 	}
 
 	/**
-	 * Append a string to go after the opening tag.
+	 * Append onto the string that goes after the opening tag.
 	 * @param string $after
 	 * @return static
 	 */
@@ -165,7 +170,7 @@ class Component {
 	}
 
 	/**
-	 * Set a string to go after the opening tag and will be reset by render().
+	 * Set a string to go after the opening tag. This will be reset by render().
 	 * @param string $after
 	 * @return static
 	 */
@@ -185,7 +190,7 @@ class Component {
 	}
 
 	/**
-	 * Get the string set to go before closing tag.
+	 * Get the string set to go before the closing tag.
 	 * @return string
 	 */
 	function getBeforeClosingTag() {
@@ -193,7 +198,7 @@ class Component {
 	}
 
 	/**
-	 * Prepend a string to go before the closing tag.
+	 * Prepend onto the string that goes before the closing tag.
 	 * @param string $before
 	 * @return static
 	 */
@@ -203,7 +208,7 @@ class Component {
 	}
 
 	/**
-	 * Set a string to go before the closing tag and will be reset by render().
+	 * Set a string to go before the closing tag. This will be reset by render().
 	 * @param string $before
 	 * @return static
 	 */
@@ -233,7 +238,7 @@ class Component {
 
 	/**
 	 * Append the CSS class(es) to the top-level element. If you append multiple classes, just separate
-	 * them with a space. Note that a space is automatically prefixed to $className.
+	 * them with a space. A space is automatically prefixed to $className.
 	 * @param string
 	 * @return static
 	 */
@@ -244,6 +249,7 @@ class Component {
 
 	/**
 	 * Set the CSS class(es) to be used with the top-level element. These will be reset by render().
+	 * A space is automatically prefixed to $className.
 	 * @param string $className
 	 */
 	protected function useCssClass($className) {
@@ -263,7 +269,7 @@ class Component {
 	}
 
 	/**
-	 * Get the class callback.
+	 * Get the class callback if set.
 	 * @return string
 	 */
 	function getCssClassCallback() {
@@ -271,7 +277,8 @@ class Component {
 	}
 
 	/**
-	 * Set the HTML tag for the topmost element. Can be null, in which case no tag is displayed.
+	 * Set the HTML tag for the topmost element. Can be null, in which case no tag (and so no class
+	 * and no additional HTML) is displayed.
 	 * @param string $htmlTag
 	 * @return static
 	 */
@@ -289,8 +296,8 @@ class Component {
 	}
 
 	/**
-	 * Set the HTML of the top-level element. Note use setCssClass or appendCssClass to add classes.
-	 * This will overwrite any HTML the child component sets and so appendHtml() should be preferred.
+	 * Set the HTML of the top-level element. Note use setCssClass() or appendCssClass() to add classes.
+	 * This will overwrite any other HTML that is added, so appendHtml() should be preferred.
 	 * @param string $html
 	 * @return static
 	 */
@@ -300,7 +307,7 @@ class Component {
 	}
 
 	/**
-	 * Get the HTML of the top-level element.
+	 * Get the HTML of the top-level element without the HTML tag and any classes.
 	 * @return string
 	 */
 	function getHtml() {
@@ -309,7 +316,7 @@ class Component {
 
 	/**
 	 * Append on to the HTML of the top-level element. Use setCssClass or appendCssClass to
-	 * add classes. Note that a space is automatically prefixed to $html.
+	 * add classes. A space is automatically prefixed to $html.
 	 * @param string $html
 	 * @return static
 	 */
@@ -319,7 +326,8 @@ class Component {
 	}
 
 	/**
-	 * Set HTML to use with the top-level element. This will be reset by render().
+	 * Set HTML to use with the top-level element. This will be reset by render(). A space is
+	 * automatically prefixed to $html.
 	 * @param string $html
 	 * @return static
 	 */
@@ -348,8 +356,10 @@ class Component {
 	}
 
 	/**
-	 * Set the input of the component. Note that input set this way will override input passed to the
-	 * render method.
+	 * Set the input of the component. Input set this way will override input passed to the
+	 * render method. Note that setting this to null will just cause the component to use the input
+	 * provided by the render method as is default. In cases where you want the component to ignore
+	 * that input, you should instead call setInput() with '' or [].
 	 * @param array|ActiveRecordInterface $input
 	 * @return static
 	 */
@@ -359,7 +369,7 @@ class Component {
 	}
 
 	/**
-	 * Get the input of the component.
+	 * Get the input of the component as set with setInput().
 	 * @return array
 	 */
 	function getInput() {
@@ -426,7 +436,7 @@ class Component {
 	 * Append/prepend an extra component to the list of components to be rendered.
 	 * @param Component $component
 	 * @param boolean $after Indicates whether the extra component should go after or before this
-	 * component.
+	 * component and all other components.
 	 * @return static
 	 */
 	function addExtraComponent(Component $component, $after = true) {
@@ -439,7 +449,8 @@ class Component {
 	}
 
 	/**
-	 * Get the components to be rendered. Note that null represents this component.
+	 * Get the components to be rendered. Note that null represents where the component renders the input
+	 * in relation to the extra components added.
 	 * @return array
 	 */
 	function getComponents() {
@@ -512,8 +523,8 @@ class Component {
 	}
 
 	/**
-	 * Set the groups that can access this component. Can be null in which case all groups can
-	 * access the component.
+	 * Set the group(s) that can access this component. Can be null in which case group membership is
+	 * not checked.
 	 * @param string|array $groups
 	 * @return static
 	 */
@@ -523,7 +534,7 @@ class Component {
 	}
 
 	/**
-	 * Get the groups that can access this component.
+	 * Get the group(s) that can access this component.
 	 * @return array
 	 */
 	function getGroups() {
@@ -531,7 +542,7 @@ class Component {
 	}
 
 	/**
-	 * Renders the component.
+	 * Render the component.
 	 * @param mixed $input Any input for the component. The effect of the input depends on the child
 	 * class of the component. By default, it is simply echoed.
 	 * @param Component $included The component that is calling render(). Should be null if render()
@@ -594,8 +605,8 @@ class Component {
 	}
 
 	/**
-	 * Get the component that is currently rendering the component. Null if the component is not
-	 * currently being rendered.
+	 * Get the component that is currently rendering this component. Return null if the
+	 * component is not currently being rendered.
 	 * @return Component
 	 */
 	function getRenderedBy() {
@@ -604,7 +615,7 @@ class Component {
 
 	/**
 	 * Get a value from the input using a key. If key is null, then the $input is returned. If
-	 * $input[$key] is not set, than null is returned.
+	 * $input[$key] is not set, then null is returned.
 	 * @param string $key
 	 * @param mixed $input
 	 * @return string
@@ -638,7 +649,8 @@ class Component {
 	}
 
 	/**
-	 * Renders the child class of this component.
+	 * Render the input given to this component. Child component classes will likely override
+	 * this function.
 	 * @param array $input
 	 * @param Component $included
 	 * @return string

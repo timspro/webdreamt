@@ -4,6 +4,9 @@ namespace WebDreamt\Component;
 
 use WebDreamt\Component;
 
+/**
+ * A class that represents icons.
+ */
 class Icon extends Component {
 
 	/**
@@ -16,21 +19,19 @@ class Icon extends Component {
 	const TYPE_DELETE = 'delete';
 
 	/**
-	 * The URL for the icon.
-	 * @var string
-	 */
-	protected $url;
-	/**
-	 * Indicates if the URL is to use AJAX.
-	 * @var boolean
-	 */
-	protected $ajax;
-	/**
 	 * Indicates the type of the icon.
 	 * @var string
 	 */
 	protected $type;
 
+	/**
+	 * Construct a new icon.
+	 * @param string $type
+	 * @param string $htmlTag
+	 * @param string $class
+	 * @param string $html
+	 * @param mixed $input
+	 */
 	function __construct($type, $htmlTag = 'span', $class = null, $html = null, $input = null) {
 		switch ($type) {
 			case static::TYPE_DELETE:
@@ -54,6 +55,12 @@ class Icon extends Component {
 		return $this->type;
 	}
 
+	/**
+	 * This simply returns ''.
+	 * @param mixed $input
+	 * @param Component $included
+	 * @return string
+	 */
 	function renderSpecial($input = null, Component $included = null) {
 		return '';
 	}

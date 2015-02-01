@@ -5,6 +5,9 @@ namespace WebDreamt\Component\Wrapper;
 use WebDreamt\Component;
 use WebDreamt\Component\Wrapper;
 
+/**
+ * A class that represents a Select box.
+ */
 class Select extends Wrapper {
 
 	/**
@@ -13,7 +16,7 @@ class Select extends Wrapper {
 	 */
 	protected $options;
 	/**
-	 * Indicate whether option's tag should have value attribute.
+	 * Indicates whether the option's tag should have a value attribute.
 	 * @var boolean
 	 */
 	protected $noValues = false;

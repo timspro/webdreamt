@@ -12,7 +12,8 @@ class Panel extends Wrapper {
 
 	/**
 	 * Construct a panel. Note that the constructor does not allow you to specify the HTML tag
-	 * and requires a value for $display (which can be null).
+	 * and requires a value for $display (which can be null). This class will also use its title as the
+	 * panel header.
 	 * @param Component $display
 	 * @param string $class
 	 * @param string $html

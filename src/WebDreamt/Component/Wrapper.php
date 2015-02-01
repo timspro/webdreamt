@@ -5,7 +5,7 @@ namespace WebDreamt\Component;
 use WebDreamt\Component;
 
 /**
- * Allows one to set a component inside another component.
+ * A class that allows one to set a component around another component.
  */
 class Wrapper extends Component {
 
@@ -16,8 +16,7 @@ class Wrapper extends Component {
 	protected $display;
 
 	/**
-	 * Construct a wrapper. Note that title is automatically set to the title of the displayed
-	 * component.
+	 * Construct a wrapper. The title is automatically set to the title of the displayed component.
 	 * @param Component $display Specify a component which the wrapper goes around. Can be null, which
 	 * indicates that the wrapper should just use the default component given by new Component().
 	 * @param string $htmlTag
@@ -56,7 +55,7 @@ class Wrapper extends Component {
 	}
 
 	/**
-	 * Renders the wrapper component.
+	 * Render the input by calling the display component's render method.
 	 * @param mixed $input
 	 * @param Component $included
 	 */
