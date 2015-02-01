@@ -445,7 +445,7 @@ class Form extends Data {
 		parent::link($column, $component, $manyColumn, $autoPropel);
 		if ($component instanceof Select) {
 			$this->formComponent[$column] = array_pop($this->linked[$column]);
-		} else {
+		} else if ($this->columns[$column][self::OPT_LABEL_ACCESS] !== false) {
 			$this->columns[$column][self::OPT_LABEL_ACCESS] = true;
 		}
 		return $this;
