@@ -21,6 +21,18 @@ use WebDreamt\Component\Wrapper;
 class Data extends Wrapper {
 
 	/**
+	 * The link causes an AJAX request to be sent out and refreshes the page.
+	 */
+	const LINK_REFRESH = 'refresh';
+	/**
+	 * The link goes to the next page.
+	 */
+	const LINK_NORMAL = 'normal';
+	/**
+	 * The link causes an AJAX request that retrieves content that is added to the page.
+	 */
+	const LINK_RETURNS = 'return';
+	/**
 	 * The accessibility of the column. A value of false means that the renderer gives no
 	 * indication that the column exists. A value of true means normal behavior.
 	 */
@@ -899,11 +911,10 @@ class Data extends Wrapper {
 	 * Add an icon.
 	 * @param Icon $icon
 	 * @param string $url The URL to send get parameters. If null, then this functionality is not used.
-	 * @param boolean $data Indicates if the request will return useful data that can be appended
-	 * to the form document.
+	 * @param string $type Indicate how the link should be handled.
 	 * @return static
 	 */
-	function addIcon(Icon $icon, $url = null, $data = false) {
+	function addIcon(Icon $icon, $url = null, $type = Data::LINK_REFRESH) {
 		if ($url !== null) {
 			$type = $icon->getType();
 			if ($type === Icon::TYPE_DELETE) {
@@ -912,8 +923,8 @@ class Data extends Wrapper {
 				$action = 'update';
 			}
 
-			$icon = new Wrapper($icon, 'a', 'wd-url');
-			if ($data) {
+			$icon = new Wrapper($icon, 'a', $type === Data::LINK_NORMAL ? '' : 'wd-url');
+			if ($type === Data::LINK_RETURNS) {
 				$icon->appendHtml('data-wd-return=""');
 			}
 			$class = $this->className;
