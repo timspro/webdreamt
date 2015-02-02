@@ -80,7 +80,7 @@
 		}
 		$newForm.insertBefore($target);
 		fixForm($newForm, {});
-		$newForm[0].reset();
+		$newForm.find("input, textarea, select").val("");
 	});
 
 	$(document).on('click', '.wd-form-submit', function (e) {

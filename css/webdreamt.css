@@ -25,9 +25,10 @@ body {
 	padding: 10px;
 	background-color: #eee;
 	border-radius: 5px;
+	margin-bottom: 0;
 }
 
-.wd-subform.wd-input-select:last-child {
+.wd-subform.wd-input-select > *:last-child {
 	margin-bottom: 0;
 }
 
