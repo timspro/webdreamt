@@ -4,6 +4,7 @@ namespace WebDreamt\Component\Wrapper\Data;
 
 use Propel\Generator\Model\PropelTypes;
 use Propel\Runtime\Map\ColumnMap;
+use WebDreamt\Box;
 use WebDreamt\Component;
 use WebDreamt\Component\Icon;
 use WebDreamt\Component\Wrapper;
@@ -410,6 +411,8 @@ class Form extends Data {
 		//If not included by a form, then just set the HTML tag.
 		if (!$form) {
 			$this->setHtmlTag('form');
+			$token = Box::get()->csrfToken();
+			$this->useAfterOpeningTag("<input type='hidden' name=':csrf' value='$token'/>");
 		} else {
 			$this->useCssClass('wd-subform');
 		}

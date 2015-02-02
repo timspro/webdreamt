@@ -68,6 +68,26 @@ class Box {
 	}
 
 	/**
+	 *
+	 * @return string A CSRF token. Will also a set a cookie if needed.
+	 */
+	function csrfToken() {
+		return $this->factory(__FUNCTION__, function() {
+					if (!isset($_COOKIE['wd-csrf-token'])) {
+						if (!headers_sent()) {
+							$value = base64_encode(openssl_random_pseudo_bytes(32));
+							setcookie('wd-csrf-token', $value);
+							return $value;
+						} else {
+							return null;
+						}
+					} else {
+						return $_COOKIE['wd-csrf-token'];
+					}
+				});
+	}
+
+	/**
 	 * @return PDO A PDO instance to the database.
 	 */
 	function db() {

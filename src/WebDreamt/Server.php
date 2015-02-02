@@ -190,21 +190,14 @@ class Server {
 	}
 
 	/**
-	 * Allow the server to handle forms via $_POST and deletes via the $_GET variable. Note that
-	 * this does not provide protection from CSRF attacks. You will likely at least want to check
-	 * the referer header before you use this method if CSRF attacks are a concern.
+	 * Allow the server to handle forms via $_POST and deletes via the $_GET variable. 
 	 */
 	function automate() {
-//		$headers = getallheaders();
-//		if (!isset($headers['X-Requested-With']) || $headers['X-Requested-With'] !== 'XMLHttpRequest') {
-//		if(!isset($_POST[':csrf_token']) ||
-//		$_POST[':csrf_token'] !== hash_hmac('sha256', $_COOKIE['cartalyst_sentry'], Box::get()->SecretKey))
-//			return;
-//		}
-//	}
 		$headers = getallheaders();
 		if (!isset($headers['X-Requested-With']) || $headers['X-Requested-With'] !== 'XMLHttpRequest') {
-			return;
+			if (!isset($_POST[':csrf']) || $_POST[':csrf'] !== $_COOKIE['wd-csrf-token']) {
+				return;
+			}
 		}
 		if (count($_POST) > 0) {
 			if ($this->batch($_POST)) {
