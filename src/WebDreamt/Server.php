@@ -194,7 +194,8 @@ class Server {
 	 * such requests must be done with AJAX to be handled by this method.
 	 */
 	function automate() {
-		if (!getallheaders()['X-Requested-With'] === 'XMLHttpRequest') {
+		$headers = getallheaders();
+		if (!isset($headers['X-Requested-With']) || $headers['X-Requested-With'] !== 'XMLHttpRequest') {
 			return;
 		}
 		if (count($_POST) > 0) {
