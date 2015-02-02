@@ -898,11 +898,12 @@ class Data extends Wrapper {
 	/**
 	 * Add an icon.
 	 * @param Icon $icon
-	 * @param string $url The URL to set get parameters. If null, then this functionality is not used.
-	 * @param boolean $ajax Sends GET request via AJAX and refreshes page on success.
+	 * @param string $url The URL to send get parameters. If null, then this functionality is not used.
+	 * @param boolean $data Indicates if the request will return useful data that can be appended
+	 * to the form document.
 	 * @return static
 	 */
-	function addIcon(Icon $icon, $url = null, $ajax = true) {
+	function addIcon(Icon $icon, $url = null, $data = false) {
 		if ($url !== null) {
 			$type = $icon->getType();
 			if ($type === Icon::TYPE_DELETE) {
@@ -911,9 +912,9 @@ class Data extends Wrapper {
 				$action = 'update';
 			}
 
-			$icon = new Wrapper($icon, 'a');
-			if ($ajax) {
-				$icon->appendHtml('data-wd-url');
+			$icon = new Wrapper($icon, 'a', 'wd-url');
+			if ($data) {
+				$icon->appendHtml('data-wd-return=""');
 			}
 			$class = $this->className;
 			$icon->setHtmlCallback(function ($input) use ($url, $action, $class) {

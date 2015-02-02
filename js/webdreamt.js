@@ -130,11 +130,12 @@
 		}
 	}
 
-	$(document).on('click', '[data-wd-url]', function (e) {
+	$(document).on('click', '.wd-url', function (e) {
 		e.preventDefault();
 		//Go ahead and send the CSRF token, althought it isn't necessary if we are just getting modals.
+		var returns = typeof $(e.target).attr('data-wd-return') === 'undefined';
 		$.post($(this).attr('href'), {':csrf': getCookie('wd-csrf-token')}, function (data) {
-			if ($.trim(data) !== '') {
+			if (returns && $.trim(data) !== '') {
 				$('body').append(data);
 				$('.wd-modal-show').modal('show');
 			} else {
