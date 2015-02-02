@@ -35,7 +35,7 @@ class Icon extends Component {
 	function __construct($type, $htmlTag = 'span', $class = null, $html = null, $input = null) {
 		switch ($type) {
 			case static::TYPE_DELETE:
-				$class .= ' glyphicon-remove';
+				$class .= ' glyphicon-remove wd-remove-icon';
 				break;
 			case static::TYPE_EDIT:
 				$class .= ' glyphicon-edit';

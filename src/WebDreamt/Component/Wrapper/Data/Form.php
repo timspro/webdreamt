@@ -5,10 +5,11 @@ namespace WebDreamt\Component\Wrapper\Data;
 use Propel\Generator\Model\PropelTypes;
 use Propel\Runtime\Map\ColumnMap;
 use WebDreamt\Component;
+use WebDreamt\Component\Icon;
 use WebDreamt\Component\Wrapper;
 use WebDreamt\Component\Wrapper\Data;
-use WebDreamt\Component\Wrapper\Select;
 use WebDreamt\Component\Wrapper\Modal;
+use WebDreamt\Component\Wrapper\Select;
 
 /**
  * A class to easily render a form for a table in the database.
@@ -284,21 +285,13 @@ class Form extends Data {
 	}
 
 	/**
-	 * Sets if the form should submit multiple items.
-	 * @param boolean $multiple
+	 * Allow the subform to submit multiple items.
 	 * @return static
 	 */
-	function setMultiple($multiple) {
-		$this->multiple = $multiple;
+	function multiple() {
+		$this->multiple = true;
+		$this->addIcon(new Icon(Icon::TYPE_DELETE));
 		return $this;
-	}
-
-	/**
-	 * Get if the form can submit multiple items.
-	 * @return boolean
-	 */
-	function getMultiple() {
-		return $this->multiple;
 	}
 
 	/**
@@ -373,8 +366,7 @@ class Form extends Data {
 		}
 		//Add a button to create another entry.
 		if ($this->multiple) {
-			$this->useBeforeClosingTag("<button type='button' class='btn btn-default wd-multiple'>"
-					. "Add Another</button>");
+			$this->useHtml("wd-another='$id'");
 		}
 
 		$component = $included;
@@ -425,6 +417,11 @@ class Form extends Data {
 		$result = parent::render($input, $included);
 
 		$this->id = null;
+
+		if ($this->multiple) {
+			$result .= "<button type='button' class='btn btn-default wd-multiple' wd-another='$id'>"
+					. "Add Another</button>";
+		}
 
 		return $result;
 	}

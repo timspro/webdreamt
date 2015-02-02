@@ -57,7 +57,8 @@
 
 	$(document).on('click', '.wd-multiple', function (e) {
 		var $target = $(e.target);
-		var $form = $target.parent();
+		var formId = $target.attr('wd-another');
+		var $form = $('.wd-form[wd-another="' + formId + '"]').last();
 		var $newForm = $form.clone(true);
 		$newForm.insertAfter($form);
 		fixForm($newForm, {});

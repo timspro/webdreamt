@@ -135,8 +135,7 @@ class FormTest extends Test {
 	 */
 	function testMultiple() {
 		$customerForm = new Form('customer');
-		$this->assertEquals(false, $customerForm->getMultiple());
-		$this->ret($customerForm->setMultiple(true));
+		$this->ret($customerForm->multiple(true));
 		$output = $customerForm->render();
 		$this->checkExists($output, [
 			'.wd-multiple'
@@ -190,7 +189,7 @@ class FormTest extends Test {
 		}
 
 		$serviceForm = new Form('service_contract');
-		$serviceForm->setMultiple(true)->hide('contract_id')->link('service_id', new Form('service'));
+		$serviceForm->multiple(true)->hide('contract_id')->link('service_id', new Form('service'));
 		$contractForm = new Form('contract');
 		$contractForm->setDataClass('wd-form');
 		$locationForm = new Form('location');

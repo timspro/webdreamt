@@ -1,13 +1,13 @@
 # Priority:
 Examine why presidents won.
 Allow removing something added with add another (tricky when trying to remove last one).
-Add another doesn't work with form (as opposed to subform).
-Errors (esp. with AJAX)
-More tests
-CSRF protection
+CSRF protection (requires changing to POSTs for deletes as we don't know the domain name to check referer)
 File upload
+Errors (esp. with AJAX)
 AJAX (for forms)
-Icons should be given the option of posting.
+More tests
+Add another doesn't work with form (as opposed to subform).
+
 
 # Lower Priority:
 Make a search component (how to make this secure? post back to component?).
