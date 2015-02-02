@@ -80,7 +80,7 @@
 		}
 		$newForm.insertBefore($target);
 		fixForm($newForm, {});
-		$newForm.find("input, textarea, select").val("");
+		$newForm.find("input[type!='hidden'], textarea, select").val("").change();
 	});
 
 	$(document).on('click', '.wd-form-submit', function (e) {
