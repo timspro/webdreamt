@@ -19805,9 +19805,9 @@ the specific language governing permissions and limitations under the Apache Lic
 		var oldId = formId.name;
 		if (newId === null) {
 			newId = 10000;
-			while ($('.wd-form > [name="' + newId + '"]').length !== 0) {
-				newId += 10000;
-			}
+		}
+		while ($('.wd-form > [name="' + newId + '"]').length !== 0) {
+			newId++;
 		}
 		formId.name = newId;
 		map[oldId] = newId;
@@ -19875,7 +19875,7 @@ the specific language governing permissions and limitations under the Apache Lic
 		}
 		$newForm.insertBefore($target);
 		fixForm($newForm, {});
-		$newForm[0].reset();
+		$newForm.find("input[type!='hidden'], textarea, select").val("").change();
 	});
 
 	$(document).on('click', '.wd-form-submit', function (e) {
