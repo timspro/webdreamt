@@ -68,7 +68,7 @@
 		}
 	});
 
-	$(document).on('click', '.wd-multiple', function (e) {
+	$(document).on('click', '.wd-.multiple', function (e) {
 		var $target = $(e.target);
 		var formId = $target.attr('wd-another');
 		var $form = $('.wd-form[wd-another="' + formId + '"]').last();
@@ -122,9 +122,18 @@
 		form.submit();
 	});
 
+	function getCookie(name) {
+		var value = "; " + document.cookie;
+		var parts = value.split("; " + name + "=");
+		if (parts.length === 2) {
+			return parts.pop().split(";").shift();
+		}
+	}
+
 	$(document).on('click', '[data-wd-url]', function (e) {
 		e.preventDefault();
-		$.get($(this).attr('href'), null, function (data) {
+		//Go ahead and send the CSRF token, althought it isn't necessary if we are just getting modals.
+		$.post($(this).attr('href'), {':csrf': getCookie('wd-csrf-token')}, function (data) {
 			if ($.trim(data) !== '') {
 				$('body').append(data);
 				$('.wd-modal-show').modal('show');
