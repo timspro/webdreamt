@@ -916,10 +916,10 @@ class Data extends Wrapper {
 	 */
 	function addIcon(Icon $icon, $url = null, $type = Data::LINK_REFRESH) {
 		if ($url !== null) {
-			$type = $icon->getType();
-			if ($type === Icon::TYPE_DELETE) {
+			$iconType = $icon->getType();
+			if ($iconType === Icon::TYPE_DELETE) {
 				$action = 'delete';
-			} else if ($type === Icon::TYPE_EDIT) {
+			} else if ($iconType === Icon::TYPE_EDIT) {
 				$action = 'update';
 			}
 
