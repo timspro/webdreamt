@@ -106,8 +106,13 @@
 
 	$(document).on('click', '[data-wd-url]', function (e) {
 		e.preventDefault();
-		$.get($(this).attr('href'), null, function () {
-			window.location.reload();
+		$.get($(this).attr('href'), null, function (data) {
+			if ($.trim(data) !== '') {
+				$('body').append(data);
+				$('.wd-modal-show').modal('show');
+			} else {
+				window.location.reload();
+			}
 		});
 	});
 
