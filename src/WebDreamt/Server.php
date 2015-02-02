@@ -193,10 +193,8 @@ class Server {
 	 * Allow the server to handle forms via $_POST and deletes via the $_GET variable.
 	 */
 	function automate() {
-		if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] !== 'XMLHttpRequest') {
-			if (!isset($_POST[':csrf']) || $_POST[':csrf'] !== $_COOKIE['wd-csrf-token']) {
-				return;
-			}
+		if (!isset($_POST[':csrf']) || $_POST[':csrf'] !== $_COOKIE['wd-csrf-token']) {
+			return;
 		}
 		if (count($_POST) > 0) {
 			if ($this->batch($_POST)) {
