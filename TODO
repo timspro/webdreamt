@@ -1,11 +1,12 @@
 # Priority:
 Examine why presidents won.
-AJAX (for icons and forms)
 Allow removing something added with add another (tricky when trying to remove last one).
+Add another doesn't work with form (as opposed to subform).
 Errors
 More tests
 CSRF protection
 File upload
+AJAX (for forms)
 
 # Lower Priority:
 Make a search component (how to make this secure? post back to component?).

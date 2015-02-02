@@ -898,7 +898,8 @@ class Data extends Wrapper {
 	/**
 	 * Add an icon.
 	 * @param Icon $icon
-	 * @param string $url
+	 * @param string $url The URL to set get parameters. If null, then this functionality is not used.
+	 * @param boolean $ajax Sends GET request via AJAX and refreshes page on success.
 	 * @return static
 	 */
 	function addIcon(Icon $icon, $url = null, $ajax = false) {
