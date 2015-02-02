@@ -18042,21 +18042,39 @@ the specific language governing permissions and limitations under the Apache Lic
 		});
 	}
 
+	var oldForms = {};
+	$(document).on('click', '.wd-remove-icon', function (e) {
+		var $target = $(this);
+		if (!$target.parent().is('a')) {
+			var $removable = $target.parent().parent();
+			var formId = $removable.attr('wd-another');
+			if (typeof formId !== 'undefined') {
+				oldForms[formId] = $removable;
+			}
+			$removable.remove();
+		}
+	});
+
 	$(document).on('click', '.wd-multiple', function (e) {
-		var $target = $(e.target);
-		var $form = $target.parent();
-		var $newForm = $form.clone(true);
-		$newForm.insertAfter($form);
+		var $target = $(this);
+		var formId = $target.attr('wd-another');
+		var $form = $('.wd-form[wd-another="' + formId + '"]').last();
+		if ($form.length === 0) {
+			var $newForm = oldForms[formId];
+			delete oldForms[formId];
+		} else {
+			var $newForm = $form.clone(true);
+		}
+		$newForm.insertBefore($target);
 		fixForm($newForm, {});
-		$target.remove();
 	});
 
 	$(document).on('click', '.wd-form-submit', function (e) {
-		var form = $(e.target).parents('form')[0];
-		if (!form.hasAttribute('method')) {
-			form.setAttribute('method', 'POST');
+		var $form = $(this).parents('form').first();
+		if (typeof $form.attr('method') === 'undefined') {
+			$form.attr('method', 'POST');
 		}
-		form.submit();
+		$form[0].submit();
 	});
 
 	function enable($switch, $other) {
@@ -18068,33 +18086,48 @@ the specific language governing permissions and limitations under the Apache Lic
 	}
 
 	$(document).on('change', '.wd-is-select', function (e) {
-		var $target = $(e.target);
+		var $target = $(this);
 		var $other = $target.parent().parent().find('.wd-is-input');
 		enable($target, $other);
 	});
 
 	$(document).on('change', '.wd-is-input', function (e) {
-		var $target = $(e.target);
+		var $target = $(this);
 		var $other = $target.parent().parent().find('.wd-is-select');
 		enable($target, $other);
 	});
 
 	$(document).on('click', '.wd-modal-submit', function (e) {
-		var form = $(e.target).parent().siblings('.modal-body').find('form')[0];
+		var form = $(this).parent().siblings('.modal-body').find('form')[0];
 		if (!form.hasAttribute('method')) {
 			form.setAttribute('method', 'POST');
 		}
-		if (!form.hasAttribute('action')) {
-			var url = document.URL.toString();
-			form.setAttribute('action', url.split("?")[0]);
-		}
+		//		if (!form.hasAttribute('action')) {
+		//			var url = document.URL.toString();
+		//			form.setAttribute('action', url);
+		//		}
 		form.submit();
 	});
 
-	$(document).on('click', '[data-wd-url]', function (e) {
+	function getCookie(name) {
+		var value = "; " + document.cookie;
+		var parts = value.split("; " + name + "=");
+		if (parts.length === 2) {
+			return parts.pop().split(";").shift();
+		}
+	}
+
+	$(document).on('click', '.wd-url', function (e) {
 		e.preventDefault();
-		$.get($(this).attr('href'), null, function () {
-			window.location.reload();
+		//Go ahead and send the CSRF token, althought it isn't necessary if we are just getting modals.
+		var returns = typeof $(this).attr('data-wd-return') !== 'undefined';
+		$.post($(this).attr('href'), {':csrf': getCookie('wd-csrf-token')}, function (data) {
+			if (returns && $.trim(data) !== '') {
+				$('body').append(data);
+				$('.wd-modal-show').modal('show');
+			} else {
+				window.location.reload();
+			}
 		});
 	});
 

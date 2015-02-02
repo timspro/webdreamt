@@ -54,6 +54,14 @@ class CustomBox extends \WebDreamt\Box {
     $this->DatabaseName = "";          //Use your database name
     $this->DatabaseUsername = "root";  //Use your database username
     $this->DatabasePassword = "";      //Use your database password
+    //This enables Propel to use database information, which is needed for much functionality.
+		$this->enable();
+    //This sets a CSRF token as a cookie, which will be used by actions.
+		$this->csrfToken();
+    //This makes the server automatically take some requests. It might be ideal for your application
+    //To move this to its own URL, so that it doesn't interfere with other GET/POST requests
+    //(although due to naming it's unlikely it would).
+		$this->server()->automate();
   }
 }
 ```
