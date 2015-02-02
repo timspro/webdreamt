@@ -190,10 +190,13 @@ class Server {
 	}
 
 	/**
-	 * Allow the server to handle forms via $_POST. Note this will also check for delete
-	 * conditions in the $_GET variable.
+	 * Allow the server to handle forms via $_POST and deletes via the $_GET variable. Note that
+	 * such requests must be done with AJAX to be handled by this method.
 	 */
 	function automate() {
+		if (!getallheaders()['X-Requested-With'] === 'XMLHttpRequest') {
+			return;
+		}
 		if (count($_POST) > 0) {
 			if ($this->batch($_POST)) {
 				header("HTTP/1.1 303 See Other");

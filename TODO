@@ -1,6 +1,5 @@
 # Priority:
 Examine why presidents won.
-Allow removing something added with add another (tricky when trying to remove last one).
 CSRF protection (requires changing to POSTs for deletes as we don't know the domain name to check referer)
 File upload
 Errors (esp. with AJAX)
