@@ -337,7 +337,7 @@ class Form extends Data {
 	function allowLabels($columns = null) {
 		$columns = is_array($columns) ? $columns : func_get_args();
 		$this->setOptions($columns, self::OPT_LABEL_ACCESS, self::FORM_LABEL);
-		if (count($this->linked) === 0) {
+		if (count($this->linked) !== 0) {
 			$this->setOptions(array_keys($this->linked), self::OPT_LABEL_ACCESS, true);
 		}
 		return $this;
