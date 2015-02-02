@@ -10,9 +10,9 @@
 		var oldId = formId.name;
 		if (newId === null) {
 			newId = 10000;
-			while ($('.wd-form > [name="' + newId + '"]').length !== 0) {
-				newId += 10000;
-			}
+		}
+		while ($('.wd-form > [name="' + newId + '"]').length !== 0) {
+			newId++;
 		}
 		formId.name = newId;
 		map[oldId] = newId;
