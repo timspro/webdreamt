@@ -97,10 +97,10 @@
 		if (!form.hasAttribute('method')) {
 			form.setAttribute('method', 'POST');
 		}
-		if (!form.hasAttribute('action')) {
-			var url = document.URL.toString();
-			form.setAttribute('action', url.split("?")[0]);
-		}
+//		if (!form.hasAttribute('action')) {
+//			var url = document.URL.toString();
+//			form.setAttribute('action', url);
+//		}
 		form.submit();
 	});
 
