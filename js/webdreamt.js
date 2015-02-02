@@ -80,6 +80,7 @@
 		}
 		$newForm.insertBefore($target);
 		fixForm($newForm, {});
+		$newForm[0].reset();
 	});
 
 	$(document).on('click', '.wd-form-submit', function (e) {
@@ -115,10 +116,6 @@
 		if (!form.hasAttribute('method')) {
 			form.setAttribute('method', 'POST');
 		}
-		//		if (!form.hasAttribute('action')) {
-		//			var url = document.URL.toString();
-		//			form.setAttribute('action', url);
-		//		}
 		form.submit();
 	});
 

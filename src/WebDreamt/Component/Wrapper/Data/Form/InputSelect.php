@@ -24,7 +24,7 @@ class InputSelect extends Form {
 	 * @param array $input
 	 */
 	function __construct($tableName, $columnName, $options, $class = null, $html = null, $input = null) {
-		parent::__construct($tableName, $class, $html, $input);
+		parent::__construct($tableName, "wd-input-select $class", $html, $input);
 		$newOptions = ["" => 'Choose...'];
 		foreach ($options as $key => $value) {
 			$newOptions[$key] = $value;

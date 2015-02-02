@@ -20,6 +20,17 @@ body {
 	margin-bottom: 15px
 }
 
+.wd-subform.wd-input-select {
+	border: 1px solid #ddd;
+	padding: 10px;
+	background-color: #eee;
+	border-radius: 5px;
+}
+
+.wd-subform.wd-input-select:last-child {
+	margin-bottom: 0;
+}
+
 .wd-icon {
 	position: absolute;
 	right: 0;
