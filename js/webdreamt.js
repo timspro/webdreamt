@@ -83,11 +83,11 @@
 	});
 
 	$(document).on('click', '.wd-form-submit', function (e) {
-		var form = $(e.target).parents('form')[0];
-		if (!form.hasAttribute('method')) {
-			form.setAttribute('method', 'POST');
+		var $form = $(e.target).parents('form').first();
+		if (typeof $form.attr('method') === 'undefined') {
+			$form.attr('method', 'POST');
 		}
-		form.submit();
+		$form[0].submit();
 	});
 
 	function enable($switch, $other) {
@@ -133,7 +133,7 @@
 	$(document).on('click', '.wd-url', function (e) {
 		e.preventDefault();
 		//Go ahead and send the CSRF token, althought it isn't necessary if we are just getting modals.
-		var returns = typeof $(e.target).attr('data-wd-return') === 'undefined';
+		var returns = typeof $(e.target).attr('data-wd-return') !== 'undefined';
 		$.post($(this).attr('href'), {':csrf': getCookie('wd-csrf-token')}, function (data) {
 			if (returns && $.trim(data) !== '') {
 				$('body').append(data);
