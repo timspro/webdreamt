@@ -190,11 +190,10 @@ class Server {
 	}
 
 	/**
-	 * Allow the server to handle forms via $_POST and deletes via the $_GET variable. 
+	 * Allow the server to handle forms via $_POST and deletes via the $_GET variable.
 	 */
 	function automate() {
-		$headers = getallheaders();
-		if (!isset($headers['X-Requested-With']) || $headers['X-Requested-With'] !== 'XMLHttpRequest') {
+		if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] !== 'XMLHttpRequest') {
 			if (!isset($_POST[':csrf']) || $_POST[':csrf'] !== $_COOKIE['wd-csrf-token']) {
 				return;
 			}
