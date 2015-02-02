@@ -76,6 +76,7 @@ class Box {
 					if (!isset($_COOKIE['wd-csrf-token'])) {
 						if (!headers_sent()) {
 							$value = base64_encode(openssl_random_pseudo_bytes(32));
+							$value = str_replace(array('+', '/', '='), array('-', '_', ''), $value);
 							setcookie('wd-csrf-token', $value);
 							return $value;
 						} else {

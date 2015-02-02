@@ -902,7 +902,7 @@ class Data extends Wrapper {
 	 * @param boolean $ajax Sends GET request via AJAX and refreshes page on success.
 	 * @return static
 	 */
-	function addIcon(Icon $icon, $url = null, $ajax = false) {
+	function addIcon(Icon $icon, $url = null, $ajax = true) {
 		if ($url !== null) {
 			$type = $icon->getType();
 			if ($type === Icon::TYPE_DELETE) {
