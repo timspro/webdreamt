@@ -1,78 +1,20 @@
-# Easy:
-Date time tests.
-Required tests.
-Add tests for command line and for guarantee.
-Order Test
-Alias Test
-Label in Display Test
-Class Label Test
+# Priority:
 Examine why presidents won.
-getValueFromInput
-Is default handled correctly in getValueFromInput?
-Should we allow multiple callbacks to be set?
-Make groups numerable
-Placeholder
-
-# Medium:
-Make a Search Component.
-Integrate Select2.js with Components.
+AJAX (for icons and forms)
+Allow removing something added with add another (tricky when trying to remove last one).
+Errors
+More tests
 CSRF protection
-Add default group support for authorization.
-Better form tests.
-File upload.
-Ajax Form
-Draggability
-Expand table rows.
-Editable table rows
-Make a display column function for group/display. Refactor group. Refactor table as a group with display
-Set html tag. Make a function that iterates over columns. Perhaps make render linked just return empty.
-"Snap to grid"
-Refactor some functions into "Common" class that contains pluralize, deleteDirectory, etc.
+File upload
 
-# Hard:
-Authorization Manager
-Fork bower-installer.
-Validation
+# Lower Priority:
+Make a search component (how to make this secure? post back to component?).
+Integrate Select2.js with components better.
+Table dragability / "Snap to grid"
+Expand table rows.
+Editable table rows.
 
 # Very Hard:
 Rethink Filler supporting libraries. (Allow circular database references.)
 Rethink Authorization supporting libraries.
-Cache forms, but how to do it for rows?
-
-# Maybe?:
-Update Septic 360
-A way to do ad hoc forms. For example, how would you do a login form? Maybe make login form a script.
-
-# Not Implemented:
-Placeholders?
-Better input controls - currency, phone-number - although this could probably be handled by third party.
-Maybe split up Group into two classes.
-Split up WebDreamt components into different repositories.
-
-Other Thoughts:
-WebDreamt might be divided up as follows:
-Server/Authentication/Authorization Classes
-Filler
-Builder
-Hyper (Cache)
-Box/Common Functions/Other Classes
-
-Create/Update/Delete, tables and columns
-
-//Modify link to disable Propel object.
-Change name for a multiple select to $name[] / Add multiple option to Select / Make sure Server's batch() can handle arrays.
-Overwrite renderLinkedComponents to add a hidden input for the form telling what Propel method
-should be used / Modify server to understand this
-Add some JavaScript for add another button.
-Are things being added in the server in the right order?
-Get the id from the current form?
-We could just mostly kick this into JavaScript?
-
-To deal with the reference issue:
-Make it so that any extra Forms when linked will have access to the linking form ID.
-How to do select and Form?
-Linked Components
-Circular references
-
-//Add error outputting for ajax.
-//Add server AJAX
+Cache forms

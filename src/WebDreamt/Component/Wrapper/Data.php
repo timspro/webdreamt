@@ -527,12 +527,13 @@ class Data extends Wrapper {
 	}
 
 	/**
-	 * Set the labels. Can set a label to null, in which case it won't be shown.
+	 * Set the labels. Any labels set with this method will automatically be shown.
 	 * @param array $columns
 	 * @return static
 	 */
 	function setLabels(array $columns) {
 		$this->mergeOptions($columns, self::OPT_LABEL);
+		$this->allowLabels(array_keys($columns));
 		return $this;
 	}
 
@@ -900,7 +901,7 @@ class Data extends Wrapper {
 	 * @param string $url
 	 * @return static
 	 */
-	function addIcon(Icon $icon, $url = null) {
+	function addIcon(Icon $icon, $url = null, $ajax = false) {
 		if ($url !== null) {
 			$type = $icon->getType();
 			if ($type === Icon::TYPE_DELETE) {
@@ -908,15 +909,14 @@ class Data extends Wrapper {
 			} else if ($type === Icon::TYPE_EDIT) {
 				$action = 'update';
 			}
-//			if (!$ajax) {
+
 			$icon = new Wrapper($icon, 'a');
-			$attribute = 'href';
-//			} else {
-//				$attribute = 'data-wd-url';
-//			}
+			if ($ajax) {
+				$icon->appendHtml('data-wd-url');
+			}
 			$class = $this->className;
-			$icon->setHtmlCallback(function ($input) use ($url, $action, $class, $attribute) {
-				$paramString = "$attribute='$url?";
+			$icon->setHtmlCallback(function ($input) use ($url, $action, $class) {
+				$paramString = "href='$url?";
 				foreach ($this->primaryKeys as $key) {
 					$key = $key->getName();
 					$paramString .= "pk-$key=" . $this->getValueFromInput($key, $input, true) . "&";
