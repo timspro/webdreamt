@@ -60,7 +60,7 @@
 		var $target = $(e.target);
 		if (!$target.parent().is('a')) {
 			var $removable = $target.parent().parent();
-			var formId = $target.attr('wd-another');
+			var formId = $removable.attr('wd-another');
 			if (typeof formId !== 'undefined') {
 				oldForms[formId] = $removable;
 			}

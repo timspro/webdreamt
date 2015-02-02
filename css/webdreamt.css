@@ -36,9 +36,9 @@ body {
 
 button.wd-multiple {
 	display: block;
+	margin-bottom: 10px;
 }
 
-.wd-icon-remove {
+.wd-remove-icon {
 	cursor: pointer;
-	margin-bottom: 10px;
 }
