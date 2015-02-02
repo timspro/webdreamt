@@ -57,7 +57,7 @@
 
 	var oldForms = {};
 	$(document).on('click', '.wd-remove-icon', function (e) {
-		var $target = $(e.target);
+		var $target = $(this);
 		if (!$target.parent().is('a')) {
 			var $removable = $target.parent().parent();
 			var formId = $removable.attr('wd-another');
@@ -68,8 +68,8 @@
 		}
 	});
 
-	$(document).on('click', '.wd-.multiple', function (e) {
-		var $target = $(e.target);
+	$(document).on('click', '.wd-multiple', function (e) {
+		var $target = $(this);
 		var formId = $target.attr('wd-another');
 		var $form = $('.wd-form[wd-another="' + formId + '"]').last();
 		if ($form.length === 0) {
@@ -83,7 +83,7 @@
 	});
 
 	$(document).on('click', '.wd-form-submit', function (e) {
-		var $form = $(e.target).parents('form').first();
+		var $form = $(this).parents('form').first();
 		if (typeof $form.attr('method') === 'undefined') {
 			$form.attr('method', 'POST');
 		}
@@ -99,19 +99,19 @@
 	}
 
 	$(document).on('change', '.wd-is-select', function (e) {
-		var $target = $(e.target);
+		var $target = $(this);
 		var $other = $target.parent().parent().find('.wd-is-input');
 		enable($target, $other);
 	});
 
 	$(document).on('change', '.wd-is-input', function (e) {
-		var $target = $(e.target);
+		var $target = $(this);
 		var $other = $target.parent().parent().find('.wd-is-select');
 		enable($target, $other);
 	});
 
 	$(document).on('click', '.wd-modal-submit', function (e) {
-		var form = $(e.target).parent().siblings('.modal-body').find('form')[0];
+		var form = $(this).parent().siblings('.modal-body').find('form')[0];
 		if (!form.hasAttribute('method')) {
 			form.setAttribute('method', 'POST');
 		}
@@ -133,7 +133,7 @@
 	$(document).on('click', '.wd-url', function (e) {
 		e.preventDefault();
 		//Go ahead and send the CSRF token, althought it isn't necessary if we are just getting modals.
-		var returns = typeof $(e.target).attr('data-wd-return') !== 'undefined';
+		var returns = typeof $(this).attr('data-wd-return') !== 'undefined';
 		$.post($(this).attr('href'), {':csrf': getCookie('wd-csrf-token')}, function (data) {
 			if (returns && $.trim(data) !== '') {
 				$('body').append(data);
