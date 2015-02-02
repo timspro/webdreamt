@@ -33,3 +33,7 @@ body {
 .wd-relative {
 	position: relative;
 }
+
+button.wd-multiple {
+	display: block;
+}

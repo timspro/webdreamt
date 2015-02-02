@@ -62,8 +62,7 @@
 		var $newForm = $form.clone(true);
 		$newForm.insertAfter($form);
 		fixForm($newForm, {});
-		$target.remove();
-	});
+		});
 
 	$(document).on('click', '.wd-form-submit', function (e) {
 		var form = $(e.target).parents('form')[0];
@@ -71,7 +70,7 @@
 			form.setAttribute('method', 'POST');
 		}
 		form.submit();
-	});
+		});
 
 	function enable($switch, $other) {
 		if ($switch.val() === '') {
@@ -98,12 +97,12 @@
 		if (!form.hasAttribute('method')) {
 			form.setAttribute('method', 'POST');
 		}
-//		if (!form.hasAttribute('action')) {
+		//		if (!form.hasAttribute('action')) {
 //			var url = document.URL.toString();
 //			form.setAttribute('action', url);
 //		}
 		form.submit();
-	});
+		});
 
 	$(document).on('click', '[data-wd-url]', function (e) {
 		e.preventDefault();
