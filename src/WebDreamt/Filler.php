@@ -115,7 +115,7 @@ class Filler {
 				$value = $numberConverted[$entity];
 			}
 			//echo $entity . "<br>";
-			if ($entity === "Users") {
+			if ($entity === "User") {
 				$populator->addEntity($entity, $value, [
 					"Permissions" => null,
 					"ActivationCode" => null,
@@ -127,7 +127,7 @@ class Filler {
 						return $generator->boolean;
 					}
 				]);
-			} elseif ($entity === "Groups") {
+			} elseif ($entity === "Group") {
 				$populator->addEntity($entity, $value, [
 					"Permissions" => null
 				]);

@@ -2,7 +2,7 @@
 Examine why presidents won.
 Allow removing something added with add another (tricky when trying to remove last one).
 Add another doesn't work with form (as opposed to subform).
-Errors
+Errors (esp. with AJAX)
 More tests
 CSRF protection
 File upload
